@@ -15,7 +15,7 @@ from logging.handlers import RotatingFileHandler
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-file_handler = RotatingFileHandler('/home/ubuntu/PythonFlask/app.log', maxBytes=10**6, backupCount=3) 
+file_handler = RotatingFileHandler('/home/ubuntu/UEI-Backend/app.log', maxBytes=10**6, backupCount=3) 
 # file_handler=RotatingFileHandler("D:/github/UEI/PythonFlask/app.log", maxBytes=10**6, backupCount=3)
 # file_handler=RotatingFileHandler("C:/Users/IDOL 3/Documents/GitHub/UEI/PythonFlask/app.log", maxBytes=10**6, backupCount=3)
 file_handler.setLevel(logging.INFO)
