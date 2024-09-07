@@ -1,0 +1,12 @@
+__pycache__
+app/__pycache__
+app/models/__pycache__
+gurukulaienv
+.venv
+migrations
+.env
+app/config
+venv
+.venv 
+old_migrations
+uploads

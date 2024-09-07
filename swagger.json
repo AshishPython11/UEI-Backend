@@ -1,0 +1,100 @@
+{
+    "swagger": "2.0",
+    "info": {
+      "title": "Sample API",
+      "description": "A sample API that demonstrates how to use Flask-SwaggerUI.",
+      "version": "1.0"
+    },
+    "basePath": "/api",
+    "schemes": [
+      "http"
+    ],
+    "consumes": [
+      "application/json"
+    ],
+    "produces": [
+      "application/json"
+    ],
+    "securityDefinitions": {
+      "jwt": {
+          "name": "Authorization",
+          "in": "header",
+          "type": "http",
+          "scheme": "bearer",
+          "bearerFormat": "JWT",
+          "description": "JWT Authorization header using the Bearer scheme"
+      }
+    },
+    "paths": {
+        "/signup": {
+            "post": {
+              "summary": "",
+              "parameters": [
+                {
+                  "user_type": "access data",
+                  "user_id_type": "access data",
+                  "password": "access data",
+                  "userid": "access data",
+                  "in": "body",
+                  "description": "JSON data for the api",
+                  "required": true,
+                  "schema": {
+                    "$ref": "#/definitions/SignupAccessData"
+                  }
+                }
+              ],
+              "responses": {
+                "200": {
+                  "description": "Successful Signup",
+                  "content": {
+                    "application/json": {
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "message": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+         
+    },
+    "definitions": {
+      "SignupAccessData": {
+        "type": "object",
+        "properties": {
+          "userid": {
+            "type": "string"
+          },
+          "user_type": {
+            "type": "string"
+          },
+          "user_id_type": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "loginAccessData": {
+        "type": "object",
+        "properties": {
+          "user_type": {
+            "type": "string"
+          },
+          "userid": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
