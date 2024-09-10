@@ -2,7 +2,7 @@ from datetime import datetime
 import json
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from app import db, api, authorizations,logger
+from app import db, api, authorizations
 from flask_restx import Api, Namespace, Resource, fields
 from app.models.student import SubjectPreference
 
@@ -66,14 +66,13 @@ class SubjectPreferenceController:
                         subject_preferences_data.append(subject_preference_data)
                     
                     if not subject_preferences_data:
-                        logger.warning("No Subject Preference found")
+                   
                         return jsonify({'message': 'No Subject Preference found', 'status': 404})
                     else:
-                        logger.info("Subjects Preferences found Successfully")
+             
                         return jsonify({'message': 'Subjects Preferences found Successfully', 'status': 200, 'data': subject_preferences_data})
                 except Exception as e:
-            
-                    logger.error(f"Error fetching subject preference information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
                 
         @self.subject_preference_ns.route('/alldata')
@@ -100,14 +99,13 @@ class SubjectPreferenceController:
                         subject_preferences_data.append(subject_preference_data)
                     
                     if not subject_preferences_data:
-                        logger.warning("No Subject Preference found")
+                       
                         return jsonify({'message': 'No Subject Preference found', 'status': 404})
                     else:
-                        logger.info("Subjects Preferences found Successfully")
+                     
                         return jsonify({'message': 'Subjects Preferences found Successfully', 'status': 200, 'data': subject_preferences_data})
                 except Exception as e:
-                
-                    logger.error(f"Error fetching subject preference information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
 
 
@@ -126,29 +124,29 @@ class SubjectPreferenceController:
                     current_user_id = get_jwt_identity()
                     score_in_percentage = data.get('score_in_percentage')
                     if not student_id :
-                        logger.warning("No student id found")
+                 
                         return jsonify({'message': 'Please Provide Admin Id', 'status': 201})
                     if not course_id :
-                        logger.warning("No course_id found")
+                
                         return jsonify({'message': 'Please Provide Course Id', 'status': 201})
                     if not subject_id :
-                        logger.warning("No Subject id found")
+          
                         return jsonify({'message': 'Please Provide Subject Id', 'status': 201})
                     if not preference :
-                        logger.warning("No Preference found")
+         
                         return jsonify({'message': 'Please Provide Preference', 'status': 201})
                     if not score_in_percentage :
-                        logger.warning("No score_in_percentage found")
+                   
                         return jsonify({'message': 'Please Provide Score in percentage', 'status': 201})
                     else:
                         subject_preference = SubjectPreference(student_id=student_id,course_id=course_id,subject_id=subject_id,preference=preference,score_in_percentage=score_in_percentage,is_active = 1,created_by=current_user_id)
                         db.session.add(subject_preference)
                         db.session.commit()
-                        logger.info("Subjects Preferences created Successfully")
+            
                         return jsonify({'message': 'Subject Preference created successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding subject preference information: {str(e)}")
+ 
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.subject_preference_ns.route('/multiple_subject/add')
@@ -173,23 +171,23 @@ class SubjectPreferenceController:
                         score_in_percentage = item.get('score_in_percentage')
 
                         if not student_id:
-                            logger.warning("No student_id found")
+                        
                             responses.append({'message': 'Please Provide Student Id', 'status': 201, 'item': item})
                             continue
                         if not course_id:
-                            logger.warning("No course_id found")
+                      
                             responses.append({'message': 'Please Provide Course Id', 'status': 201, 'item': item})
                             continue
                         if not subject_id:
-                            logger.warning("No Subject id found")
+                         
                             responses.append({'message': 'Please Provide Subject Id', 'status': 201, 'item': item})
                             continue
                         if not preference:
-                            logger.warning("No Preference found")
+       
                             responses.append({'message': 'Please Provide Preference', 'status': 201, 'item': item})
                             continue
                         if score_in_percentage is None:
-                            logger.warning("No score_in_percentage found")
+                   
                             responses.append({'message': 'Please Provide Score in Percentage', 'status': 201, 'item': item})
                             continue
 
@@ -206,11 +204,11 @@ class SubjectPreferenceController:
                     
                     db.session.commit()
                     responses.append({'message': 'Subject Preferences Added successfully', 'status': 200})
-                    logger.info("Subjects Preferences added Successfully")
+                  
                     return jsonify(responses)
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding subject preference information: {str(e)}")
+                  
                     return jsonify({'message': str(e), 'status': 500})
             
             @self.subject_preference_ns.route('/multiple_subject/edit')
@@ -236,27 +234,27 @@ class SubjectPreferenceController:
                             score_in_percentage = item.get('score_in_percentage')
 
                             if not record_id:
-                                logger.warning("No record_id found")
+                           
                                 responses.append({'message': 'Please Provide Record Id', 'status': 201, 'item': item})
                                 continue
                             if not student_id:
-                                logger.warning("No student_id found")
+                           
                                 responses.append({'message': 'Please Provide Student Id', 'status': 201, 'item': item})
                                 continue
                             if not course_id:
-                                logger.warning("No course_id found")
+                          
                                 responses.append({'message': 'Please Provide Course Id', 'status': 201, 'item': item})
                                 continue
                             if not subject_id:
-                                logger.warning("No Subject id found")
+                        
                                 responses.append({'message': 'Please Provide Subject Id', 'status': 201, 'item': item})
                                 continue
                             if not preference:
-                                logger.warning("No Preference found")
+                            
                                 responses.append({'message': 'Please Provide Preference', 'status': 201, 'item': item})
                                 continue
                             if score_in_percentage is None:
-                                logger.warning("No score_in_percentage found")
+                            
                                 responses.append({'message': 'Please Provide Score in Percentage', 'status': 201, 'item': item})
                                 continue
 
@@ -272,13 +270,13 @@ class SubjectPreferenceController:
                             subject_preference.score_in_percentage = score_in_percentage
                             subject_preference.updated_by = current_user_id
                             db.session.commit()
-                            logger.info("Subjects Preferences updated Successfully")
+               
                         responses.append({'message': 'Subject Preferences Updated successfully', 'status': 200})
 
                         return jsonify(responses)
                     except Exception as e:
                         db.session.rollback()
-                        logger.error(f"Error editing subject preference information: {str(e)}")
+              
                         return jsonify({'message': str(e), 'status': 500})
 
 
@@ -297,25 +295,24 @@ class SubjectPreferenceController:
                     current_user_id = get_jwt_identity()
                     score_in_percentage = data.get('score_in_percentage')
                     if not student_id :
-                        logger.warning("No student_id found")
+            
                         return jsonify({'message': 'Please Provide Admin Id', 'status': 201})
                     if not course_id :
-                        logger.warning("No course_id found")
+                    
                         return jsonify({'message': 'Please Provide Course Id', 'status': 201})
                     if not subject_id :
-                        logger.warning("No Subject id found")
+                
                         return jsonify({'message': 'Please Provide Subject Id', 'status': 201})
                     if not preference :
-                        logger.warning("No Preference found")
+                
                         return jsonify({'message': 'Please Provide Preference', 'status': 201})
                     if not score_in_percentage :
-                
-                        logger.warning("No  found")
+         
                         return jsonify({'message': 'Please Provide Score in percentage', 'status': 201})
                     else:
                         subject_preference = SubjectPreference.query.get(id)
                         if not subject_preference:
-                            logger.warning("No Subject Preference found")
+                
                             return jsonify({'message': 'Subject Preference not found', 'status': 404})
                         else:
                             subject_preference.student_id = student_id
@@ -325,11 +322,11 @@ class SubjectPreferenceController:
                             subject_preference.score_in_percentage = score_in_percentage
                             subject_preference.updated_by = current_user_id
                             db.session.commit()
-                            logger.info("Subjects Preferences updated Successfully")
+           
                             return jsonify({'message': 'Subject Preference updated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error editing subject preference information: {str(e)}")
+          
                     return jsonify({'message': str(e), 'status': 500})
                         
             @self.subject_preference_ns.doc('subject_preference/get', security='jwt')
@@ -338,8 +335,7 @@ class SubjectPreferenceController:
                 try:
               
                     subject_preferences = SubjectPreference.query.filter_by(student_id=id,is_active=1).all()
-                    if not subject_preferences:
-                        logger.warning("No Subject Preference found")
+                    if not subject_preferences:       
                         return jsonify({'message': 'Subject Preference not found', 'status': 404})
                     else:
                         subject_preferences_data = []
@@ -358,11 +354,9 @@ class SubjectPreferenceController:
                             subject_preferences_data.append(subject_preference_data)
                         
                         print(subject_preference_data)
-                        logger.info("Subjects Preferences found Successfully")
+            
                         return jsonify({'message': 'Subject Preference found Successfully', 'status': 200,'data':subject_preferences_data})
                 except Exception as e:
-                    
-                    logger.error(f"Error fetching subject preference information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
 
      
@@ -374,16 +368,15 @@ class SubjectPreferenceController:
                     try:
                         subject_preference = SubjectPreference.query.get(id)
                         if not subject_preference:
-                            logger.warning("No Subject Preference found")
+                    
                             return jsonify({'message': 'Student Preference  not found', 'status': 404})
                         else:
                             subject_preference.is_active = 0
                             db.session.commit()
-                            logger.info("Subjects Preferences deleted Successfully")
+                     
                             return jsonify({'message': 'Student Preference deleted successfully', 'status': 200})  
                     except Exception as e:
-                        
-                        logger.error(f"Error delelting subject preference information: {str(e)}")
+ 
                         return jsonify({'message': str(e), 'status': 500})
                         
         @self.subject_preference_ns.route('/activate/<int:id>')
@@ -394,16 +387,13 @@ class SubjectPreferenceController:
                 try:
                     subject_preference = SubjectPreference.query.get(id)
                     if not subject_preference:
-                        logger.warning("No Subject Preference found")
+ 
                         return jsonify({'message': 'Subject Preference not found', 'status': 404})
-
                     subject_preference.is_active = 1
                     db.session.commit()
-                    logger.info("Subjects Preferences activated Successfully")
                     return jsonify({'message': 'Subject Preference activated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error activating subject preference information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
             
         @self.subject_preference_ns.route('/deactivate/<int:id>')
@@ -414,16 +404,13 @@ class SubjectPreferenceController:
                 try:
                     subject_preference = SubjectPreference.query.get(id)
                     if not subject_preference:
-                        logger.warning("No Subject Preference found")
                         return jsonify({'message': 'Subject Preference not found', 'status': 404})
-
                     subject_preference.is_active = 0
                     db.session.commit()
-                    logger.info("Subjects Preferences deactivated Successfully")
+            
                     return jsonify({'message': 'Subject Preference deactivated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error deactivating subject preference information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
                     
 

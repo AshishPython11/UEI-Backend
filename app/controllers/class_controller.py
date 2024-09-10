@@ -1,7 +1,7 @@
 import json
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from app import db,app,api,authorizations,logger
+from app import db,app,api,authorizations
 from flask_restx import  Api, Namespace, Resource, fields
 from app.models.adminuser import AdminBasicInformation
 from app.models.student import ClassMaster
@@ -54,13 +54,13 @@ class ClassController:
                         classes_data.append(class_data)
 
                     if not classes_data:
-                        logger.warning("Classes not found ")
+         
                         return jsonify({'message': 'No class found', 'status': 404})
-                    logger.info("Classes Found Successfully")
+    
                     return jsonify({'message': 'Class Found Successfully', 'status': 200, 'data': classes_data})
                 except Exception as e:
                     
-                    logger.error(f"Error fetching class: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.class_ns.route('/add')
@@ -76,7 +76,7 @@ class ClassController:
                         current_user_id = get_jwt_identity()
 
                         if not class_name:
-                            logger.warning("No class name provided")
+                 
                             return jsonify({'message': 'Please Provide Class Name', 'status': 400})
 
                         
@@ -88,22 +88,22 @@ class ClassController:
                                 existing_class.is_active = True
                                 existing_class.updated_by = current_user_id
                                 db.session.commit()
-                                logger.info("Class created successfully")
+                  
                                 return jsonify({'message': 'Class Created Successfully', 'status': 200})
                             else:
                                 
-                                logger.warning("Class already exists and is not deleted")
+               
                                 return jsonify({'message': 'Class Already Exists', 'status': 409})
 
                       
                         new_class = ClassMaster(class_name=class_name, is_active=True, created_by=current_user_id)
                         db.session.add(new_class)
                         db.session.commit()
-                        logger.info("Class created successfully")
+
                         return jsonify({'message': 'Class Created Successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding class: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.class_ns.route('/edit/<int:id>')
@@ -118,27 +118,27 @@ class ClassController:
                     current_user_id = get_jwt_identity()
 
                     if not class_name:
-                        logger.warning("No classes found")
+      
                         return jsonify({'message': 'Please Provide Class Name', 'status': 400})
 
                     classes = ClassMaster.query.get(id)
                     if not classes:
-                        logger.warning("No classes found")
+   
                         return jsonify({'message': 'Class Not Found', 'status': 404})
 
                     existing_class = ClassMaster.query.filter_by(class_name=class_name).first()
                     if existing_class:
-                        logger.warning(" classe already exists")
+
                         return jsonify({'message': 'Class Already Exists', 'status': 409})
 
                     classes.class_name = class_name
                     classes.updated_by = current_user_id
                     db.session.commit()
-                    logger.info("class updated successfully")
+
                     return jsonify({'message': 'Class Updated Successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error editing class: {str(e)}")
+        
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.class_ns.route('/get/<int:id>')
@@ -149,7 +149,7 @@ class ClassController:
                 try:
                     classes = ClassMaster.query.get(id)
                     if not classes:
-                        logger.warning("Class Name Not Provided")
+                
                         return jsonify({'message': 'Class Not Found', 'status': 404})
 
                     class_data = {
@@ -160,11 +160,10 @@ class ClassController:
                         'created_at': classes.created_at,
                         'updated_at': classes.updated_at,
                     }
-                    logger.info("class found successfully")
+              
                     return jsonify({'message': 'Class Found Successfully', 'status': 200, 'data': class_data})
                 except Exception as e:
-                    
-                    logger.error(f"Error fetching class: {str(e)}")
+ 
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.class_ns.route('/delete/<int:id>')
@@ -175,16 +174,16 @@ class ClassController:
                 try:
                     classes = ClassMaster.query.get(id)
                     if not classes:
-                        logger.warning(f"Class not found: class_id {id}")
+
                         return jsonify({'message': 'Class Not Found', 'status': 404})
 
                     classes.is_deleted = True
                     db.session.commit()
-                    logger.info(f"Class deleted successfully: class_id {id}")
+
                     return jsonify({'message': 'Class Deleted Successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error deleting class: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
         @self.class_ns.route('/activate/<int:id>')
         class CourseActivate(Resource):
@@ -194,17 +193,17 @@ class ClassController:
                 try:
                     classes = ClassMaster.query.get(id)
                     if not classes:
-                        logger.warning(f"Class with ID {id} not found")
+                      
                         return jsonify({'message': 'Class Not Found', 'status': 404})
                     else:
                         classes.is_active = 1
                         classes.updated_by = get_jwt_identity()
                         db.session.commit()
-                        logger.info(f"Class Activated Successfully")
+            
                         return jsonify({'message': 'Class Activated Successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error activating Class: {str(e)}")
+      
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.class_ns.route('/deactivate/<int:id>')
@@ -215,17 +214,17 @@ class ClassController:
                 try:
                     classes = ClassMaster.query.get(id)
                     if not classes:
-                        logger.warning(f"Class with ID {id} not found")
+    
                         return jsonify({'message': 'Class not found', 'status': 404})
                     else:
                         classes.is_active = 0
                         classes.updated_by = get_jwt_identity()
                         db.session.commit()
-                        logger.info(f"Class activated successfully")
+
                         return jsonify({'message': 'Class Deactivated Successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error deactivating Class: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
         
         self.api.add_namespace(self.class_ns)

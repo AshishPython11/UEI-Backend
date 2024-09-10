@@ -2,7 +2,7 @@ from datetime import datetime
 import json
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from app import db, api, authorizations,logger
+from app import db, api, authorizations
 from flask_restx import Api, Namespace, Resource, fields
 from app.models.student import StudentAddress
 
@@ -56,14 +56,13 @@ class StudentAddressController:
                         student_addresses_data.append(student_address_data)
                     
                     if not student_addresses_data:
-                        logger.warning("No StudentAddress found")
+      
                         return jsonify({'message': 'No StudentAddress found', 'status': 404})
                     else:
-                        logger.info("StudentAddresses found Successfully")
+       
                         return jsonify({'message': 'StudentAddresses found Successfully', 'status': 200, 'data': student_addresses_data})
                 except Exception as e:
-                    
-                    logger.error(f"Error fetching student address information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
                 
         @self.student_address_ns.route('/alldata')
@@ -94,14 +93,13 @@ class StudentAddressController:
                         student_addresses_data.append(student_address_data)
                     
                     if not student_addresses_data:
-                        logger.warning("No StudentAddress found")
+
                         return jsonify({'message': 'No StudentAddress found', 'status': 404})
                     else:
-                        logger.info("StudentAddresses found Successfully")
+       
                         return jsonify({'message': 'StudentAddresses found Successfully', 'status': 200, 'data': student_addresses_data})
                 except Exception as e:
-                   
-                    logger.error(f"Error fetching student address information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
         @self.student_address_ns.route('/add')
         class StudentAddressAdd(Resource):
@@ -122,39 +120,39 @@ class StudentAddressController:
                     address_type = data.get('address_type')
                     current_user_id = get_jwt_identity()
                     if not student_id :
-                        logger.warning("No student_id found")
+ 
                         return jsonify({'message': 'Please Provide Student Id', 'status': 201})
                     if not address1 :
-                        logger.warning("No address1 found")
+
                         return jsonify({'message': 'Please Provide Address 1', 'status': 201})
                    
                     if not country :
-                        logger.warning("No country found")
+   
                         return jsonify({'message': 'Please Provide Country', 'status': 201})
                     if not state :
-                        logger.warning("No state found")
+       
                         return jsonify({'message': 'Please Provide State', 'status': 201})
                     if not city :
-                        logger.warning("No city found")
+
                         return jsonify({'message': 'Please Provide City', 'status': 201})
                     if not district :
-                        logger.warning("No district found")
+
                         return jsonify({'message': 'Please Provide District', 'status': 201})
                     if not pincode :
-                        logger.warning("No pincode found")
+
                         return jsonify({'message': 'Please Provide Pincode', 'status': 201})
                     if not address_type :
-                        logger.warning("No address_type found")
+
                         return jsonify({'message': 'Please Provide Address Type', 'status': 201})
                     else:
                         student_address = StudentAddress(student_id=student_id,address1=address1,address2=address2,country=country,state=state,city=city,district=district,pincode=pincode,address_type=address_type,is_active = 1,created_by=current_user_id)
                         db.session.add(student_address)
                         db.session.commit()
-                        logger.info("StudentAddresses created Successfully")
+     
                         return jsonify({'message': 'Student Address created successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding student address information: {str(e)}")
+ 
                     return jsonify({'message': str(e), 'status': 500})
                 
         @self.student_address_ns.route('/edit/<int:id>')
@@ -176,31 +174,31 @@ class StudentAddressController:
                     address_type = data.get('address_type')
                     current_user_id = get_jwt_identity()
                     if not student_id :
-                        logger.warning("No student_id found")
+
                         return jsonify({'message': 'Please Provide Student Id', 'status': 201})
                     if not address1 :
-                        logger.warning("No address1 found")
+
                         return jsonify({'message': 'Please Provide Address 1', 'status': 201})
                     if not address2 :
-                        logger.warning("No address2 found")
+        
                         return jsonify({'message': 'Please Provide Address 2', 'status': 201})
                     if not country :
-                        logger.warning("No country found")
+
                         return jsonify({'message': 'Please Provide Country', 'status': 201})
                     if not state :
-                        logger.warning("No state found")
+           
                         return jsonify({'message': 'Please Provide State', 'status': 201})
                     if not city :
-                        logger.warning("No city found")
+    
                         return jsonify({'message': 'Please Provide City', 'status': 201})
                     if not district :
-                        logger.warning("No district found")
+
                         return jsonify({'message': 'Please Provide District', 'status': 201})
                     if not pincode :
-                        logger.warning("No pincode found")
+
                         return jsonify({'message': 'Please Provide Pincode', 'status': 201})
                     if not address_type :
-                        logger.warning("No address_type found")
+   
                         return jsonify({'message': 'Please Provide Address Type', 'status': 201})
                     else:
                   
@@ -221,7 +219,7 @@ class StudentAddressController:
                             )
                             db.session.add(student_address)
                             db.session.commit()
-                            logger.info("StudentAddresses created Successfully")
+ 
                             return jsonify({'message': 'Student Address created successfully', 'status': 201})
                         else:
                             student_address.student_id = student_id
@@ -235,11 +233,11 @@ class StudentAddressController:
                             student_address.address_type = address_type
                             student_address.updated_by = current_user_id
                             db.session.commit()
-                            logger.info("StudentAddresses updated Successfully")
+                     
                             return jsonify({'message': 'Student Address updated successfully', 'status': 200})
                 except Exception as e:
                         db.session.rollback()
-                        logger.error(f"Error editing student address information: {str(e)}")
+             
                         return jsonify({'message': str(e), 'status': 500})
                         
             @self.student_address_ns.doc('student_address/get', security='jwt')
@@ -249,7 +247,7 @@ class StudentAddressController:
                
                     student_addresses = StudentAddress.query.filter_by(student_id=id).all()
                     if not student_addresses:
-                        logger.warning("No StudentAddress found")
+                
                         return jsonify({'message': 'Student Address not found', 'status': 404})
                     else:
                         student_addresses_data = []
@@ -272,11 +270,10 @@ class StudentAddressController:
                             }
                             student_addresses_data.append(student_address_data)
                         print(student_address_data)
-                        logger.info("StudentAddresses found Successfully")
+            
                         return jsonify({'message': 'Student Address found Successfully', 'status': 200,'data':student_addresses_data})
                 except Exception as e:
-                
-                    logger.error(f"Error fetching student address information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
         @self.student_address_ns.route('delete/<int:id>')
         class StudentAddressDelete(Resource):
@@ -286,16 +283,14 @@ class StudentAddressController:
                     try:
                         student_address = StudentAddress.query.get(id)
                         if not student_address:
-                            logger.warning("No StudentAddress found")
+                  
                             return jsonify({'message': 'Student Address  not found', 'status': 404})
                         else:
                             student_address.is_active = 0
-                            db.session.commit()
-                            logger.info("StudentAddresses deleted Successfully")
+                    
                             return jsonify({'message': 'Student Address deleted successfully', 'status': 200})
                     except Exception as e:
-                    
-                        logger.error(f"Error delelting student address information: {str(e)}")
+
                         return jsonify({'message': str(e), 'status': 500})
                         
         @self.student_address_ns.route('/activate/<int:id>')
@@ -306,16 +301,16 @@ class StudentAddressController:
                 try:
                     student_address = StudentAddress.query.get(id)
                     if not student_address:
-                        logger.warning("No StudentAddress found")
+                    
                         return jsonify({'message': 'Student Address not found', 'status': 404})
                     else:
                         student_address.is_active = 1
                         db.session.commit()
-                        logger.info("StudentAddresses activated Successfully")
+               
                         return jsonify({'message': 'Student Address activated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error activating student address information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.student_address_ns.route('/deactivate/<int:id>')
@@ -326,16 +321,16 @@ class StudentAddressController:
                 try:
                     student_address = StudentAddress.query.get(id)
                     if not student_address:
-                        logger.warning("No StudentAddress found")
+
                         return jsonify({'message': 'Student Address not found', 'status': 404})
                     else:
                         student_address.is_active = 0
                         db.session.commit()
-                        logger.info("StudentAddresses deactivated Successfully")
+
                         return jsonify({'message': 'Student Address deactivated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error deactivating student address information: {str(e)}")
+    
                     return jsonify({'message': str(e), 'status': 500})
         
         self.api.add_namespace(self.student_address_ns)

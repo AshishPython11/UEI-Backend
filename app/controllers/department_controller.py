@@ -1,7 +1,7 @@
 import json
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from app import db, api, authorizations,logger
+from app import db, api, authorizations
 from flask_restx import Api, Namespace, Resource, fields
 from app.models.adminuser import AdminBasicInformation, DepartmentMaster
 from sqlalchemy import desc
@@ -31,22 +31,22 @@ class DepartmentController:
                     current_user_id = get_jwt_identity()
               
                     if not department_name:
-                        logger.warning('Department name not provided')
+                   
                         return jsonify({'message': 'Please Provide Department name', 'status': 201})
                     else:
                         existing_deptartment = DepartmentMaster.query.filter_by(department_name=department_name).first()
 
                         if existing_deptartment:
-                            logger.info('Department already exists')
+                            
                             return jsonify({'message': 'Department already exists', 'status': 409})
                         department = DepartmentMaster(department_name=department_name,created_by=current_user_id)
                         db.session.add(department)
                         db.session.commit()
-                        logger.info('Department created successfully')
+    
                         return jsonify({'message': 'Department created successfully', 'status': 200})
                 except Exception as e:
                     
-                    logger.error(f"Error fetching department information: {str(e)}")
+                 
                     return jsonify({'message': str(e), 'status': 500})
         @self.department_ns.route('/list')
         class DepartmentList(Resource):
@@ -87,14 +87,13 @@ class DepartmentController:
                         departments_data.append(department_data)
                     
                     if not departments_data:
-                        logger.info('No departments found')
+                    
                         return jsonify({'message': 'No Admin Addresses found', 'status': 404})
                     else:
-                        logger.info('Departments found successfully')
+                      
                         return jsonify({'message': 'Admin Addresses found Successfully', 'status': 200, 'data': departments_data})
                 except Exception as e:
-                    
-                    logger.error(f"Error fetching department information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
                     
         
@@ -110,27 +109,27 @@ class DepartmentController:
                     department_name = data.get('department_name')
                     current_user_id = get_jwt_identity()
                     if not department_name:
-                        logger.warning('Department name not provided')
+
                         return jsonify({'message': 'Please provide department name', 'status': 400})
                     else:
                         department = DepartmentMaster.query.get(id)
                         if not department:
-                            logger.warning('Department not provided')
+       
                             return jsonify({'message': 'Department not found', 'status': 404})
                         else:
                             existing_deptartment = DepartmentMaster.query.filter_by(department_name=department_name).first()
 
                             if existing_deptartment:
-                                logger.warning('Department alreay exists')
+
                                 return jsonify({'message': 'Department already exists', 'status': 409})
                             department.department_name = department_name
                             department.updated_by= current_user_id
                             db.session.commit()
-                            logger.info('Department updated uccesfully')
+
                             return jsonify({'message': 'Department updated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error editing department information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
                     
             @self.department_ns.doc('department/get', security='jwt')
@@ -139,7 +138,7 @@ class DepartmentController:
                 try:
                     department = DepartmentMaster.query.get(id)
                     if not department:
-                        logger.warning('Department not found')
+      
                         return jsonify({'message': 'Department not found', 'status': 404})
                     else:
                         department_data = {
@@ -152,11 +151,9 @@ class DepartmentController:
                             'updated_at':department.updated_at
                         }
                         print(department_data)
-                        logger.info('Department found successfully')
+                 
                         return jsonify({'message': 'Department found Successfully', 'status': 200,'data':department_data})
                 except Exception as e:
-                    
-                    logger.error(f"Error fetching department information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
         
         @self.department_ns.route('delete/<int:id>')
@@ -167,17 +164,17 @@ class DepartmentController:
                     try:
                         department_entity = DepartmentMaster.query.get(id)
                         if not department_entity:
-                            logger.warning('Department not found')
+     
                             return jsonify({'message': 'Department not found', 'status': 404})
                         else:
                             # department_entity.is_active = 0
                             department_entity.is_deleted=True
                             db.session.commit()
-                            logger.info('Department deleted successfully')
+       
                             return jsonify({'message': 'Department deleted successfully', 'status': 200})
                     except Exception as e:
                     
-                        logger.error(f"Error deleting department information: {str(e)}")
+
                         return jsonify({'message': str(e), 'status': 500})
                         
         @self.department_ns.route('/activate/<int:id>')
@@ -188,17 +185,17 @@ class DepartmentController:
                 try:
                     department = DepartmentMaster.query.get(id)
                     if not department:
-                        logger.warning('Department not found')
+
                         return jsonify({'message': 'Department not found', 'status': 404})
                     else:
                         department.is_active = 1
                         department.updated_by = get_jwt_identity()
                         db.session.commit()
-                        logger.info('Department activated successfully')
+
                         return jsonify({'message': 'Department activated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error activating department information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.department_ns.route('/deactivate/<int:id>')
@@ -209,17 +206,17 @@ class DepartmentController:
                 try:
                     department = DepartmentMaster.query.get(id)
                     if not department:
-                        logger.warning('Department not found')
+
                         return jsonify({'message': 'Department not found', 'status': 404})
                     else:
                         department.is_active = 0
                         department.updated_by = get_jwt_identity()
                         db.session.commit()
-                        logger.info('Department deactivated successfully')
+
                         return jsonify({'message': 'Department deactivated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error deactivating department information: {str(e)}")
+ 
                     return jsonify({'message': str(e), 'status': 500})
         
         self.api.add_namespace(self.department_ns)
