@@ -3,7 +3,7 @@ import json
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
-from app import db, api, authorizations,logger
+from app import db, api, authorizations
 from flask_restx import Api, Namespace, Resource, fields
 from app.models.adminuser import AdminAddress
 
@@ -56,40 +56,30 @@ class AdminAddressController:
                 
                         
                     if not admin_id :
-                        logger.warning('No Admin id found')
                         return jsonify({'message': 'Please Provide Admin Id', 'status': 201})
                     if not address1 :
-                        logger.warning('No address1 found')
                         return jsonify({'message': 'Please Provide Address 1', 'status': 201})
                    
                     if not country :
-                        logger.warning('No country found')
                         return jsonify({'message': 'Please Provide Country', 'status': 201})
                     if not state :
-                        logger.warning('No state found')
                         return jsonify({'message': 'Please Provide State', 'status': 201})
                     if not city :
-                        logger.warning('No city found')
                         return jsonify({'message': 'Please Provide City', 'status': 201})
                     if not district :
-                        logger.warning('No district found')
                         return jsonify({'message': 'Please Provide District', 'status': 201})
                     if not pincode :
-                        logger.warning('No pincode found')
                         return jsonify({'message': 'Please Provide Pincode', 'status': 201})
                     if not address_type :
-                        logger.warning('No Address type found')
                         return jsonify({'message': 'Please Provide Address Type', 'status': 201})
                     else:
                         admin_address = AdminAddress(admin_id=admin_id,address1=address1,address2=address2,country=country,state=state,city=city,district=district,pincode=pincode,address_type=address_type,is_active=1,created_by=current_user_id)
                         db.session.add(admin_address)
                         db.session.commit()
                         message = 'Admin Address created successfully'
-                        logger.info(message)
                         return jsonify({'message': 'Admin Address Created Successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error creating Admin Address: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.admin_address_ns.route('/list')
@@ -118,15 +108,10 @@ class AdminAddressController:
                         admin_addresses_data.append(admin_address_data)
                     
                     if not admin_addresses_data:
-                        
-                        logger.warning('No Admin Addresses found')
                         return jsonify({'message': 'No Admin Addresses found', 'status': 404})
                     else:
-                        
-                        logger.info('Admin Addresses found successfully')
                         return jsonify({'message': 'Admin Addresses found Successfully', 'status': 200, 'data': admin_addresses_data})
                 except Exception as e:
-                    logger.error(f"Error fetching Admin Addresses: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
         @self.admin_address_ns.route('/alldata')
         class AdminAddressList(Resource):
@@ -155,14 +140,11 @@ class AdminAddressController:
 
                     if not admin_addresses_data:
                         message = 'No Admin Addresses found'
-                        logger.info(message)
                         return jsonify({'message': message, 'status': 404})
                     else:
                         message = 'Admin Addresses found successfully'
-                        logger.info(message)
                         return jsonify({'message': message, 'status': 200, 'data': admin_addresses_data})
                 except Exception as e:
-                    logger.error(f"Error fetching Admin Addresses: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
                    
         @self.admin_address_ns.route('/edit/<int:id>')
@@ -185,31 +167,22 @@ class AdminAddressController:
                     current_user_id = get_jwt_identity()
                     
                     if not admin_id :
-                        logger.warning('No Admin id found')
                         return jsonify({'message': 'Please Provide Admin Id', 'status': 201})
                     if not address1 :
-                        logger.warning('No address1 found')
                         return jsonify({'message': 'Please Provide Address 1', 'status': 201})
                     if not address2 :
-                        logger.warning('No Adress2 found')
                         return jsonify({'message': 'Please Provide Address 2', 'status': 201})
                     if not country :
-                        logger.warning('No country found')
                         return jsonify({'message': 'Please Provide Country', 'status': 201})
                     if not state :
-                        logger.warning('No state found')
                         return jsonify({'message': 'Please Provide State', 'status': 201})
                     if not city :
-                        logger.warning('No city found')
                         return jsonify({'message': 'Please Provide City', 'status': 201})
                     if not district :
-                        logger.warning('No district found')
                         return jsonify({'message': 'Please Provide District', 'status': 201})
                     if not pincode :
-                        logger.warning('No pincode found')
                         return jsonify({'message': 'Please Provide Pincode', 'status': 201})
                     if not address_type :
-                        logger.warning('No Adress type found')
                         return jsonify({'message': 'Please Provide Address Type', 'status': 201})
                     else:
                        
@@ -231,7 +204,6 @@ class AdminAddressController:
                             db.session.add(admin_address)
                             db.session.commit()
                             message = 'Admin Address created successfully'
-                            logger.info(message)
                             return jsonify({'message': message, 'status': 201})
 
                         else:
@@ -247,11 +219,9 @@ class AdminAddressController:
                             admin_address.updated_by = current_user_id
                             db.session.commit()
                             message = 'Admin Address updated successfully'
-                            logger.info(message)
                             return jsonify({'message': message, 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error editing Admin Address: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
                             
                     
@@ -263,7 +233,6 @@ class AdminAddressController:
                     admin_addresses = AdminAddress.query.filter_by(admin_id=id).all()
                     if not admin_addresses:
                         message = 'Admin Address not found'
-                        logger.info(message)
                         return jsonify({'message': message, 'status': 404})
                     else: 
                         admin_addresses_data=[]
@@ -286,12 +255,9 @@ class AdminAddressController:
 
                         print(admin_address_data)
                         message = 'Admin Address found successfully'
-                        logger.info(message)
                         return jsonify({'message': message, 'status': 200, 'data': admin_addresses_data})
                         
                 except Exception as e:
-              
-                    logger.error(f"Error fetching admin address: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
                 
         @self.admin_address_ns.route('/activate/<int:id>')
@@ -303,17 +269,14 @@ class AdminAddressController:
                     admin_address = AdminAddress.query.get(id)
                     if not admin_address:
                         message = 'Admin Address not found'
-                        logger.info(message)
                         return jsonify({'message': message, 'status': 404})
                     else:
                         admin_address.is_active = 1
                         db.session.commit()
                         message = 'Admin Address activated successfully'
-                        logger.info(message)
                         return jsonify({'message': message, 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error activating Admin Address: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.admin_address_ns.route('/deactivate/<int:id>')
@@ -325,17 +288,14 @@ class AdminAddressController:
                     admin_address = AdminAddress.query.get(id)
                     if not admin_address:
                         message = 'Admin Address not found'
-                        logger.info(message)
                         return jsonify({'message': message, 'status': 404})
                     else:
                         admin_address.is_active = 0
                         db.session.commit()
                         message = 'Admin Address deactivated successfully'
-                        logger.info(message)
                         return jsonify({'message': message, 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error deactivating Admin Address: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
             
         
