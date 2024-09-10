@@ -4,7 +4,7 @@ import json
 import os
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from app import db, api, authorizations,logger
+from app import db, api, authorizations
 from flask_restx import Api, Namespace, Resource, fields
 from app.models.adminuser import CourseMaster, Institution, SubjectMaster,EntityType,LanguageMaster
 from app.models.student import AcademicHistory, Contact,NewStudentAcademicHistory, LanguageKnown, Student, StudentAddress, StudentHobby, StudentLogin,ClassMaster, SubjectPreference,Hobby
@@ -105,17 +105,16 @@ class StudentController:
                         students_data.append(student_data)
                     
                     if not students_data:
-                        logger.warning("No Student found")
+                        
                         return jsonify({'message': 'No Student found', 'status': 404})
                     else:
-                        logger.info("Students found Successfully")
+                       
                         return jsonify({'message': 'Students found Successfully', 'status': 200, 'data': students_data})
                     
             
                     return jsonify({'message': 'Profile picture path stored successfully', 'status': 200})
                 except Exception as e:
-                   
-                    logger.error(f"Error fetching student information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
         @self.student_ns.route('/add')
         class StudentAdd(Resource):
@@ -147,22 +146,22 @@ class StudentController:
 
                    
                     if not first_name:
-                        logger.warning("No first_name found")
+                      
                         return jsonify({'message': 'Please Provide First Name', 'status': 201})
                     if not last_name:
-                        logger.warning("No last_name found")
+                      
                         return jsonify({'message': 'Please Provide Last Name', 'status': 201})
                     if not gender:
-                        logger.warning("No gender found")
+                    
                         return jsonify({'message': 'Please Provide Gender', 'status': 201})
                     if not dob:
-                        logger.warning("No dob found")
+                  
                         return jsonify({'message': 'Please Provide Date of Birth', 'status': 201})
                     if not father_name:
-                        logger.warning("No father_name found")
+                  
                         return jsonify({'message': 'Please Provide Father Name', 'status': 201})
                     if not mother_name:
-                        logger.warning("No mother_name found")
+                      
                         return jsonify({'message': 'Please Provide Mother Name', 'status': 201})
 
                 
@@ -207,11 +206,11 @@ class StudentController:
                         db.session.add(student)
 
                     db.session.commit()
-                    logger.info("Students processed Successfully")
+                 
                     return jsonify({'message': 'Student record processed successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding student information: {str(e)}")
+              
                     return jsonify({'message': str(e), 'status': 500})
                 
         @self.student_ns.route('/add/store_profile_picture')
@@ -226,21 +225,21 @@ class StudentController:
                     pic_path = data.get('pic_path')
                     current_user_id = get_jwt_identity()
                     if not student_login_id:
-                        logger.warning("No student_login_id found")
+                  
                         return jsonify({'message': 'Student Login ID is required', 'status': 400})
                     if not pic_path:
-                        logger.warning("No pic_path found")
+                  
                         return jsonify({'message': 'Picture Path is required', 'status': 400})
 
                     student = StudentLogin.query.filter_by(student_id=student_login_id).first()
                     if not student:
-                        logger.warning("No Student found")
+                 
                         return jsonify({'message': 'Student not found', 'status': 404})
                     newstudent = Student.query.filter_by(student_login_id=student_login_id).first()
                     
                     newstudent.pic_path = pic_path
                     db.session.commit()
-                    logger.info("Profile picture path stored successfully")
+                  
                     return jsonify({
                         'message': 'Profile picture path stored successfully',
                         'status': 200,
@@ -248,7 +247,7 @@ class StudentController:
                     })
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding student information: {str(e)}")
+             
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.student_ns.route('/get/<int:id>')
@@ -259,7 +258,7 @@ class StudentController:
                 try:
                     student = Student.query.filter_by(student_login_id=id).first()
                     if not student:
-                        logger.warning("No Student found")
+                 
                         return jsonify({'message': 'Student not found', 'status': 404})
                     else:
                         student_data = {
@@ -279,11 +278,11 @@ class StudentController:
                             'is_active': student.is_active,
                             
                         }
-                        logger.info("Student found Successfully")
+               
                         return jsonify({'message': 'Student found Successfully', 'status': 200,'data':student_data}) 
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error editing student information: {str(e)}")
+            
                     return jsonify({'message': str(e), 'status': 500})
             @self.student_ns.route('/getProfile/<int:id>')
             class StudentGetProfile(Resource):
@@ -294,7 +293,7 @@ class StudentController:
                         student_login = StudentLogin.query.get(id)
                         student = Student.query.filter_by(student_login_id=id).first()
                         if not student:
-                            logger.warning("No Student found")
+                           
                             prompt = "**question** in Educational term"
                             return jsonify({'message': 'Student not found', 'status': 404, 'data': {'prompt': prompt, 'user_id': student_login.userid}})
                         
@@ -414,11 +413,10 @@ class StudentController:
                                 prompt = prompt.replace(f'**{key}**', str(data))
 
                         student_data['prompt'] = prompt
-                        logger.info("Student found Successfully")
+                     
                         return jsonify({'message': 'Student found Successfully', 'status': 200, 'data': student_data}) 
                     except Exception as e:
-                    
-                            logger.error(f"Error fetching student information: {str(e)}")
+
                             return jsonify({'message': str(e), 'status': 500})        
         @self.student_ns.route('/edit/<int:id>')
         class StudentEdit(Resource):
@@ -444,28 +442,28 @@ class StudentController:
 
                     
                     if not first_name:
-                        logger.warning("No first_name found")
+                       
                         return jsonify({'message': 'Please Provide First Name', 'status': 400})
                     if not last_name:
-                        logger.warning("No last_name found")
+               
                         return jsonify({'message': 'Please Provide Last Name', 'status': 400})
                     if not gender:
-                        logger.warning("No gender found")
+                    
                         return jsonify({'message': 'Please Provide Gender', 'status': 400})
                     if not dob:
-                        logger.warning("No dob found")
+               
                         return jsonify({'message': 'Please Provide Date of Birth', 'status': 400})
                     if not father_name:
-                        logger.warning("No father_name found")
+               
                         return jsonify({'message': 'Please Provide Father Name', 'status': 400})
                     if not mother_name:
-                        logger.warning("No mother_name found")
+          
                         return jsonify({'message': 'Please Provide Mother Name', 'status': 400})
 
                     
                     student = Student.query.filter_by(student_login_id=id).first()
                     if not student:
-                        logger.warning("No Student found")
+             
                         return jsonify({'message': 'Student not found', 'status': 404})
                 
                 
@@ -484,11 +482,11 @@ class StudentController:
                     student.updated_at = datetime.now()
 
                     db.session.commit()
-                    logger.info("Student updated Successfully")
+              
                     return jsonify({'message': 'Student updated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error edting student information: {str(e)}")
+           
                     return jsonify({'message': str(e), 'status': 500})
                         
             @self.student_ns.doc('student/get', security='jwt')
@@ -497,7 +495,7 @@ class StudentController:
                 try:
                     student = Student.query.get(id)
                     if not student:
-                        logger.warning("No Student found")
+          
                         return jsonify({'message': 'Student not found', 'status': 404})
                     else:
                         student_data = {
@@ -518,11 +516,10 @@ class StudentController:
                             
                         }
                         print(student_data)
-                        logger.info("Student found Successfully")
+           
                         return jsonify({'message': 'Student found Successfully', 'status': 200,'data':student_data})
                 except Exception as e:
-                  
-                    logger.error(f"Error fetching student information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
                     
                 
@@ -549,27 +546,27 @@ class StudentController:
                     mobile_no_call = data.get('mobile_no_call')
 
                     if not first_name:
-                        logger.warning("No first_name found")
+                    
                         return jsonify({'message': 'Please Provide First Name', 'status': 201})
                     if not last_name:
-                        logger.warning("No last_name found")
+                
                         return jsonify({'message': 'Please Provide Last Name', 'status': 201})
                     if not gender:
-                        logger.warning("No v found")
+                    
                         return jsonify({'message': 'Please Provide Gender', 'status': 201})
                     if not dob:
-                        logger.warning("No dob found")
+                  
                         return jsonify({'message': 'Please Provide Date of Birth', 'status': 201})
                     if not father_name:
-                        logger.warning("No v found")
+              
                         return jsonify({'message': 'Please Provide Father Name', 'status': 201})
                     if not mother_name:
-                        logger.warning("No mother_name found")
+                    
                         return jsonify({'message': 'Please Provide Mother Name', 'status': 201})
                     else:
                         student = Student.query.filter_by(student_id=id).first()
                         if not student:
-                            logger.warning("No Student found")
+                   
                             return jsonify({'message': 'Student not found', 'status': 404})
                         else:
                             student.aim = aim
@@ -597,11 +594,11 @@ class StudentController:
    
                                     contact.mobile_no_call = mobile_no_call
                             db.session.commit()
-                            logger.info("Student updated Successfully")
+                        
                             return jsonify({'message': 'Student updated successfully', 'status': 200})
                 except Exception as e:
                         db.session.rollback()
-                        logger.error(f"Error editing student information: {str(e)}")
+             
                         return jsonify({'message': str(e), 'status': 500})
         @self.student_ns.route('delete/<int:id>')
         class StudentDelete(Resource):
@@ -611,17 +608,16 @@ class StudentController:
                     try:
                         student = Student.query.get(id)
                         if not student:
-                            logger.warning("No Student found")
+                         
                             return jsonify({'message': 'Student not found', 'status': 404})
                         else:
              
                             student.is_deleted=True
                             db.session.commit()
-                            logger.info("Student deleted Successfully")
+                   
                             return jsonify({'message': 'Student deleted successfully', 'status': 200})
                     except Exception as e:
-                        
-                        logger.error(f"Error deleting student information: {str(e)}")
+
                         return jsonify({'message': str(e), 'status': 500})
                     
         @self.student_ns.route('/activate/<int:id>')
@@ -632,16 +628,16 @@ class StudentController:
                 try:
                     student = Student.query.get(id)
                     if not student:
-                        logger.warning("No Student found")
+
                         return jsonify({'message': 'Student not found', 'status': 404})
                     else:
                         student.is_active = 1
                         db.session.commit()
-                        logger.info("Student activated Successfully")
+
                         return jsonify({'message': 'Student activated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error activating student information: {str(e)}")
+  
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.student_ns.route('/deactivate/<int:id>')
@@ -652,16 +648,16 @@ class StudentController:
                 try:
                     student = Student.query.get(id)
                     if not student:
-                        logger.warning("No Student found")
+              
                         return jsonify({'message': 'Student not found', 'status': 404})
                     else:
                         student.is_active = 0
                         db.session.commit()
-                        logger.info("Student deactivated Successfully")
+                        
                         return jsonify({'message': 'Student deactivated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error deactivating student information: {str(e)}")
+                  
                     return jsonify({'message': str(e), 'status': 500})
                     
         @self.student_ns.route('/profile-completion/<int:id>')
@@ -672,7 +668,7 @@ class StudentController:
                 try:
                     student = Student.query.get(id)
                     if not student:
-                        logger.warning("No Student found")
+                      
                         return jsonify({'message': 'Student not found', 'status': 404})
                     
                     required_fields = ['first_name', 'last_name', 'gender', 'dob', 'father_name', 'mother_name', 'pic_path']
@@ -684,10 +680,9 @@ class StudentController:
                         return jsonify({'message': 'No required fields defined', 'status': 500}), 500
                     
                     completion_percentage = (filled_required_fields / total_required_fields) * 100
-                    logger.info("Profile completion percentage calculated successfully")
+             
                     return jsonify({'message': 'Profile completion percentage calculated successfully', 'status': 200, 'completion_percentage': completion_percentage})
                 except Exception as e:
-             
-                    logger.error(f"Error fetching student profile information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
         self.api.add_namespace(self.student_ns)

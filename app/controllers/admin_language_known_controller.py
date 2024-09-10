@@ -2,7 +2,7 @@ from datetime import datetime
 import json
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from app import db, api, authorizations,logger
+from app import db, api, authorizations
 from flask_restx import Api, Namespace, Resource, fields
 from app.models.adminuser import AdminLanguageKnown
 
@@ -31,9 +31,7 @@ class AdminLanguageKnownController:
         self.admin_language_known_bp = Blueprint('admin_language_known', __name__)
         self.admin_language_known_ns = Namespace('admin_language_known', description='Admin language Known Details', authorizations=authorizations)
         
-        # self.api = Api(self.admin_language_known_bp)
-        # self.api.add_namespace(self.admin_language_known_ns)
-        # self.api.init_app(self.admin_language_known_bp)
+  
         self.register_routes()
     def calculate_completion_percentage(self, data):
         filled_fields = sum(1 for field in self.required_fields if field in data and data[field])
@@ -61,14 +59,14 @@ class AdminLanguageKnownController:
                         admin_language_knownes_data.append(admin_language_known_data)
                     
                     if not admin_language_knownes_data:
-                        logger.info('No active admin language known records found')
+           
                         return jsonify({'message': 'No Admin Language Known found', 'status': 404})
                     else:
-                        logger.info('Admin language known records fetched successfully')
+               
                         return jsonify({'message': 'Admin Language Known found Successfully', 'status': 200, 'data': admin_language_knownes_data})
                 except Exception as e:
                    
-                    logger.error(f"Error fetching Admin language known information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
         @self.admin_language_known_ns.route('/alldata')
         class AdminLanguageKnownList(Resource):
@@ -91,14 +89,13 @@ class AdminLanguageKnownController:
                         admin_language_knownes_data.append(admin_language_known_data)
                     
                     if not admin_language_knownes_data:
-                        logger.info('No admin language known records found')
+                 
                         return jsonify({'message': 'No Admin Language Known found', 'status': 404})
                     else:
-                        logger.info('Admin language known records fetched successfully')
+                   
                         return jsonify({'message': 'Admin Language Known found Successfully', 'status': 200, 'data': admin_language_knownes_data})
                 except Exception as e:
                     
-                    logger.error(f"Error fetching Admin language known information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
         @self.admin_language_known_ns.route('/add')
         class AdminLanguageKnownAdd(Resource):
@@ -113,23 +110,23 @@ class AdminLanguageKnownController:
                     proficiency = data.get('proficiency')
                     current_user_id = get_jwt_identity()
                     if not admin_id :
-                        logger.warning('Admin Id is missing')
+                
                         return jsonify({'message': 'Please Provide Admin Id', 'status': 201})
                     if not language_id :
-                        logger.warning('language Id is missing')
+              
                         return jsonify({'message': 'Please Provide Language Id', 'status': 201})
                     if not proficiency :
-                        logger.warning('proficiency is missing')
+       
                         return jsonify({'message': 'Please Provide Proficiency', 'status': 201})
                     else:
                         admin_language_known = AdminLanguageKnown(admin_id=admin_id,language_id=language_id,proficiency=proficiency,is_active=1,created_by=current_user_id)
                         db.session.add(admin_language_known)
                         db.session.commit()
-                        logger.info('Admin language Known added successfully')
+                       
                         return jsonify({'message': 'Admin language Known created successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding Admin language known information: {str(e)}")
+          
                     return jsonify({'message': str(e), 'status': 500})
                 
         @self.admin_language_known_ns.route('/multiple/add')
@@ -152,15 +149,15 @@ class AdminLanguageKnownController:
                         proficiency = item.get('proficiency')
 
                         if not admin_id:
-                            logger.warning('admin_id is missing')
+                        
                             responses.append({'message': 'Please Provide Admin Id', 'status': 201, 'item': item})
                             continue
                         if not language_id:
-                            logger.warning('language_id is missing')
+                        
                             responses.append({'message': 'Please Provide Language Id', 'status': 201, 'item': item})
                             continue
                         if not proficiency:
-                            logger.warning('proficiency is missing')
+                        
                             responses.append({'message': 'Please Provide Proficiency', 'status': 201, 'item': item})
                             continue
 
@@ -174,13 +171,13 @@ class AdminLanguageKnownController:
                         db.session.add(admin_language_known)
                     
                     db.session.commit()
-                    logger.info('Multiple admin languages known added successfully')
+            
                     responses.append({'message': 'Admin Languages Added successfully', 'status': 200})
 
                     return jsonify(responses)
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding multiple Admin language known information: {str(e)}")
+               
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.admin_language_known_ns.route('/multiple_language/edit')
@@ -204,25 +201,25 @@ class AdminLanguageKnownController:
                         proficiency = item.get('proficiency')
 
                         if not record_id:
-                            logger.warning('record_id is missing')
+                        
                             responses.append({'message': 'Please Provide Record Id', 'status': 201, 'item': item})
                             continue
                         if not admin_id:
-                            logger.warning('admin_id is missing')
+                        
                             responses.append({'message': 'Please Provide Admin Id', 'status': 201, 'item': item})
                             continue
                         if not language_id:
-                            logger.warning('language_id is missing')
+                 
                             responses.append({'message': 'Please Provide Language Id', 'status': 201, 'item': item})
                             continue
                         if not proficiency:
-                            logger.warning('proficiency is missing')
+                      
                             responses.append({'message': 'Please Provide Proficiency', 'status': 201, 'item': item})
                             continue
 
                         admin_language_known = AdminLanguageKnown.query.filter_by(id=record_id).first()
                         if not admin_language_known:
-                            logger.warning('admin_language_known is missing')
+             
                             responses.append({'message': f'Admin language Known with id {record_id} not found', 'status': 404, 'item': item})
                             continue
 
@@ -233,11 +230,11 @@ class AdminLanguageKnownController:
                         db.session.commit()
 
                     responses.append({'message': 'Admin Languages Updated successfully', 'status': 200})
-                    logger.info('Multiple admin languages known updated successfully')
+            
                     return jsonify(responses)
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error editing multiple Admin language known information: {str(e)}")
+                  
                     return jsonify({'message': str(e), 'status': 500})
                                      
         @self.admin_language_known_ns.route('/edit/<int:id>')
@@ -253,19 +250,19 @@ class AdminLanguageKnownController:
                     proficiency = data.get('proficiency')
                     current_user_id = get_jwt_identity()
                     if not admin_id :
-                        logger.warning('admin Id is missing')
+                    
                         return jsonify({'message': 'Please Provide Admin Id', 'status': 201})
                     if not language_id :
-                        logger.warning('language Id is missing')
+            
                         return jsonify({'message': 'Please Provide Language Id', 'status': 201})
                     if not proficiency :
-                        logger.warning(' proficiency is missing')
+         
                         return jsonify({'message': 'Please Provide Proficiency', 'status': 201})
                     else:
                        
                         admin_language_known = AdminLanguageKnown.query.filter_by(admin_id=admin_id).first()
                         if not admin_language_known:
-                            logger.warning('Admin language Known not found')
+                    
                             return jsonify({'message': 'Admin language Known not found', 'status': 404})
                         else:
                             admin_language_known.admin_id = admin_id
@@ -273,11 +270,11 @@ class AdminLanguageKnownController:
                             admin_language_known.proficiency = proficiency
                             admin_language_known.updated_by = current_user_id
                             db.session.commit()
-                            logger.info('Admin language Known updated successfully')
+                       
                             return jsonify({'message': 'Admin language Known updated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error editing Admin language known information: {str(e)}")
+            
                     return jsonify({'message': 'Internal Server Error', 'status': 500})
                     
             @self.admin_language_known_ns.doc('admin_language_known/get', security='jwt')
@@ -287,7 +284,7 @@ class AdminLanguageKnownController:
                 
                     admin_language_knowns = AdminLanguageKnown.query.filter_by(admin_id=id,is_active=1).all()
                     if not admin_language_knowns:
-                        logger.error(f'Admin language Known not found')
+         
                         return jsonify({'message': 'Admin language Known not found', 'status': 404})
                     else:
                         admin_language_known_data = []
@@ -300,11 +297,10 @@ class AdminLanguageKnownController:
                                 'is_active': admin_language_known.is_active
                             })
                             print(admin_language_known_data)
-                        logger.info(f'Admin language Known deleted successfully')
+                  
                         return jsonify({'message': 'Admin Language Known found Successfully', 'status': 200,'data':admin_language_known_data})
                 except Exception as e:
-                    
-                    logger.error(f"Error fetching Admin language known information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
                 
         @self.admin_language_known_ns.route('/delete/<int:id>')
@@ -315,16 +311,16 @@ class AdminLanguageKnownController:
                     try:
                         admin_language_known = AdminLanguageKnown.query.get(id)
                         if not admin_language_known:
-                            logger.warning(f'Admin language Known not found')
+                        
                             return jsonify({'message': 'Admin language Known  not found', 'status': 404})
                         else:
                             admin_language_known.is_active = 0
                             db.session.commit()
-                            logger.info(f'Admin language Known deleted successfully')
+                          
                             return jsonify({'message': 'Admin Language Known deleted successfully', 'status': 200})
                     except Exception as e:
                         db.session.rollback()
-                        logger.error(f"Error deleting Admin language known information: {str(e)}")
+             
                         return jsonify({'message': str(e), 'status': 500})
                         
         @self.admin_language_known_ns.route('/activate/<int:id>')
@@ -335,16 +331,16 @@ class AdminLanguageKnownController:
                 try:
                     admin_language_known = AdminLanguageKnown.query.get(id)
                     if not admin_language_known:
-                        logger.warning(f'Admin language Known not found')
+                 
                         return jsonify({'message': 'Admin language Known not found', 'status': 404})
                     else:
                         admin_language_known.is_active = 1
                         db.session.commit()
-                        logger.info(f'Admin language Known activated successfully')
+           
                         return jsonify({'message': 'Admin Language Known activated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error activating Admin language known information: {str(e)}")
+             
                     return jsonify({'message': str(e), 'status': 500})
         
         @self.admin_language_known_ns.route('/deactivate/<int:id>')
@@ -355,16 +351,16 @@ class AdminLanguageKnownController:
                 try:
                     admin_language_known = AdminLanguageKnown.query.get(id)
                     if not admin_language_known:
-                        logger.warning(f'Admin language Known not found')
+                       
                         return jsonify({'message': 'Admin language Known not found', 'status': 404})
                     else:
                         admin_language_known.is_active = 0
                         db.session.commit()
-                        logger.info(f'Admin language Known deactivated successfully')
+            
                         return jsonify({'message': 'Admin Language Known deactivated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error deactivating Admin language known information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
             
         self.api.add_namespace(self.admin_language_known_ns)
