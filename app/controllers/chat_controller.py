@@ -6,7 +6,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from sqlalchemy import func
 from flask import Blueprint, jsonify, request,current_app
-from app import db, app, api, authorizations,logger
+from app import db, app, api, authorizations
 from flask_restx import Api, Namespace, Resource, fields
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from openai import OpenAI
@@ -123,7 +123,6 @@ class ChatController:
                             }
                         except Exception as e:
                             error_message = str(e)
-                            logger.error("Error while calling GPT-3 API")
                             return jsonify(
                                 {
                                     "message": "Error while calling GPT-3 API",
@@ -131,7 +130,6 @@ class ChatController:
                                     "status": 500,
                                 }
                             )
-                        logger.info("Answer getting successfully")
                         return jsonify(
                             {
                                 "message": "Answer getting successfully",
@@ -141,7 +139,6 @@ class ChatController:
                         )
                 except Exception as e:
                         db.session.rollback()
-                        logger.error(f"Error adding  chat information: {str(e)}")
                         return jsonify({'message': 'Internal Server Error', 'status': 500})
 
         @self.chat_ns.route("/chatadd")
@@ -162,7 +159,6 @@ class ChatController:
                     print("similarity_question >> ", cached_response.chat_question.strip().lower(),question.strip().lower())
                     if cached_response.chat_question.strip().lower()  == question.strip().lower():
                     # if similarity_question > 95:
-                        logger.info(f"Found similar question: {cached_response.chat_question}")
                         return {
                             "cached_response": cached_response,
                             # "similarity": similarity_question,
@@ -268,12 +264,10 @@ class ChatController:
                         )
 
                     if not question:
-                        logger.warning("Missing question")
                         return jsonify(
                             {"message": "Please Provide Question", "status": 201}
                         )
                     if not prompt:
-                        logger.warning("Missing prompt")
                         return jsonify({"message": "Please Provide Prompt", "status": 201})
 
                     gpt3_system_prompt = self.get_gpt3_prompt(base_prompt)
@@ -339,7 +333,6 @@ class ChatController:
                             )
                             db.session.add(new_chat_entry)
                             db.session.commit()
-                            logger.info(f"GPT-3 response stored successfully for question: {question}")
                         return jsonify({
                             'message': 'Answer stored successfully',
                             'data': {
@@ -375,7 +368,6 @@ class ChatController:
                             "prompt": prompt,
                         }
                     except Exception as e:
-                        logger.error(f"Error in post method: {str(e)}")
                         error_message = str(e)
                         return jsonify(
                             {
@@ -394,7 +386,6 @@ class ChatController:
                     )
                 except Exception as e:
                         db.session.rollback()
-                        logger.error(f"Error adding  chat information: {str(e)}")
                         return jsonify({'message': 'Internal Server Error', 'status': 500})
         
         @self.chat_ns.route("/chatconversation")
@@ -465,7 +456,6 @@ class ChatController:
                                     filtered_responses.append(content)
                         
                         if not filtered_responses:
-                            logger.warning("No relevant answer found")
                             return jsonify({'message': 'No relevant answer found', 'status': 404})
                         
                         # Store only the first relevant response, assuming it's the most relevant
@@ -481,7 +471,6 @@ class ChatController:
                             )
                             db.session.add(new_chat_entry)
                             db.session.commit()
-                        logger.info("Answer stored successfully")
                         return jsonify({
                             'message': 'Answer stored successfully',
                             'data': {
@@ -495,7 +484,6 @@ class ChatController:
 
                     except Exception as e:
                         error_message = str(e)
-                        logger.error("Error while calling GPT-3 API")
                         return jsonify({
                             'message': 'Error while calling GPT-3 API',
                             'error': error_message,
@@ -503,20 +491,18 @@ class ChatController:
                         })
                 except Exception as e:
                         db.session.rollback()
-                        logger.error(f"Error adding  chat information: {str(e)}")
                         return jsonify({'message': 'Internal Server Error', 'status': 500})
         
         @self.chat_ns.route('/api/chat-count/<int:student_id>')
         class GetChatCount(Resource):
             def get(self,student_id):
                 try:
-                    logger.info(f"Chat count for student_id {student_id}: {chat_count}")
+                   
                     chat_count = ChatConversionData.query.filter_by(is_deleted=False).filter_by(student_id=student_id).count()
 
                     return jsonify({'student_id': student_id, 'chat_count': chat_count,'status': 200})
 
                 except Exception as e:
-                    logger.error(f"Error occurred in GetChatCount: {str(e)}")
                     return jsonify({'message': 'Error occurred', 'error': str(e),'status': 500})
 
         # @self.chat_ns.route("/chat/fetch-or-generate", methods=["POST"])    
@@ -904,7 +890,6 @@ class ChatController:
                         })
                 except Exception as e:
                         db.session.rollback()
-                        logger.error(f"Error adding  chat information: {str(e)}")
                         return jsonify({'message': 'Internal Server Error', 'status': 500})
         @self.chat_ns.route("/generate-from-api", methods=["POST"])
         class GenerateChat(Resource):
@@ -1021,7 +1006,6 @@ class ChatController:
                             db.session.commit()
 
                         response_array = filtered_responses.split(' ')
-                        logger.info("Answer generated and stored successfully")
                         return jsonify({
                             'message': 'Answer generated and stored successfully',
                             'status': 200,
@@ -1034,7 +1018,6 @@ class ChatController:
 
                     except Exception as e:
                         error_message = str(e)
-                        logger.error("Error while calling GPT-3 API")
                         return jsonify(
                             {
                                 "message": "Error while calling GPT-3 API",
@@ -1044,7 +1027,6 @@ class ChatController:
                         )
                 except Exception as e:
                         db.session.rollback()
-                        logger.error(f"Error adding  chat information: {str(e)}")
                         return jsonify({'message': 'Internal Server Error', 'status': 500})
         @self.chat_ns.route('/store')
         class StoreChat(Resource):
@@ -1069,11 +1051,9 @@ class ChatController:
 
                     db.session.add(chat_data)
                     db.session.commit()
-                    logger.info("Chat data stored successfully")
                     return {'message': 'Chat data stored successfully', 'status': 201}
                 except Exception as e:
                         db.session.rollback()
-                        logger.error(f"Error adding  chat information: {str(e)}")
                         return jsonify({'message': 'Internal Server Error', 'status': 500})
 
                                 

@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from app import db, api, authorizations, logger
+from app import db, api, authorizations
 from flask_restx import Api, Namespace, Resource, fields
 from app.models.student import NewStudentAcademicHistory
 from app.models.adminuser import Institution
@@ -82,13 +82,13 @@ class NewStudentAcademicHistoryController:
                         data.append(history_data)
 
                     if not data:
-                        logger.warning("No Academic Histories found")
+                    
                         return jsonify({'message': 'No Academic Histories found', 'status': 404})
                     else:
-                        logger.info("Academic Histories found successfully")
+                   
                         return jsonify({'message': 'Academic Histories found successfully', 'status': 200, 'data': data})
                 except Exception as e:
-                    logger.error(f"Error fetching academic histories: {str(e)}")
+                
                     return jsonify({'message': str(e), 'status': 500})
         @self.new_student_academic_history_ns.route('/alldata')
         class StudentAcademicHistoryList(Resource):
@@ -123,13 +123,13 @@ class NewStudentAcademicHistoryController:
                         student_academic_histories_data.append(history_data)
                     
                     if not student_academic_histories_data:
-                        logger.warning("No student academic histories found")
+             
                         return jsonify({'message': 'No student academic histories found', 'status': 404})
                     else:
-                        logger.info("Student academic histories retrieved successfully")
+               
                         return jsonify({'message': 'Student Academic Histories retrieved successfully', 'status': 200, 'data': student_academic_histories_data})
                 except Exception as e:
-                    logger.error(f"Error fetching student academic history information: {str(e)}")
+          
                     return jsonify({'message': str(e), 'status': 500})
 
        
@@ -163,11 +163,9 @@ class NewStudentAcademicHistoryController:
                     db.session.add(new_academic_history)
                     db.session.commit()
 
-                    logger.info("Academic History created successfully")
                     return jsonify({'message': 'Academic History created successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding academic history: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.new_student_academic_history_ns.route('/multiple_academic_history/add')
@@ -179,7 +177,7 @@ class NewStudentAcademicHistoryController:
                 try:
                     data = request.json.get('histories')
                     if not isinstance(data, list):
-                        logger.warning("Payload is not an array")
+                
                         return jsonify({'message': 'Payload should be an array of objects', 'status': 400})
 
                     current_user_id = get_jwt_identity()
@@ -188,7 +186,7 @@ class NewStudentAcademicHistoryController:
                     for item in data:
                       
                         if not all(key in item for key in ['student_id', 'institution_type', 'board', 'state_for_stateboard', 'class_id', 'year', 'institute_id', 'course_id', 'learning_style']):
-                            logger.warning("Missing required fields in payload")
+                           
                             return jsonify({'message': 'Missing required fields', 'status': 400})
 
                         new_academic_history = NewStudentAcademicHistory(
@@ -209,11 +207,11 @@ class NewStudentAcademicHistoryController:
                     
                     db.session.commit()
                     responses.append({'message': 'Academic Histories created successfully', 'status': 200})
-                    logger.info("Academic Histories created successfully")
+            
                     return jsonify(responses)
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding multiple academic histories: {str(e)}")
+           
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.new_student_academic_history_ns.route('/multiple_academic_history/edit')
@@ -226,7 +224,7 @@ class NewStudentAcademicHistoryController:
                     try:
                         data = request.json.get('histories')
                         if not data:
-                            logger.warning("No data provided")
+                
                             return jsonify({'message': 'No data provided', 'status': 400})
 
                         current_user_id = get_jwt_identity()
@@ -252,15 +250,15 @@ class NewStudentAcademicHistoryController:
 
                                 responses.append({'id': record.id, 'message': 'Academic History updated successfully'})
                             else:
-                                logger.warning(f"Record with ID {record_id} not found")
+                                
                                 responses.append({'id': record_id, 'message': 'Record not found'})
 
                         db.session.commit()
-                        logger.info("Academic Histories updated successfully")
+                       
                         return jsonify({'message': 'Academic Histories updated successfully', 'status': 200, 'data': responses})
                     except Exception as e:
                         db.session.rollback()
-                        logger.error(f"Error updating multiple academic histories: {str(e)}")
+                  
                         return jsonify({'message': str(e), 'status': 500})
 
         @self.new_student_academic_history_ns.route('/edit/<int:id>')
@@ -331,7 +329,7 @@ class NewStudentAcademicHistoryController:
                             }
                             student_academic_historyes_data.append(student_academic_history_data)
                         print(student_academic_history_data)
-                        logger.info("Student Academic Historys found Successfully")
+                       
                         return jsonify({'message': 'Student Academic History found Successfully', 'status': 200,'data':student_academic_historyes_data})
                 except Exception as e:
                     return jsonify({'message': str(e), 'status': 500})

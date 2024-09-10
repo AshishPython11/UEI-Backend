@@ -2,7 +2,7 @@ import json
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.models.adminuser import AdminBasicInformation
-from app import db, api, authorizations,logger
+from app import db, api, authorizations
 from flask_restx import Api, Namespace, Resource, fields
 from app.models.student import Hobby
 from sqlalchemy import desc
@@ -58,14 +58,13 @@ class HobbyController:
                         hobbyes_data.append(hobby_data)
                     
                     if not hobbyes_data:
-                        logger.info('No hobbies found')
+           
                         return jsonify({'message': 'No Hobby found', 'status': 404})
                     else:
-                        logger.info('Hobby retrieved successfully')
+  
                         return jsonify({'message': 'Hobbies found Successfully', 'status': 200, 'data': hobbyes_data})
                 except Exception as e:
-                    
-                    logger.error(f"Error fetching hobby information: {str(e)}")
+ 
                     return jsonify({'message': str(e), 'status': 500})
         @self.hobby_ns.route('/add')
         class HobbyAdd(Resource):
@@ -78,17 +77,16 @@ class HobbyController:
                     hobby_name = data.get('hobby_name')
                     current_user_id = get_jwt_identity()
                     if not hobby_name:
-                        logger.warning('No hobby name found')
                         return jsonify({'message': 'Please Provide Hobby name', 'status': 201})
                     else:
                         hobby = Hobby(hobby_name=hobby_name,is_active = 1,created_by = current_user_id)
                         db.session.add(hobby)
                         db.session.commit()
-                        logger.info('Hobbies created successfully')
+         
                         return jsonify({'message': 'Hobby created successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding hobby information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
                 
         @self.hobby_ns.route('/edit/<int:id>')
@@ -102,22 +100,22 @@ class HobbyController:
                     hobby_name = data.get('hobby_name')
                     current_user_id = get_jwt_identity()
                     if not hobby_name:
-                        logger.warning('No hobby name found')
+         
                         return jsonify({'message': 'Please provide hobby name', 'status': 400})
                     else:
                         hobby = Hobby.query.get(id)
                         if not hobby:
-                            logger.warning('No hobby found')
+         
                             return jsonify({'message': 'Hobby not found', 'status': 404})
                         else:
                             hobby.hobby_name = hobby_name
                             hobby.updarted_by = current_user_id
                             db.session.commit()
-                            logger.info('Hobby updated successfully')
+    
                             return jsonify({'message': 'Hobby updated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error editing hobby information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
                     
             @self.hobby_ns.doc('hobby/get', security='jwt')
@@ -126,7 +124,7 @@ class HobbyController:
                 try:
                     hobby = Hobby.query.get(id)
                     if not hobby:
-                        logger.warning('No hobby found')
+            
                         return jsonify({'message': 'Hobby not found', 'status': 404})
                     else:
                         hobby_data = {
@@ -138,11 +136,11 @@ class HobbyController:
                             'updated_at':hobby.updated_at,
                         }
                         print(hobby_data)
-                        logger.info('Hobby found successfully')
+       
                         return jsonify({'message': 'Hobby found Successfully', 'status': 200,'data':hobby_data})
                 except Exception as e:
                    
-                    logger.error(f"Error fetching hobby information: {str(e)}")
+   
                     return jsonify({'message': str(e), 'status': 500})
                     
         @self.hobby_ns.route('delete/<int:id>')
@@ -153,17 +151,17 @@ class HobbyController:
                     try:
                         hobby_entity = Hobby.query.get(id)
                         if not hobby_entity:
-                            logger.warning('No hobby found')
+               
                             return jsonify({'message': 'hobby not found', 'status': 404})
                         else:
                          
                             hobby_entity.is_deleted=True
                             db.session.commit()
-                            logger.info('Hobby deleted successfully')
+                     
                             return jsonify({'message': 'Hobby deleted successfully', 'status': 200})
                     except Exception as e:
                         
-                        logger.error(f"Error deleting hobby information: {str(e)}")
+       
                         return jsonify({'message': str(e), 'status': 500})
                         
         @self.hobby_ns.route('/activate/<int:id>')
@@ -174,16 +172,16 @@ class HobbyController:
                 try:
                     hobby = Hobby.query.get(id)
                     if not hobby:
-                        logger.warning('No hobby found')
+             
                         return jsonify({'message': 'Hobby not found', 'status': 404})
                     else:
                         hobby.is_active = 1
                         db.session.commit()
-                        logger.info('Hobby activated successfully')
+           
                         return jsonify({'message': 'Hobby activated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error activating hobby information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.hobby_ns.route('/deactivate/<int:id>')
@@ -194,16 +192,16 @@ class HobbyController:
                 try:
                     hobby = Hobby.query.get(id)
                     if not hobby:
-                        logger.warning("No hobby found")
+          
                         return jsonify({'message': 'Hobby not found', 'status': 404})
                     else:
                         hobby.is_active = 0
                         db.session.commit()
-                        logger.info('Hobby deactivated successfully')
+                
                         return jsonify({'message': 'Hobby deactivated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error deactivating hobby information: {str(e)}")
+             
                     return jsonify({'message': str(e), 'status': 500})
 
 
