@@ -115,6 +115,7 @@ class FormController:
                         form = FormMasterData(form_name=form_name,sub_menu_master_id=sub_menu_master_id,menu_master_id=menu_master_id,form_url=form_url,form_description=form_description,is_menu_visible=is_menu_visible,is_active=1,created_by=current_user_id)
                         db.session.add(form)
                         db.session.commit()
+                        return jsonify({'message': 'Form created successfully', 'status': 201})
 
                         
                 except Exception as e:
