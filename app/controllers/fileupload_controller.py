@@ -7,7 +7,7 @@ from flask import url_for
 import base64
 import json
 
-UPLOAD_FOLDER = 'uploads/student'
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads', 'student')
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 current_path = os.getcwd()
 full_path = os.path.join(current_path, UPLOAD_FOLDER)

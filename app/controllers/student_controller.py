@@ -10,7 +10,7 @@ from app.models.adminuser import CourseMaster, Institution, SubjectMaster,Entity
 from app.models.student import AcademicHistory, Contact,NewStudentAcademicHistory, LanguageKnown, Student, StudentAddress, StudentHobby, StudentLogin,ClassMaster, SubjectPreference,Hobby
 
 # UPLOAD_FOLDER = 'uploads/student'
-UPLOAD_FOLDER = '/home/ubuntu/UEI-Backend/uploads/student'
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads', 'student')
 current_path = os.getcwd()
 full_path = os.path.join(current_path, UPLOAD_FOLDER)
 class StudentController:
