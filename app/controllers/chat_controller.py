@@ -66,7 +66,7 @@ class ChatController:
         @self.chat_ns.route("/chat")
         class ChatAdd(Resource):
             client = OpenAI(
-                api_key=os.environ.get('API_KEY'),
+                api_key=API_KEY
             )
 
             def get_gpt3_prompt(self, prompt):
@@ -146,7 +146,7 @@ class ChatController:
         @self.chat_ns.route("/chatadd")
         class ChatbotAdd(Resource):
             client = OpenAI(
-                api_key=os.environ.get('API_KEY'),
+                api_key=API_KEY,
             )
 
             def get_similar_question(self, question, stream, course):
@@ -394,7 +394,7 @@ class ChatController:
         
         class ChatAdd(Resource):
             client = OpenAI(
-                api_key=os.environ.get('API_KEY'),)
+                api_key=API_KEY)
 
             def get_gpt3_prompt(self, prompt):
                 gpt3_system_prompt = f"'{prompt}'\n\n"
@@ -896,7 +896,7 @@ class ChatController:
         @self.chat_ns.route("/generate-from-api", methods=["POST"])
         class GenerateChat(Resource):
             client = OpenAI(
-                api_key=os.environ.get('API_KEY'),
+                api_key=API_KEY
             )
 
             def get_gpt3_prompt(self, prompt):
