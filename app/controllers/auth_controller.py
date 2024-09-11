@@ -135,40 +135,50 @@ class AuthController:
                     data = request.json
                     userid = data.get('userid')
                     password = data.get('password')
-                    user = None
+
                     if not userid or not password:
-                        return jsonify({'message': 'userid and password are required','status':400})
+                        return jsonify({'message': 'userid and password are required', 'status': 400})
+
+                    user_type = data.get('user_type')
+                    user = None
+
+                    if user_type == 'student':
+                        user = StudentLogin.query.filter_by(userid=userid, is_active=1).first()
                     else:
-                        if(data.get('user_type') == 'student'):
-                            user = StudentLogin.query.filter_by(userid=userid,is_active=1).first()
-                            login_data = LoginLog(student_id=user.student_id,userid=userid,login_time=datetime.now(),ipaddress=request.remote_addr,is_active=1)
-                        else:
-                            user = AdminLogin.query.filter_by(userid=userid,is_active=1).first()
-                            login_data = LoginLog(admin_id=user.admin_id,userid=userid,login_time=datetime.now(),ipaddress=request.remote_addr,is_active=1)
-                    if not user or not check_password_hash(user.password, password):
-                        return jsonify({'message': 'Invalid userid or password','status':404})
+                        user = AdminLogin.query.filter_by(userid=userid, is_active=1).first()
+
+                    if user is None:
+                        return jsonify({'message': 'User does not exist', 'status': 404})
+
+                    if not check_password_hash(user.password, password):
+                        return jsonify({'message': 'Invalid userid or password', 'status': 404})
+
+                    if user_type == 'student':
+                        id = user.student_id
+                        login_data = LoginLog(student_id=id, userid=userid, login_time=datetime.now(), ipaddress=request.remote_addr, is_active=1)
                     else:
-                        if(data.get('user_type') == 'student'):
-                            id = user.student_id
-                        else:
-                            id = user.admin_id
-                        access_token = create_access_token(identity=id)
-                       
-                        bearer_token = f"Bearer {access_token}"
-                        user.refresh_token = access_token
-                        userdata = {
-                            'id':id,
-                            'userid':user.userid,
-                            'user_type':data.get('user_type')
-                        }
-                        db.session.add(login_data)
-                        db.session.commit()
-                        return jsonify({'token': bearer_token,'data':userdata,'message': 'User Logged In Successfully','status':200})
+                        id = user.admin_id
+                        login_data = LoginLog(admin_id=id, userid=userid, login_time=datetime.now(), ipaddress=request.remote_addr, is_active=1)
+
+                    access_token = create_access_token(identity=id)
+                    bearer_token = f"Bearer {access_token}"
+                    user.refresh_token = access_token
+
+                    userdata = {
+                        'id': id,
+                        'userid': user.userid,
+                        'user_type': user_type
+                    }
+
+                    db.session.add(login_data)
+                    db.session.commit()
+
+                    return jsonify({'token': bearer_token, 'data': userdata, 'message': 'User Logged In Successfully', 'status': 200})
+
                 except Exception as e:
                     db.session.rollback()
-             
+                    
                     return jsonify({'message': str(e), 'status': 500})
-                pass
 
         @self.auth_ns.route('/logout')
         class Logout(Resource):

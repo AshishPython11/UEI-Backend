@@ -22,7 +22,9 @@ from nltk.stem import WordNetLemmatizer
 import spacy
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
-
+from dotenv import load_dotenv
+load_dotenv()
+API_KEY=os.getenv("OPENAI_API_KEY")
 
 # nlp = spacy.load("en_core_web_md")
 # nlp = spacy.load("en_core_web_md")
@@ -812,7 +814,7 @@ class ChatController:
             def get_similar_question(self, question):
                 question_keywords = self.extract_keywords(question)
                 if not question_keywords:
-                    return "No relevant data available."
+                    return None
 
                 cached_responses = ChatConversionData.query.filter(
                     ChatConversionData.is_deleted == False
