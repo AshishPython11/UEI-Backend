@@ -1,7 +1,7 @@
 import json
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from app import db, api, authorizations,logger
+from app import db, api, authorizations
 from flask_restx import Api, Namespace, Resource, fields
 from app.models.adminuser import AdminBasicInformation
 from app.models.student import StudentLogin,StudentFeedback,Feedback,Student
@@ -73,13 +73,11 @@ class FeedbackController:
                         feedbacks_data.append(feedback_data)
 
                     if not feedbacks_data:
-                        logger.warning('Feedback question not found')
+                
                         return jsonify({'message': 'No feedback questions found', 'status': 404})
                     else:
-                        logger.info("Feedback questions found successfully")
                         return jsonify({'message': 'Feedback questions found successfully', 'status': 200, 'data': feedbacks_data})
                 except Exception as e:
-                    logger.error(f"Error fetching feedback information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
         @self.feedback_ns.route('/add')
         class FeedbackAdd(Resource):
@@ -98,11 +96,9 @@ class FeedbackController:
                         feedback = Feedback(question=question, options=options, is_active=1, created_by=current_user_id)
                         db.session.add(feedback)
                         db.session.commit()
-                        logger.info("Feedback created successfully")
                         return jsonify({'message': 'Feedback created successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding feedback information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
         @self.feedback_ns.route('/edit/<int:id>')
         class FeedbackEdit(Resource):
@@ -116,23 +112,19 @@ class FeedbackController:
                     options = data.get('options')
                     current_user_id = get_jwt_identity()
                     if not question or not options:
-                        logger.warning('question and option not found')
                         return jsonify({'message': 'Please provide question and options', 'status': 400})
                     else:
                         feedback = Feedback.query.get(id)
                         if not feedback:
-                            logger.warning('Feedback not found')
                             return jsonify({'message': 'Feedback not found', 'status': 404})
                         else:
                             feedback.question = question
                             feedback.options = options
                             feedback.updated_by = current_user_id
                             db.session.commit()
-                            logger.info("Feedback updated successfully")
                             return jsonify({'message': 'Feedback updated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error editing feedback information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
         @self.feedback_ns.route('/delete/<int:id>')
         class FeedbackDelete(Resource):
@@ -142,16 +134,12 @@ class FeedbackController:
                 try:
                     feedback = Feedback.query.get(id)
                     if not feedback:
-                        logger.warning('Feedback not found')
                         return jsonify({'message': 'Feedback not found', 'status': 404})
                     else:
                         feedback.is_deleted = True
                         db.session.commit()
-                        logger.info("Feedback deleted successfully")
                         return jsonify({'message': 'Feedback deleted successfully', 'status': 200})
                 except Exception as e:
-                    
-                    logger.error(f"Error deleting feedback information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
         @self.feedback_ns.route('/student_feedback')
         class StudentFeedbackAdd(Resource):
@@ -165,7 +153,6 @@ class FeedbackController:
                     feedbacks = data.get('feedbacks')
 
                     if not student_id or not feedbacks:
-                        logger.warning('Please provide student_id and feedbacks')
                         return jsonify({'message': 'Please provide student_id and feedbacks', 'status': 400})
 
                     for feedback_entry in feedbacks:
@@ -173,7 +160,6 @@ class FeedbackController:
                         answer = feedback_entry.get('answer')
 
                         if not question:
-                            logger.warning('Each feedback entry must include a question')
                             return jsonify({'message': 'Each feedback entry must include a question', 'status': 400})
 
                         if answer is not None and len(answer.strip()) > 0:
@@ -185,13 +171,11 @@ class FeedbackController:
                             db.session.add(student_feedback)
                             db.session.commit()
 
-                    logger.info('Student feedback submitted successfully')
                     return jsonify({'message': 'Student feedback submitted successfully', 'status': 200})
 
 
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding student feedback information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
         @self.feedback_ns.route('/student_feedback/<int:student_id>')
         class StudentFeedbackGet(Resource):
@@ -201,7 +185,6 @@ class FeedbackController:
                 try:
                     student = Student.query.filter_by(student_login_id=student_id).first()
                     if not student:
-                        logger.warning('Student not found for the given student_id')
                         return jsonify({'message': 'Student not found', 'status': 404})
 
                     feedbacks = StudentFeedback.query.filter_by(student_id=student_id).all()
@@ -213,7 +196,8 @@ class FeedbackController:
                         try:
                             answer = json.loads(answer) if isinstance(answer, str) and answer.startswith('[') else answer
                         except json.JSONDecodeError:
-                            logger.warning(f"Failed to decode answer: {answer}")
+                            pass
+                     
 
                         feedback_data = {
                             'id': feedback.id,
@@ -227,15 +211,15 @@ class FeedbackController:
                         feedbacks_data.append(feedback_data)
 
                     if not feedbacks_data:
-                        logger.warning('No feedback found for the given student_id')
+                 
                         return jsonify({'message': 'No feedback found', 'status': 404})
                
-                    logger.info("Feedback retrieved successfully")
+           
                     return jsonify({'message': 'Feedback retrieved successfully', 'status': 200, 'data': feedbacks_data})
 
                 
                 except Exception as e:
-                    logger.error(f"Error retrieving feedback information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
         @self.feedback_ns.route('/all_student_feedback')
         class AllStudentFeedbackGet(Resource):
@@ -262,7 +246,7 @@ class FeedbackController:
                         try:
                             answer = json.loads(answer) if isinstance(answer, str) and answer.startswith('[') else answer
                         except json.JSONDecodeError:
-                            logger.warning(f"Failed to decode answer: {answer}")
+                            pass
 
                         feedback_data = {
                             'id': feedback.id,
@@ -280,7 +264,7 @@ class FeedbackController:
                         grouped_feedbacks[student_name]['responses'].append(feedback_data)
 
                     if not grouped_feedbacks:
-                        logger.warning('No feedback found')
+            
                         return jsonify({'message': 'No feedback found', 'status': 404})
 
                     feedbacks_array = [
@@ -293,11 +277,11 @@ class FeedbackController:
                         for student_name, details in grouped_feedbacks.items()
                     ]
                     
-                    logger.info("All feedback retrieved successfully")
+
                     return jsonify({'message': 'All Feedback retrieved successfully', 'status': 200, 'data': feedbacks_array})
 
                 except Exception as e:
-                    logger.error(f"Error retrieving all feedback information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
                 
         @self.feedback_ns.route('/<int:id>')
@@ -356,16 +340,16 @@ class FeedbackController:
                 try:
                     feedback = Feedback.query.get(id)
                     if not feedback:
-                        logger.warning("No Feedback found")
+ 
                         return jsonify({'message': 'Feedback not found', 'status': 404})
                     else:
                         feedback.is_active = True
                         db.session.commit()
-                        logger.info("Feedback activated successfully")
+   
                         return jsonify({'message': 'Feedback activated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error activating feedback: {str(e)}")
+      
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.feedback_ns.route('/deactivate/<int:id>')
@@ -376,16 +360,16 @@ class FeedbackController:
                 try:
                     feedback = Feedback.query.get(id)
                     if not feedback:
-                        logger.warning("No Feedback found")
+    
                         return jsonify({'message': 'Feedback not found', 'status': 404})
                     else:
                         feedback.is_active = False
                         db.session.commit()
-                        logger.info("Feedback deactivated successfully")
+    
                         return jsonify({'message': 'Feedback deactivated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error deactivating feedback: {str(e)}")
+        
                     return jsonify({'message': str(e), 'status': 500})
                 
         @self.feedback_ns.route('/student_activate/<int:id>')
@@ -396,16 +380,16 @@ class FeedbackController:
                 try:
                     student_feedback = StudentFeedback.query.get(id)
                     if not student_feedback:
-                        logger.warning("No StudentFeedback found")
+         
                         return jsonify({'message': 'Student Feedback not found', 'status': 404})
                     else:
                         student_feedback.is_active = 1
                         db.session.commit()
-                        logger.info("Student Feedback activated successfully")
+
                         return jsonify({'message': 'Student Feedback activated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error activating student feedback: {str(e)}")
+       
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.feedback_ns.route('/student_deactivate/<int:id>')
@@ -416,16 +400,16 @@ class FeedbackController:
                 try:
                     student_feedback = StudentFeedback.query.get(id)
                     if not student_feedback:
-                        logger.warning("No StudentFeedback found")
+         
                         return jsonify({'message': 'Student Feedback not found', 'status': 404})
                     else:
                         student_feedback.is_active = 0
                         db.session.commit()
-                        logger.info("Student Feedback deactivated successfully")
+          
                         return jsonify({'message': 'Student Feedback deactivated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error deactivating student feedback: {str(e)}")
+       
                     return jsonify({'message': str(e), 'status': 500})
 
 

@@ -1,7 +1,7 @@
 import json
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from app import db,app,api,authorizations,logger
+from app import db,app,api,authorizations
 from flask_restx import  Api, Namespace, Resource, fields
 from app.models.adminuser import AdminBasicInformation, CourseMaster
 from sqlalchemy import desc
@@ -58,14 +58,13 @@ class CourseController:
                         coursees_data.append(course_data)
                     
                     if not coursees_data:
-                        logger.warning("No courses found")
+                   
                         return jsonify({'message': 'No Course found', 'status': 404})
                     else:
-                        logger.info("Courses found successfully")
+                        
                         return jsonify({'message': 'Courses found Successfully', 'status': 200, 'data': coursees_data})
                 except Exception as e:
-                    
-                    logger.error(f"Error fetching course: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
         
         
@@ -81,22 +80,22 @@ class CourseController:
                     current_user_id = get_jwt_identity()
                     print(data)
                     if not course_name :
-                        logger.warning("Course name not provided")
+                      
                         return jsonify({'message': 'Please Provide Course name','status':201})
                     else:
                         existing_course = CourseMaster.query.filter_by(course_name=course_name).first()
 
                         if existing_course:
-                            logger.warning(f"Course '{course_name}' already exists")
+                   
                             return jsonify({'message': 'Course already exists', 'status': 409})
                         course =  CourseMaster(course_name=course_name,is_active=1,is_deleted=False,created_by=current_user_id)
                         db.session.add(course)
                         db.session.commit()
-                        logger.info(f"Course '{course_name}' created successfully")
+                       
                         return jsonify({'message': 'Course created successfully','status':200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding course: {str(e)}")
+                  
                     return jsonify({'message': str(e), 'status': 500})
                 
         @self.course_ns.route('/edit/<int:id>')
@@ -110,27 +109,27 @@ class CourseController:
                     course_name = data.get('course_name')
                     current_user_id = get_jwt_identity()
                     if not course_name:
-                        logger.warning("Course name not provided")
+                      
                         return jsonify({'message': 'Please provide course name', 'status': 400})
                     else:
                         course = CourseMaster.query.get(id)
                     if not course:
-                        logger.warning(f"Course with ID {id} not found")
+                       
                         return jsonify({'message': 'Course not found', 'status': 404})
                     else:
                         existing_course = CourseMaster.query.filter_by(course_name=course_name).first()
 
                         if existing_course:
-                            logger.warning(f"Course '{course_name}' already exists")
+                   
                             return jsonify({'message': 'Course already exists', 'status': 409})
                         course.course_name = course_name
                         course.updated_by = current_user_id
                         db.session.commit()
-                        logger.info(f"Course with ID {id} updated successfully")
+                      
                         return jsonify({'message': 'Course updated successfully', 'status':200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error editing course: {str(e)}")
+                
                     return jsonify({'message': str(e), 'status': 500})
                         
             @self.course_ns.doc('course/get', security='jwt')
@@ -139,7 +138,7 @@ class CourseController:
                 try:
                     course = CourseMaster.query.get(id)
                     if not course:
-                        logger.warning(f"Course with ID {id} not found")
+                        
                         return jsonify({'message': 'Course not found', 'status': 404})
                     else:
                         course_data = {
@@ -150,11 +149,10 @@ class CourseController:
                             'created_at':course.created_at,
                             'updated_at':course.updated_at,
                         }
-                        logger.info(f"Course with ID {id} found successfully")
+        
                         return jsonify({'message': 'Course found Successfully', 'status': 200,'data':course_data})
                 except Exception as e:
-                    
-                    logger.error(f"Error fetching course: {str(e)}")
+    
                     return jsonify({'message': str(e), 'status': 500})
         @self.course_ns.route('delete/<int:id>')
         class CourseDelete(Resource):
@@ -164,17 +162,16 @@ class CourseController:
                     try:
                         course_entity = CourseMaster.query.get(id)
                         if not course_entity:
-                            logger.warning(f"Course with ID {id} not found")
+                        
                             return jsonify({'message': 'course not found', 'status': 404})
                         else:
                             # course_entity.is_active = 0
                             course_entity.is_deleted=True
                             db.session.commit()
-                            logger.info(f"Course with ID {id} deleted successfully")
+                         
                             return jsonify({'message': 'course deleted successfully', 'status': 200})
                     except Exception as e:
-                        
-                        logger.error(f"Error deleting course: {str(e)}")
+
                         return jsonify({'message': str(e), 'status': 500})
                     
         @self.course_ns.route('/activate/<int:id>')
@@ -185,17 +182,17 @@ class CourseController:
                 try:
                     course = CourseMaster.query.get(id)
                     if not course:
-                        logger.warning(f"Course with ID {id} not found")
+
                         return jsonify({'message': 'Course not found', 'status': 404})
                     else:
                         course.is_active = 1
                         course.updated_by = get_jwt_identity()
                         db.session.commit()
-                        logger.info(f"Course activated successfully")
+                
                         return jsonify({'message': 'Course activated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error activating course: {str(e)}")
+           
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.course_ns.route('/deactivate/<int:id>')
@@ -206,17 +203,17 @@ class CourseController:
                 try:
                     course = CourseMaster.query.get(id)
                     if not course:
-                        logger.warning(f"Course with ID {id} not found")
+          
                         return jsonify({'message': 'Course not found', 'status': 404})
                     else:
                         course.is_active = 0
                         course.updated_by = get_jwt_identity()
                         db.session.commit()
-                        logger.info(f"Course activated successfully")
+         
                         return jsonify({'message': 'Course deactivated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error deactivating course: {str(e)}")
+    
                     return jsonify({'message': str(e), 'status': 500})
                 
         self.api.add_namespace(self.course_ns)

@@ -1,7 +1,7 @@
 import json
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from app import db, api, authorizations,logger
+from app import db, api, authorizations
 from flask_restx import Api, Namespace, Resource, fields
 from app.models.adminuser import AdminBasicInformation, EntityType, Institution
 from sqlalchemy import desc
@@ -79,14 +79,14 @@ class InstituteController:
                         institutiones_data.append(institution_data)
                     
                     if not institutiones_data:
-                        logger.warning('No institution name found')
+         
                         return jsonify({'message': 'No Institution found', 'status': 404})
                     else:
-                        logger.info("Institution found successfully")
+               
                         return jsonify({'message': 'Institutions found Successfully', 'status': 200, 'data': institutiones_data})
                 except Exception as e:
                     
-                    logger.error(f"Error fetching institute information: {str(e)}")
+      
                     return jsonify({'message': str(e), 'status': 500})
                 
             
@@ -111,14 +111,14 @@ class InstituteController:
                     mobile_no = data.get('mobile_no')
                     current_user_id = get_jwt_identity()
                     if not institution_name :
-                        logger.warning('No institution name found')
+            
                         return jsonify({'message': 'Please Provide Institution name', 'status': 201})
                   
                     else:
                         existing_institute = Institution.query.filter_by(institution_name=institution_name).first()
 
                         if existing_institute:
-                            logger.warning('institutions found alreay exists')
+                   
                             return jsonify({'message': 'Institute already exists', 'status': 409})
                         institution = Institution(institution_name=institution_name,entity_id=entity_id,address=address,state=state,country=country,city=city,district=district,pincode=pincode,website_url=website_url,email_id=email_id,mobile_no=mobile_no,is_active=1,created_by=current_user_id)
                         db.session.add(institution)
@@ -130,7 +130,7 @@ class InstituteController:
                 }})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding institute information: {str(e)}")
+      
                     return jsonify({'message': str(e), 'status': 500})
                 
         @self.institution_ns.route('/edit/<int:id>')
@@ -154,38 +154,38 @@ class InstituteController:
                     mobile_no = data.get('mobile_no')
                     current_user_id = get_jwt_identity()
                     if not institution_name :
-                        logger.warning('No institution name found')
+       
                         return jsonify({'message': 'Please Provide Institution name', 'status': 201})
                     
                     if not address :
-                        logger.warning('No address found')
+          
                         return jsonify({'message': 'Please Provide Address', 'status': 201})
                     if not country :
-                        logger.warning('No country found')
+          
                         return jsonify({'message': 'Please Provide Country', 'status': 201})
                     if not state :
-                        logger.warning('No state found')
+               
                         return jsonify({'message': 'Please Provide State', 'status': 201})
                     if not city :
-                        logger.warning('No institution name found')
+    
                         return jsonify({'message': 'Please Provide City', 'status': 201})
                     if not district :
-                        logger.warning('No city found')
+          
                         return jsonify({'message': 'Please Provide District', 'status': 201})
                     if not pincode :
-                        logger.warning('No pincode found')
+       
                         return jsonify({'message': 'Please Provide Pincode', 'status': 201})
                     
                     if not email_id or not mobile_no:
-                        logger.warning('No email,mobile_nofound')
+     
                         return jsonify({'message': 'Please Provide Email Id', 'status': 201})
                     if not mobile_no:
-                        logger.warning('No institution name found')
+            
                         return jsonify({'message': 'Please Provide Mobile No', 'status': 201})
                     else:
                         institution = Institution.query.get(id)
                         if not institution:
-                            logger.warning('No institution name found')
+                        
                             return jsonify({'message': 'Institution not found', 'status': 404})
                         else:
                             
@@ -202,11 +202,11 @@ class InstituteController:
                             institution.mobile_no = mobile_no
                             institution.updated_by = current_user_id
                             db.session.commit()
-                            logger.info("Institution updated successfully")
+                    
                             return jsonify({'message': 'Institution updated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error editing institute information: {str(e)}")
+           
                     return jsonify({'message': str(e), 'status': 500})
                     
             @self.institution_ns.doc('institution/get', security='jwt')
@@ -215,7 +215,7 @@ class InstituteController:
                 try:
                     institution = Institution.query.get(id)
                     if not institution:
-                        logger.warning('No institution found')
+        
                         return jsonify({'message': 'Institution not found', 'status': 404})
                     else:
                         institution_data = {
@@ -237,11 +237,10 @@ class InstituteController:
                             
                         }
                         print(institution_data)
-                        logger.info("Institution found successfully")
+             
                         return jsonify({'message': 'Institution found Successfully', 'status': 200,'data':institution_data})
                 except Exception as e:
-              
-                    logger.error(f"Error fetching institute information: {str(e)}")
+      
                     return jsonify({'message': str(e), 'status': 500})
         @self.institution_ns.route('delete/<int:id>')
         class InstitutionDelete(Resource):
@@ -251,17 +250,16 @@ class InstituteController:
                     try:
                         institution_entity = Institution.query.get(id)
                         if not institution_entity:
-                            logger.warning('No institution  found')
+                          
                             return jsonify({'message': 'institution not found', 'status': 404})
                         else:
                             
                             institution_entity.is_deleted=True
                             db.session.commit()
-                            logger.info("Institution deleted successfully")
+                         
                             return jsonify({'message': 'Institution deleted successfully', 'status': 200})
                     except Exception as e:
-                   
-                        logger.error(f"Error delelting institute information: {str(e)}")
+  
                         return jsonify({'message': str(e), 'status': 500})
                     
         @self.institution_ns.route('/activate/<int:id>')
@@ -272,16 +270,16 @@ class InstituteController:
                 try:
                     institution = Institution.query.get(id)
                     if not institution:
-                        logger.warning('No institution found')
+            
                         return jsonify({'message': 'Institution not found', 'status': 404})
 
                     institution.is_active = 1
                     db.session.commit()
-                    logger.info("Institution activated successfully")
+           
                     return jsonify({'message': 'Institution activated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error activating institute information: {str(e)}")
+ 
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.institution_ns.route('/deactivate/<int:id>')
@@ -290,18 +288,18 @@ class InstituteController:
             @jwt_required()
             def put(self, id):
                 try:
-                    logger.warning('No institution found')
+
                     institution = Institution.query.get(id)
                     if not institution:
                         return jsonify({'message': 'Institution not found', 'status': 404})
 
                     institution.is_active = 0
                     db.session.commit()
-                    logger.info("Institution deactivated successfully")
+             
                     return jsonify({'message': 'Institution deactivated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error deactivating institute information: {str(e)}")
+ 
                     return jsonify({'message': str(e), 'status': 500})
 
 
