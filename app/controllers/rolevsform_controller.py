@@ -4,7 +4,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.models.adminuser import AdminBasicInformation
 from app import db, api, authorizations,logger
 from flask_restx import Api, Namespace, Resource, fields
-from app.models.role import FormMasterData, RoleMasterData, RoleVsFormMasterData,ManageRole
+from app.models.role import FormMasterData, RoleMasterData, RoleVsFormMasterData,ManageRole,RoleVsAdminMaster
 from sqlalchemy import desc
 class RolevsFormController:
     def __init__(self,api):
@@ -79,6 +79,48 @@ class RolevsFormController:
                  
                     logger.error(f"Error fetching rolevsform information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
+        # @self.rolevsform_ns.route('/add')
+        # class RolevsFormAdd(Resource):
+        #     @self.rolevsform_ns.doc('rolevsform/add', security='jwt')
+        #     @self.api.expect(self.rolevsform_model, validate=True)
+        #     @jwt_required()
+        #     def post(self):
+        #         try:
+        #             data = request.json
+        #             role_master_id = data.get('role_master_id')
+        #             form_master_id = data.get('form_master_id')
+        #             is_search = data.get('is_search')
+        #             is_save = data.get('is_save')
+        #             is_update = data.get('is_update')
+        #             current_user_id = get_jwt_identity()
+
+        #             if not form_master_id:
+        #                 logger.warning("No form_master_id found")
+        #                 return jsonify({'message': 'Please Provide Form ID', 'status': 400})
+        #             if not role_master_id:
+        #                 logger.warning("No role_master_id found")
+        #                 return jsonify({'message': 'Please Provide Role ID', 'status': 400})
+
+
+                 
+        #             new_association = RoleVsFormMasterData(
+        #                 role_master_id=role_master_id,
+        #                 form_master_id=form_master_id,
+        #                 is_search=is_search,
+        #                 is_save=is_save,
+        #                 is_update=is_update, 
+        #                 created_by=current_user_id
+        #             )
+        #             db.session.add(new_association)
+        #             db.session.commit()
+
+        #             logger.info("Role vs Form association created successfully")
+        #             return jsonify({'message': 'Role vs Form association created successfully', 'status': 200})
+        #         except Exception as e:
+        #             db.session.rollback()
+        #             logger.error(f"Error adding rolevsform information: {str(e)}")
+        #             return jsonify({'message': str(e), 'status': 500})
+      
         @self.rolevsform_ns.route('/add')
         class RolevsFormAdd(Resource):
             @self.rolevsform_ns.doc('rolevsform/add', security='jwt')
@@ -87,11 +129,11 @@ class RolevsFormController:
             def post(self):
                 try:
                     data = request.json
-                    role_master_id = data.get('role_master_id')
-                    form_master_id = data.get('form_master_id')
-                    is_search = data.get('is_search')
-                    is_save = data.get('is_save')
-                    is_update = data.get('is_update')
+                    role_master_id = str(data.get('role_master_id'))  # Ensure it's treated as a string
+                    form_master_id = str(data.get('form_master_id'))  # Ensure it's treated as a string
+                    is_search = data.get('is_search', True)
+                    is_save = data.get('is_save', True)
+                    is_update = data.get('is_update', True)
                     current_user_id = get_jwt_identity()
 
                     if not form_master_id:
@@ -101,27 +143,53 @@ class RolevsFormController:
                         logger.warning("No role_master_id found")
                         return jsonify({'message': 'Please Provide Role ID', 'status': 400})
 
-
-                 
                     new_association = RoleVsFormMasterData(
                         role_master_id=role_master_id,
                         form_master_id=form_master_id,
                         is_search=is_search,
                         is_save=is_save,
-                        is_update=is_update, 
+                        is_update=is_update,
                         created_by=current_user_id
                     )
                     db.session.add(new_association)
                     db.session.commit()
 
-                    logger.info("Role vs Form association created successfully")
-                    return jsonify({'message': 'Role vs Form association created successfully', 'status': 200})
+                 
+                    assigned_admins = RoleVsAdminMaster.query.filter_by(role_master_id=role_master_id).all()
+
+                    for admin in assigned_admins:
+                        manage_role = ManageRole.query.filter_by(
+                            admin_id=str(admin.admin_id),  
+                            role_master_id=role_master_id,
+                            form_master_id=form_master_id  
+                        ).first()
+
+                        if manage_role:
+                           
+                            manage_role.is_active = 1
+                            manage_role.is_delete = False
+                        else:
+                       
+                            manage_role = ManageRole(
+                                admin_id=str(admin.admin_id), 
+                                role_master_id=role_master_id,
+                                form_master_id=form_master_id,
+                                is_active=1,
+                                is_delete=False,
+                                is_search=is_search,
+                                is_save=is_save,
+                                is_update=is_update
+                            )
+                            db.session.add(manage_role)
+
+                    db.session.commit()
+
+                    logger.info("Form assigned to role and associated admins successfully")
+                    return jsonify({'message': 'Form assigned to role and associated admins successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
                     logger.error(f"Error adding rolevsform information: {str(e)}")
-                    return jsonify({'message': str(e), 'status': 500})
-      
-                
+                    return jsonify({'message': str(e), 'status': 500})       
         @self.rolevsform_ns.route('/edit/<int:id>')
         class RolevsFormEdit(Resource):
             @self.rolevsform_ns.doc('rolevsform/edit', security='jwt')
