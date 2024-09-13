@@ -14,10 +14,12 @@ import logging
 from logging.handlers import RotatingFileHandler
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+log_directory = os.getcwd() 
+log_file = os.path.join(log_directory, 'app.log') 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
-file_handler = RotatingFileHandler('/home/ubuntu/UEI-Backend/app.log', maxBytes=10**6, backupCount=3) 
-# file_handler=RotatingFileHandler("D:/github/UEI/PythonFlask/app.log", maxBytes=10**6, backupCount=3)
-# file_handler=RotatingFileHandler("C:/Users/IDOL 3/Documents/GitHub/UEI/PythonFlask/app.log", maxBytes=10**6, backupCount=3)
+file_handler = RotatingFileHandler(log_file, maxBytes=10**6, backupCount=3)
 file_handler.setLevel(logging.INFO)
 
 formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -27,7 +29,7 @@ logger.addHandler(file_handler)
 # Initialize Flask app
 app = Flask(__name__, static_folder='app/resources')
 CORS(app, resources={r"/*/*": {"origins": "*"}})
-
+app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'uploads', 'student')
 
 # Load configurations from config.py
 app.config.from_object('app.config.Config')

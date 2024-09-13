@@ -2,7 +2,7 @@ from datetime import datetime
 import json
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from app import db, api, authorizations,logger
+from app import db, api, authorizations
 from flask_restx import Api, Namespace, Resource, fields
 from app.models.adminuser import AdminContact
 
@@ -51,14 +51,11 @@ class AdminContactController:
                         admin_contactes_data.append(admin_contact_data)
                     
                     if not admin_contactes_data:
-                        logger.info('No active admin contacts found')
                         return jsonify({'message': 'No Admin Contact found', 'status': 404})
                     else:
-                        logger.info('Active admin contacts found successfully')
                         return jsonify({'message': 'Admin Contact found Successfully', 'status': 200, 'data': admin_contactes_data})
                 except Exception as e:
-                    
-                    logger.error(f"Error fetching Admin contact information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
                     
         @self.admin_contact_ns.route('/alldata')
@@ -83,14 +80,10 @@ class AdminContactController:
                         admin_contactes_data.append(admin_contact_data)
                     
                     if not admin_contactes_data:
-                        logger.info('No admin contacts found')
                         return jsonify({'message': 'No Admin Contact found', 'status': 404})
-                    else:
-                        logger.info('All admin contacts found successfully')
+                    else:                  
                         return jsonify({'message': 'Admin Contact found Successfully', 'status': 200, 'data': admin_contactes_data})
                 except Exception as e:
-                    
-                    logger.error(f"Error fetching Admin contact information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
         @self.admin_contact_ns.route('/add')
         class AdminContactAdd(Resource):
@@ -108,31 +101,23 @@ class AdminContactController:
                     email_id = data.get('email_id')
                     
                     current_user_id = get_jwt_identity()
-                    if not admin_id :
-                        logger.warning('admin_id is missing')
+                    if not admin_id :             
                         return jsonify({'message': 'Please Provide Admin Id', 'status': 201})
-                    if not mobile_isd_call :
-                        logger.warning('mobile_isd_call is missing')
+                    if not mobile_isd_call :              
                         return jsonify({'message': 'Please Provide Mobile ISD', 'status': 201})
-                    if not mobile_no_call :
-                        logger.warning('mobile_no_call is missing')
+                    if not mobile_no_call :               
                         return jsonify({'message': 'Please Provide Mobile No', 'status': 201})
-                    if not mobile_isd_watsapp :
-                        logger.warning('mobile_isd_watsapp is missing')
-                        return jsonify({'message': 'Please Provide Whatsapp mobile ISD', 'status': 201})
-                   
-                    if not email_id :
-                        logger.warning('email_id is missing')
+                    if not mobile_isd_watsapp :            
+                        return jsonify({'message': 'Please Provide Whatsapp mobile ISD', 'status': 201})                   
+                    if not email_id :                  
                         return jsonify({'message': 'Please Provide Email Id', 'status': 201})
                     else:
                         admin_contact = AdminContact(admin_id=admin_id,mobile_isd_call=mobile_isd_call,mobile_no_call=mobile_no_call,mobile_isd_watsapp=mobile_isd_watsapp,mobile_no_watsapp=mobile_no_watsapp,email_id=email_id,is_active = 1,created_by=current_user_id)
                         db.session.add(admin_contact)
-                        db.session.commit()
-                        logger.info('Admin Contact created successfully')
+                        db.session.commit()                     
                         return jsonify({'message': 'Admin Contact created successfully', 'status': 200})
                 except Exception as e:
-                    db.session.rollback()
-                    logger.error(f"Error adding Admin contact information: {str(e)}")
+                    db.session.rollback()               
                     return jsonify({'message': str(e), 'status': 500})
                 
         @self.admin_contact_ns.route('/edit/<int:id>')
@@ -151,24 +136,18 @@ class AdminContactController:
                     email_id = data.get('email_id')
                     
                     current_user_id = get_jwt_identity()
-                    if not admin_id :
-                        logger.warning('Admin Id is missing')
+                    if not admin_id :                    
                         return jsonify({'message': 'Please Provide Admin Id', 'status': 201})
-                    if not mobile_isd_call :
-                        logger.warning(' mobile_isd_call is missing')
+                    if not mobile_isd_call :                 
                         return jsonify({'message': 'Please Provide Mobile ISD', 'status': 201})
-                    if not mobile_no_call :
-                        logger.warning('mobile_no_call is missing')
+                    if not mobile_no_call :                  
                         return jsonify({'message': 'Please Provide Mobile No', 'status': 201})
-                    if not mobile_isd_watsapp :
-                        logger.warning('mobile_isd_watsapp is missing')
+                    if not mobile_isd_watsapp :                       
                         return jsonify({'message': 'Please Provide Whatsapp mobile ISD', 'status': 201})
                    
-                    else:
-                       
+                    else:                       
                         admin_contact = AdminContact.query.filter_by(admin_id=id).first()
-                        if not admin_contact:
-                            logger.warning(' Admin Contact not found')
+                        if not admin_contact:                            
                             return jsonify({'message': 'Admin Contact not found', 'status': 404})
                         else:
                             admin_contact.admin_id = admin_id
@@ -179,12 +158,11 @@ class AdminContactController:
                             admin_contact.is_active = 1
                           
                             admin_contact.updated_by=current_user_id
-                            db.session.commit()
-                            logger.info('Admin Contact updated successfully')
+                            db.session.commit()                          
                             return jsonify({'message': 'Admin Contact updated successfully', 'status': 200})
                 except Exception as e:
                         db.session.rollback()
-                        logger.error(f"Error editing Admin contact information: {str(e)}")
+                    
                         return jsonify({'message': str(e), 'status': 500})
                     
             @self.admin_contact_ns.doc('admin_contact/get', security='jwt')
@@ -194,7 +172,7 @@ class AdminContactController:
                
                     admin_contact = AdminContact.query.filter_by(admin_id=id).first()
                     if not admin_contact:
-                        logger.error(f'Admin Contact with ID: {id} not found')
+                      
                         return jsonify({'message': 'Admin Contact not found', 'status': 404})
                     else:
                         admin_contact_data = {
@@ -209,11 +187,11 @@ class AdminContactController:
                             
                         }
                         print(admin_contact_data)
-                        logger.info(f'Admin Contact found successfully: {admin_contact_data}')
+                      
                         return jsonify({'message': 'Admin Contact found Successfully', 'status': 200,'data':admin_contact_data})
                 except Exception as e:
                     
-                    logger.error(f"Error fetching Admin Contact Information: {str(e)}")
+             
                     return jsonify({'message': str(e), 'status': 500})
                 
         @self.admin_contact_ns.route('/activate/<int:id>')
@@ -224,16 +202,16 @@ class AdminContactController:
                 try:
                     admin_contact = AdminContact.query.get(id)
                     if not admin_contact:
-                        logger.error(f'Admin Contact with ID: {id} not found')
+                  
                         return jsonify({'message': 'Admin Contact not found', 'status': 404})
                     else:
                         admin_contact.is_active = 1
                         db.session.commit()
-                        logger.info('Admin Contact activated successfully')
+        
                         return jsonify({'message': 'Admin Contact activated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error activating Admin Contact Information: {str(e)}")
+        
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.admin_contact_ns.route('/deactivate/<int:id>')
@@ -244,16 +222,16 @@ class AdminContactController:
                 try:
                     admin_contact = AdminContact.query.get(id)
                     if not admin_contact:
-                        logger.error(f'Admin Contact with ID: {id} not found')
+                  
                         return jsonify({'message': 'Admin Contact not found', 'status': 404})
                     else:
                         admin_contact.is_active = 0
                         db.session.commit()
-                        logger.info('Admin Contact deactivated successfully')
+               
                         return jsonify({'message': 'Admin Contact deactivated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error deactivating Admin contact information: {str(e)}")
+                 
                     return jsonify({'message': str(e), 'status': 500})
 
             

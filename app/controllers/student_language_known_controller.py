@@ -2,7 +2,7 @@ from datetime import datetime
 import json
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from app import db, api, authorizations,logger
+from app import db, api, authorizations
 from flask_restx import Api, Namespace, Resource, fields
 from app.models.student import LanguageKnown
 
@@ -55,14 +55,13 @@ class StudentLanguageKnownController:
                         student_language_knowns_data.append(student_language_known_data)
                     
                     if not student_language_knowns_data:
-                        logger.warning("No Student Language Known found")
+
                         return jsonify({'message': 'No Student Language Known found', 'status': 404})
                     else:
-                        logger.info("Student Language Known  found Successfully")
+
                         return jsonify({'message': 'Student Language Known  found Successfully', 'status': 200, 'data': student_language_knowns_data})
                 except Exception as e:
-                    
-                    logger.error(f"Error fetching student language known information: {str(e)}")
+    
                     return jsonify({'message': str(e), 'status': 500})
                 
         @self.student_language_known_ns.route('/alldata')
@@ -85,14 +84,13 @@ class StudentLanguageKnownController:
                         student_language_knowns_data.append(student_language_known_data)
                     
                     if not student_language_knowns_data:
-                        logger.warning("No Student Language Known found")
+             
                         return jsonify({'message': 'No Student Language Known found', 'status': 404})
                     else:
-                        logger.info("Student Language Known  found Successfully")
+               
                         return jsonify({'message': 'Student Language Known  found Successfully', 'status': 200, 'data': student_language_knowns_data})
                 except Exception as e:
-                   
-                    logger.error(f"Error fetching student language known information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
         @self.student_language_known_ns.route('/add')
         class StudentLanguageKnownAdd(Resource):
@@ -107,23 +105,23 @@ class StudentLanguageKnownController:
                     proficiency = data.get('proficiency')
                     current_user_id = get_jwt_identity()
                     if not student_id :
-                        logger.warning("No Student id found")
+                  
                         return jsonify({'message': 'Please Provide Student Id', 'status': 201})
                     if not language_id :
-                        logger.warning("No Student Language id found")
+                      
                         return jsonify({'message': 'Please Provide Language Id', 'status': 201})
                     if not proficiency :
-                        logger.warning("No proficiency found")
+                        
                         return jsonify({'message': 'Please Provide Proficiency', 'status': 201})
                     else:
                         student_language_known = LanguageKnown(student_id=student_id,language_id=language_id,proficiency=proficiency,is_active =1,created_by=current_user_id)
                         db.session.add(student_language_known)
                         db.session.commit()
-                        logger.info("Student Language Known created Successfully")
+                     
                         return jsonify({'message': 'Student language Known created successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding student language known information: {str(e)}")
+        
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.student_language_known_ns.route('/multiple/add')
@@ -135,7 +133,7 @@ class StudentLanguageKnownController:
                 try:
                     data = request.json.get('languages') 
                     if not isinstance(data, list):
-                        logger.warning("Payload should be an array of objects")
+         
                         return jsonify({'message': 'Payload should be an array of objects', 'status': 400})
 
                     current_user_id = get_jwt_identity()
@@ -147,15 +145,15 @@ class StudentLanguageKnownController:
                         proficiency = item.get('proficiency')
 
                         if not student_id:
-                            logger.warning("No student_id found")
+                       
                             responses.append({'message': 'Please Provide Student Id', 'status': 201, 'item': item})
                             continue
                         if not language_id:
-                            logger.warning("No language_id found")
+                     
                             responses.append({'message': 'Please Provide Language Id', 'status': 201, 'item': item})
                             continue
                         if not proficiency:
-                            logger.warning("No proficiency found")
+                   
                             responses.append({'message': 'Please Provide Proficiency', 'status': 201, 'item': item})
                             continue
 
@@ -169,13 +167,13 @@ class StudentLanguageKnownController:
                         db.session.add(admin_language_known)
                     
                     db.session.commit()
-                    logger.info("Student Languages added Successfully")
+                 
                     responses.append({'message': 'Student Languages Added successfully', 'status': 200})
 
                     return jsonify(responses)   
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding student language known information: {str(e)}")
+                
                     return jsonify({'message': str(e), 'status': 500})
         @self.student_language_known_ns.route('/multiple_language/edit')
         class StudentMultipleLanguageKnownEdit(Resource):
@@ -198,25 +196,25 @@ class StudentLanguageKnownController:
                         proficiency = item.get('proficiency')
 
                         if not record_id:
-                            logger.warning("No record_id found")
+                    
                             responses.append({'message': 'Please Provide Record Id', 'status': 201, 'item': item})
                             continue
                         if not student_id:
-                            logger.warning("No Student id found")
+                   
                             responses.append({'message': 'Please Provide Student Id', 'status': 201, 'item': item})
                             continue
                         if not language_id:
-                            logger.warning("No language_id found")
+                      
                             responses.append({'message': 'Please Provide Language Id', 'status': 201, 'item': item})
                             continue
                         if not proficiency:
-                            logger.warning("No proficiency found")
+                          
                             responses.append({'message': 'Please Provide Proficiency', 'status': 201, 'item': item})
                             continue
 
                         student_language_known = LanguageKnown.query.filter_by(language_known_id=record_id).first()
                         if not student_language_known:
-                            logger.warning("No Student Language Known found")
+                        
                             responses.append({'message': f'Student language Known with id {record_id} not found', 'status': 404, 'item': item})
                             continue
 
@@ -225,14 +223,14 @@ class StudentLanguageKnownController:
                         student_language_known.proficiency = proficiency
                         student_language_known.updated_by = current_user_id
                         db.session.commit()
-                    logger.info("Student Languages updated Successfully")
+                  
 
                     responses.append({'message': 'Student Languages Updated successfully', 'status': 200})
 
                     return jsonify(responses)
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error editing student language known information: {str(e)}")
+                  
                     return jsonify({'message': str(e), 'status': 500})
         @self.student_language_known_ns.route('/edit/<int:id>')
         class StudentLanguageKnownEdit(Resource):
@@ -247,19 +245,19 @@ class StudentLanguageKnownController:
                     proficiency = data.get('proficiency')
                     current_user_id = get_jwt_identity()
                     if not student_id :
-                        logger.warning("No Student id found")
+                      
                         return jsonify({'message': 'Please Provide Student Id', 'status': 201})
                     if not language_id :
-                        logger.warning("No Student Language id found")
+                       
                         return jsonify({'message': 'Please Provide Language Id', 'status': 201})
                     if not proficiency :
-                        logger.warning("No proficiency  found")
+               
                         return jsonify({'message': 'Please Provide Proficiency', 'status': 201})
                     else:
                       
                         student_language_known = LanguageKnown.query.filter_by(language_known_id=id).first()
                         if not student_language_known:
-                            logger.warning("No Student Language Known found")
+                        
                             return jsonify({'message': 'Student language Known not found', 'status': 404})
                         else:
                             student_language_known.student_id = student_id
@@ -267,11 +265,10 @@ class StudentLanguageKnownController:
                             student_language_known.proficiency = proficiency
                             student_language_known.updated_by = current_user_id
                             db.session.commit()
-                            logger.info("Student Language Known updated Successfully")
                             return jsonify({'message': 'Student language Known updated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error editing student language known information: {str(e)}")
+             
                     return jsonify({'message': str(e), 'status': 500})
                     
             @self.student_language_known_ns.doc('student_language_known/get', security='jwt')
@@ -281,7 +278,7 @@ class StudentLanguageKnownController:
                
                     student_language_knowns = LanguageKnown.query.filter_by(student_id=id,is_active=1).all()
                     if not student_language_knowns:
-                        logger.warning("No Student Language Known found")
+          
                         return jsonify({'message': 'Student language Known not found', 'status': 404})
                     else:
                         student_language_knowns_data =[]
@@ -295,11 +292,10 @@ class StudentLanguageKnownController:
                             }
                             student_language_knowns_data.append(student_language_known_data)
                             print(student_language_known_data)
-                        logger.info("Student Language Known  found Successfully")
+              
                         return jsonify({'message': 'Student language Known found Successfully', 'status': 200,'data':student_language_knowns_data})
                 except Exception as e:
-                 
-                    logger.error(f"Error fetching student language known information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
         @self.student_language_known_ns.route('delete/<int:id>')
         class LanguageKnownDelete(Resource):
@@ -309,16 +305,15 @@ class StudentLanguageKnownController:
                     try:
                         student_language_known = LanguageKnown.query.get(id)
                         if not student_language_known:
-                            logger.warning("No Student Language Known found")
+                   
                             return jsonify({'message': 'Student language Known  not found', 'status': 404})
                         else:
                             student_language_known.is_active = 0
                             db.session.commit()
-                            logger.info("Student Language Known  deleted Successfully")
+                           
                             return jsonify({'message': 'Student language Known deleted successfully', 'status': 200})
                     except Exception as e:
-                    
-                            logger.error(f"Error deleting student language known information: {str(e)}")
+
                             return jsonify({'message': str(e), 'status': 500})
                     
         @self.student_language_known_ns.route('/activate/<int:id>')
@@ -333,11 +328,11 @@ class StudentLanguageKnownController:
 
                     student_language_known.is_active = 1
                     db.session.commit()
-                    logger.info("Student Language Known  activated Successfully")
+                   
                     return jsonify({'message': 'Student language Known activated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error activating student language known information: {str(e)}")
+                 
                     return jsonify({'message': str(e), 'status': 500})
         
         @self.student_language_known_ns.route('/deactivate/<int:id>')
@@ -348,15 +343,15 @@ class StudentLanguageKnownController:
                 try:
                     student_language_known = LanguageKnown.query.get(id)
                     if not student_language_known:
-                        logger.warning("No Student Language Known found")
+                
                         return jsonify({'message': 'Student language Known not found', 'status': 404})
 
                     student_language_known.is_active = 0
                     db.session.commit()
-                    logger.info("Student Language Known deactivated    Successfully")
+               
                     return jsonify({'message': 'Student language Known deactivated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error dectivating  student language known information: {str(e)}")
+    
                     return jsonify({'message': str(e), 'status': 500})
         self.api.add_namespace(self.student_language_known_ns)

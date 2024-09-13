@@ -1,7 +1,7 @@
 import json
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from app import db, api, authorizations,logger
+from app import db, api, authorizations
 from flask_restx import Api, Namespace, Resource, fields
 from app.models.chatbot import ChatData,CustomChatData
 from app.models.student import Student, StudentLogin
@@ -50,14 +50,13 @@ class ChatbotController:
                         chatbot_data_list.append(chatbot_data)
                     
                     if not chatbot_data_list:
-                        logger.warning("No Chat found")
+              
                         return jsonify({'message': 'No Chat found', 'status': 404})
                     else:
-                        logger.info("Chat found successfully")
+                       
                         return jsonify({'message': 'Chat found Successfully', 'status': 200, 'data': chatbot_data_list})
                 except Exception as e:
-                     
-                        logger.error(f"Error fetching  chat information: {str(e)}")
+
                         return jsonify({'message': str(e), 'status': 500})
         @self.chatbot_ns.route('/getalldata')
         class ChatbotList(Resource):
@@ -90,13 +89,13 @@ class ChatbotController:
                         chatbot_data_list.append(chatbot_data)
                     
                     if not chatbot_data_list:
-                        logger.warning("No Chat found")
+             
                         return jsonify({'message': 'No Chat found', 'status': 404})
                     else:
-                        logger.info("Chat found successfully")
+                   
                         return jsonify({'message': 'Chat found Successfully', 'status': 200, 'data': chatbot_data_list})
                 except Exception as e:
-                    logger.error("error")
+               
                     return jsonify({'message': str(e), 'status': 500})
                 
         @self.chatbot_ns.route('/add')
@@ -111,17 +110,17 @@ class ChatbotController:
                     chat_question = data.get('chat_question')
                     response = data.get('response')
                     if not student_id :
-                        logger.warning("student id is missing")
+         
                         return jsonify({'message': 'Please Provide student_id', 'status': 201})
                     else:
                         Chat = ChatData(student_id=student_id,chat_question=chat_question,response=response)
                         db.session.add(Chat)
                         db.session.commit()
-                        logger.info("Chat created successfully")
+                   
                         return jsonify({'message': 'Chat created successfully', 'status': 200})
                 except Exception as e:
                         db.session.rollback()
-                        logger.error(f"Error adding  chat information: {str(e)}")
+                
                         return jsonify({'message': str(e), 'status': 500})
         @self.chatbot_ns.route('/delete/<int:id>')
         class ChatbotDelete(Resource):
@@ -132,17 +131,17 @@ class ChatbotController:
                
                         chatbot_entity = CustomChatData.query.get(id)
                         if not chatbot_entity:
-                            logger.warning("Chat History not found")
+                     
                             return jsonify({'message': 'Chat History not found', 'status': 404})
                         else:
                    
                             chatbot_entity.is_deleted=True
                             db.session.commit()
-                            logger.info("Chatbot activated successfully")
+                        
                             return jsonify({'message': 'Chatbot activated successfully', 'status': 200})
                     except Exception as e:
                        
-                        logger.error(f"Error deleting  chat information: {str(e)}")
+         
                         return jsonify({'message': str(e), 'status': 500})
                     
         @self.chatbot_ns.route('/activate/<int:id>')
@@ -153,16 +152,16 @@ class ChatbotController:
                 try:
                     chatbot = ChatData.query.get(id)
                     if not chatbot:
-                        logger.warning("Chatbot not found")
+           
                         return jsonify({'message': 'Chatbot not found', 'status': 404})
                     else:
                         chatbot.is_active = 1
                         db.session.commit()
-                        logger.info("Chatbot activated successfully")
+                   
                         return jsonify({'message': 'Chatbot activated successfully', 'status': 200})
                 except Exception as e:
                         db.session.rollback()
-                        logger.error(f"Error activating  chat information: {str(e)}")
+                  
                         return jsonify({'message': str(e), 'status': 500})
 
         @self.chatbot_ns.route('/deactivate/<int:id>')
@@ -173,17 +172,17 @@ class ChatbotController:
                 try:
                     chatbot = ChatData.query.get(id)
                     if not chatbot:
-                        logger.warning("Chatbot not found")
+                       
                         return jsonify({'message': 'Chatbot not found', 'status': 404})
                     else:
                         chatbot.is_active = 0
                     
                         db.session.commit()
-                        logger.info("Chatbot deactivated successfully")
+                 
                         return jsonify({'message': 'Chatbot deactivated successfully', 'status': 200})
                 except Exception as e:
                         db.session.rollback()
-                        logger.error(f"Error deactivating  chat information: {str(e)}")
+
                         return jsonify({'message': str(e), 'status': 500})
                 
         @self.chatbot_ns.route('/chat_data_store')
@@ -199,7 +198,7 @@ class ChatbotController:
                     chat_conversation = data.get('chat_conversation')
                     flagged = data.get('flagged', True)
                     if not student_id or not chat_title or not chat_conversation:
-                        logger.warning("student_id, chat_title, chat_conversation are missing")
+            
                         return jsonify({'message': 'Please provide all required fields: student_id, chat_title, chat_conversation', 'status': 400})
 
                     student_login = StudentLogin.query.filter_by(student_id=student_id).first()
@@ -210,10 +209,10 @@ class ChatbotController:
                     chat_data = CustomChatData(student_id=login_id, chat_title=chat_title, chat_conversation=chat_conversation,flagged=flagged)
                     db.session.add(chat_data)
                     db.session.commit()
-                    logger.info("Chat data created successfully")
+         
                     return jsonify({'message': 'Chat data created successfully', 'status': 200})
                 except Exception as e:
-                    logger.error("error")
+            
                     return jsonify({'message': str(e), 'status': 500})
 
 

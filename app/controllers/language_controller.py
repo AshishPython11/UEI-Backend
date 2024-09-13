@@ -1,7 +1,7 @@
 import json
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from app import db, api, authorizations,logger
+from app import db, api, authorizations
 from flask_restx import Api, Namespace, Resource, fields
 from app.models.adminuser import AdminBasicInformation, LanguageMaster
 from sqlalchemy import desc
@@ -60,14 +60,14 @@ class LanguageController:
                         languagees_data.append(language_data)
                     
                     if not languagees_data:
-                        logger.warning("No languages found")
+             
                         return jsonify({'message': 'No Language found', 'status': 404})
                     else:
-                        logger.info("Languages fetched successfully")
+             
                         return jsonify({'message': 'Languages found Successfully', 'status': 200, 'data': languagees_data})
                 except Exception as e:
                     
-                    logger.error(f"Error fetching language information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
         @self.language_ns.route('/add')
         class LanguageAdd(Resource):
@@ -82,17 +82,17 @@ class LanguageController:
                     icon = data.get('icon')
                     current_user_id = get_jwt_identity()
                     if not language_name:
-                        logger.warning("No languages name found")
+ 
                         return jsonify({'message': 'Please Provide Language name', 'status': 201})
                     else:
                         language = LanguageMaster(language_name=language_name,description=description,icon=icon,is_active=1,created_by=current_user_id)
                         db.session.add(language)
                         db.session.commit()
-                        logger.info("Languages created successfully")
+           
                         return jsonify({'message': 'Language created successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding language information: {str(e)}")
+     
                     return jsonify({'message': str(e), 'status': 500})
                 
         @self.language_ns.route('/edit/<int:id>')
@@ -108,12 +108,12 @@ class LanguageController:
                     icon = data.get('icon')
                     current_user_id = get_jwt_identity()
                     if not language_name:
-                        logger.warning("No languages name found")
+                   
                         return jsonify({'message': 'Please provide language name', 'status': 400})
                     else:
                         language = LanguageMaster.query.get(id)
                         if not language:
-                            logger.warning("No languages found")
+                
                             return jsonify({'message': 'Language not found', 'status': 404})
                         else:
                             language.language_name = language_name
@@ -121,11 +121,11 @@ class LanguageController:
                             language.icon = icon
                             language.updated_by = current_user_id
                             db.session.commit()
-                            logger.info("Languages updated successfully")
+       
                             return jsonify({'message': 'Language updated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error aditing language information: {str(e)}")
+         
                     return jsonify({'message': str(e), 'status': 500})
                     
             @self.language_ns.doc('language/get', security='jwt')
@@ -134,7 +134,7 @@ class LanguageController:
                 try:
                     language = LanguageMaster.query.get(id)
                     if not language:
-                        logger.warning("No languages found")
+            
                         return jsonify({'message': 'Language not found', 'status': 404})
                     else:
                         language_data = {
@@ -146,11 +146,11 @@ class LanguageController:
                             'updated_at':language.updated_at,
                         }
                         print(language_data)
-                        logger.info("Languages found successfully")
+      
                         return jsonify({'message': 'Language found Successfully', 'status': 200,'data':language_data})
                 except Exception as e:
                    
-                    logger.error(f"Error fetching language information: {str(e)}")
+           
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.language_ns.route('delete/<int:id>')
@@ -161,17 +161,16 @@ class LanguageController:
                     try:
                         language_entity = LanguageMaster.query.get(id)
                         if not language_entity:
-                            logger.warning("No languages entity found")
+                  
                             return jsonify({'message': 'Language not found', 'status': 404})
                         else:
                           
                             language_entity.is_deleted=True
                             db.session.commit()
-                            logger.info("Languages deleted successfully")
+             
                             return jsonify({'message': 'Language deleted successfully', 'status': 200})
                     except Exception as e:
-                        
-                        logger.error(f"Error deleting language information: {str(e)}")
+    
                         return jsonify({'message': str(e), 'status': 500})
                     
         @self.language_ns.route('/activate/<int:id>')
@@ -182,16 +181,16 @@ class LanguageController:
                 try:
                     language = LanguageMaster.query.get(id)
                     if not language:
-                        logger.warning("No languages found")
+            
                         return jsonify({'message': 'Language not found', 'status': 404})
 
                     language.is_active = 1
                     db.session.commit()
-                    logger.info("Languages activated successfully")
+          
                     return jsonify({'message': 'Language activated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error activating language information: {str(e)}")
+       
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.language_ns.route('/deactivate/<int:id>')
@@ -202,16 +201,16 @@ class LanguageController:
                 try:
                     language = LanguageMaster.query.get(id)
                     if not language:
-                        logger.warning("No languages found")
+        
                         return jsonify({'message': 'Language not found', 'status': 404})
 
                     language.is_active = 0
                     db.session.commit()
-                    logger.info("Languages deactivated successfully")
+                
                     return jsonify({'message': 'Language deactivated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error deactivating language information: {str(e)}")
+               
                     return jsonify({'message': str(e), 'status': 500})
 
 

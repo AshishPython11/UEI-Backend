@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app import db, api, authorizations,logger
+from app import db, api, authorizations
 from flask_restx import Api, Namespace, Resource, fields
 from app.models.student import Contact, StudentAddress, Student, AcademicHistory  # Adjust the import based on your model location
 from sqlalchemy import desc
@@ -23,7 +23,7 @@ class ProfileController:
                     
                     student = Student.query.filter_by(student_login_id=current_user_id, is_deleted=False).first()
                     if not student:
-                        logger.warning("Student not found")
+               
                         return jsonify({'message': 'Student not found', 'status': 404})
                     
                     
@@ -70,13 +70,13 @@ class ProfileController:
                     print("Profile Complete:", profile_complete)
 
                     if profile_complete:
-                        logger.info("Profile is complete")
+                       
                         return jsonify({'message': 'Profile is complete','status': 200,'is_complete': True})
                     else:
-                        logger.info("Profile is incomplete")
+             
                         return jsonify({'message': 'Profile is incomplete', 'status': 400,'is_complete': False})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error fetching student profile information: {str(e)}")
+           
                     return jsonify({'message': str(e), 'status': 500})
         self.api.add_namespace(self.profile_ns)

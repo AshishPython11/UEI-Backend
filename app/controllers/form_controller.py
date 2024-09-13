@@ -3,7 +3,7 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from jinja2 import Undefined
 from app.models.adminuser import AdminBasicInformation
-from app import db, api, authorizations,logger
+from app import db, api, authorizations
 from flask_restx import Api, Namespace, Resource, fields
 from app.models.role import FormMasterData, MenuMasterData, SubMenuMasterData,ManageRole
 from sqlalchemy import desc,text
@@ -76,14 +76,13 @@ class FormController:
                         formes_data.append(form_data)
                     
                     if not formes_data:
-                        logger.info('No forms found')
+    
                         return jsonify({'message': 'No Form found', 'status': 404})
                     else:
-                        logger.info('Forms retrieved successfully')
+
                         return jsonify({'message': 'Forms found Successfully', 'status': 200, 'data': formes_data})
                 except Exception as e:
-                
-                    logger.error(f"Error fetching form information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.form_ns.route('/add')
@@ -102,25 +101,26 @@ class FormController:
                     is_menu_visible = data.get('is_menu_visible')
                     current_user_id = get_jwt_identity()
                     if not form_name :
-                        logger.warning('Form name is missing')
+       
                         return jsonify({'message': 'Please Provide Form name', 'status': 201})
                    
                     if not menu_master_id :
-                        logger.warning('menu_master_id is missing')
+ 
                         return jsonify({'message': 'Please Provide Menu Id', 'status': 201})
                     if not form_url :
-                        logger.warning('Form url is missing')
+
                         return jsonify({'message': 'Please Provide Form Url', 'status': 201})
                    
                     else:
                         form = FormMasterData(form_name=form_name,sub_menu_master_id=sub_menu_master_id,menu_master_id=menu_master_id,form_url=form_url,form_description=form_description,is_menu_visible=is_menu_visible,is_active=1,created_by=current_user_id)
                         db.session.add(form)
                         db.session.commit()
-                        logger.info('Form created successfully')
+                        return jsonify({'message': 'Form created successfully', 'status': 201})
+
                         
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error fetching form information: {str(e)}")
+  
                     return jsonify({'message': str(e), 'status': 500})
                     
         @self.form_ns.route('/edit/<int:id>')
@@ -139,20 +139,20 @@ class FormController:
                     is_menu_visible = data.get('is_menu_visible')
                     current_user_id = get_jwt_identity()
                     if not form_name :
-                        logger.warning('Form name is missing')
+
                         return jsonify({'message': 'Please Provide Form name', 'status': 201})
                  
                     if not menu_master_id :
-                        logger.warning('menu master id is missing')
+          
                         return jsonify({'message': 'Please Provide Menu Id', 'status': 201})
                     if not form_url :
-                        logger.warning('Form url is missing')
+ 
                         return jsonify({'message': 'Please Provide Form Url', 'status': 201})
                     
                     else:
                         form = FormMasterData.query.get(id)
                         if not form:
-                            logger.warning(f'Form with id {id} not found')
+
                             return jsonify({'message': 'Form not found', 'status': 404})
                         else:
                             form.form_name = form_name
@@ -163,11 +163,11 @@ class FormController:
                             form.is_menu_visible = is_menu_visible
                             form.updated_by=current_user_id
                             db.session.commit()
-                            logger.info(f'Form with id {id} updated successfully')
+           
                             return jsonify({'message': 'Form updated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error editing form information: {str(e)}")
+             
                     return jsonify({'message': str(e), 'status': 500})
                     
             @self.form_ns.doc('form/get', security='jwt')
@@ -176,8 +176,8 @@ class FormController:
                 try:
                     form = FormMasterData.query.get(id)
                     if not form:
-                        logger.warning(f'Form with id {id} not found')
-                        return jsonify({'message': 'Form not found', 'status': 404})
+                        pass
+     
                     else:
                         form_data = {
                             'id': form.form_master_id,
@@ -194,11 +194,10 @@ class FormController:
                             
                         }
                         print(form_data)
-                        logger.info(f'Form found Successfully')
+                
                         return jsonify({'message': 'Form found Successfully', 'status': 200,'data':form_data})
                 except Exception as e:
-                  
-                    logger.error(f"Error fetching form information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
         @self.form_ns.route('delete/<int:id>')
         class FormDelete(Resource):
@@ -208,7 +207,7 @@ class FormController:
                     try:
                         form_entity = FormMasterData.query.get(id)
                         if not form_entity:
-                            logger.warning(f'Form with id {id} not found')
+       
                             return jsonify({'message': 'form not found', 'status': 404})
                         else:
                             str_id=str(id)
@@ -222,11 +221,10 @@ class FormController:
                             form_entity.is_active = 0
                             form_entity.is_deleted=True
                             db.session.commit()
-                            logger.info(f'Form with id {id} deleted successfully')
+         
                             return jsonify({'message': 'Form deleted successfully', 'status': 200})
                     except Exception as e:
-                    
-                        logger.error(f"Error deleting Form information: {str(e)}")
+
                         return jsonify({'message': str(e), 'status': 500})
                     
         @self.form_ns.route('/activate/<int:id>')
@@ -237,17 +235,17 @@ class FormController:
                 try:
                     form = FormMasterData.query.get(id)
                     if not form:
-                        logger.warning(f'Form with id {id} not found')
+
                         return jsonify({'message': 'Form not found', 'status': 404})
                     else:
                         form.is_active = 1
                     
                         db.session.commit()
-                        logger.info(f'Form activated successfully')
+    
                         return jsonify({'message': 'Form activated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error activating form information: {str(e)}")
+    
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.form_ns.route('/deactivate/<int:id>')
@@ -258,16 +256,16 @@ class FormController:
                 try:
                     form = FormMasterData.query.get(id)
                     if not form:
-                        logger.warning(f'Form with id {id} not found')
+
                         return jsonify({'message': 'Form not found', 'status': 404})
                     else:
                         form.is_active = 0
                         db.session.commit()
-                        logger.info(f'Form deactivated successfully')
+
                         return jsonify({'message': 'Form deactivated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error deactivating form information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
 
         
