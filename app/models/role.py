@@ -2,6 +2,7 @@ from datetime import datetime
 from .student import Student
 from .adminuser import AdminBasicInformation,TimestampMixin
 from app import db
+from sqlalchemy.orm import relationship
 
 
 class RoleVsAdminMaster(db.Model,TimestampMixin):
@@ -15,6 +16,8 @@ class RoleVsAdminMaster(db.Model,TimestampMixin):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now())
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now(), onupdate=datetime.now())
     is_deleted = db.Column(db.Boolean, default=False)  # New field
+    admin = relationship('AdminBasicInformation', backref='role_assignments')
+    role = relationship('RoleMasterData', backref='admin_assignments')
 
 
 class Role(db.Model,TimestampMixin):
@@ -167,6 +170,7 @@ class RoleVsFormMaster(db.Model,TimestampMixin):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now())
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now(), onupdate=datetime.now())
     is_deleted = db.Column(db.Boolean, default=False)  # New field
+    
 
 
 class RoleVsFormMasterData(db.Model,TimestampMixin):
@@ -183,6 +187,8 @@ class RoleVsFormMasterData(db.Model,TimestampMixin):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now())
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now(), onupdate=datetime.now())
     is_deleted = db.Column(db.Boolean, default=False)  # New field
+    role = relationship('RoleMasterData', backref='form_assignments')
+    form = relationship('FormMasterData', backref='role_assignments')
 
 
 

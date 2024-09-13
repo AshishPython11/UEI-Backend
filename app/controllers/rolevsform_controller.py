@@ -82,7 +82,7 @@ class RolevsFormController:
         @self.rolevsform_ns.route('/add')
         class RolevsFormAdd(Resource):
             @self.rolevsform_ns.doc('rolevsform/add', security='jwt')
-            @self.api.expect(self.rolevsform_model)
+            @self.api.expect(self.rolevsform_model, validate=True)
             @jwt_required()
             def post(self):
                 try:
@@ -93,25 +93,99 @@ class RolevsFormController:
                     is_save = data.get('is_save')
                     is_update = data.get('is_update')
                     current_user_id = get_jwt_identity()
-                    if not form_master_id :
+
+                    if not form_master_id:
                         logger.warning("No form_master_id found")
-                        return jsonify({'message': 'Please Provide RolevsForm Data  Id', 'status': 201})
-                    if not role_master_id :
+                        return jsonify({'message': 'Please Provide Form ID', 'status': 400})
+                    if not role_master_id:
                         logger.warning("No role_master_id found")
-                        return jsonify({'message': 'Please Provide Role Id', 'status': 201})
-                  
-                    else:
-                        form = RoleVsFormMasterData(is_search=is_search,role_master_id=role_master_id,form_master_id=form_master_id,is_save=is_save,is_update=is_update,is_active =1,created_by = current_user_id)
-                        manage_role_data = ManageRole(role_master_id=role_master_id, form_master_id=form_master_id, is_search=is_search, is_save=is_save, is_update=is_update, is_active=1, is_delete=False)
-                        db.session.add(manage_role_data)
-                        db.session.add(form)
-                        db.session.commit()
-                        logger.info("Rolevsform created Successfully")
-                        return jsonify({'message': 'RolevsForm Data  created successfully', 'status': 200})
+                        return jsonify({'message': 'Please Provide Role ID', 'status': 400})
+
+                    
+                    # existing_association = RoleVsFormMasterData.query.filter_by(
+                    #     role_master_id=role_master_id, form_master_id=form_master_id).first()
+
+                    # if existing_association:
+                    #     logger.warning("Form is already assigned to this role")
+                    #     return jsonify({'message': 'Form is already assigned to this role', 'status': 409})
+
+                 
+                    new_association = RoleVsFormMasterData(
+                        role_master_id=role_master_id,
+                        form_master_id=form_master_id,
+                        is_search=is_search,
+                        is_save=is_save,
+                        is_update=is_update, 
+                        created_by=current_user_id
+                    )
+                    db.session.add(new_association)
+                    db.session.commit()
+
+                    logger.info("Role vs Form association created successfully")
+                    return jsonify({'message': 'Role vs Form association created successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
                     logger.error(f"Error adding rolevsform information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
+        # @self.rolevsform_ns.route('/add_or_update')
+        # class RolevsFormAddOrUpdate(Resource):
+        #     @self.rolevsform_ns.doc('rolevsform/add_or_update', security='jwt')
+        #     @self.api.expect(self.rolevsform_model)
+        #     @jwt_required()
+        #     def post(self):
+        #         try:
+        #             data = request.json
+        #             role_master_id = data.get('role_master_id')
+        #             form_master_id = data.get('form_master_id')
+        #             is_search = data.get('is_search', True)
+        #             is_save = data.get('is_save', True)
+        #             is_update = data.get('is_update', True)
+        #             current_user_id = get_jwt_identity()
+
+        #             if not form_master_id or not role_master_id:
+        #                 return jsonify({'message': 'role_master_id and form_master_id are required', 'status': 400})
+
+        #             # Fetch or create the RoleVsFormMaster entry
+        #             existing_association = RoleVsFormMasterData.query.filter_by(
+        #                 role_master_id=role_master_id, form_master_id=form_master_id).first()
+
+        #             if existing_association:
+                       
+        #                 existing_association.is_search = is_search
+        #                 existing_association.is_save = is_save
+        #                 existing_association.is_update = is_update
+        #                 existing_association.updated_by = current_user_id
+                    
+        #             else:
+                     
+        #                 new_association = RoleVsFormMasterData(
+        #                     role_master_id=role_master_id,
+        #                     form_master_id=form_master_id,
+        #                     is_search=is_search,
+        #                     is_save=is_save,
+        #                     is_update=is_update,
+        #                     updated_by=current_user_id,
+        #                     created_by=current_user_id
+        #                 )
+        #                 db.session.add(new_association)
+
+        #             db.session.commit()
+
+        #             self.update_all_role_form_assignments(role_master_id, form_master_id)
+
+        #             return jsonify({'message': 'Role-form assignment updated successfully', 'status': 200})
+        #         except Exception as e:
+        #             db.session.rollback()
+        #             logger.error(f"Error updating role-form assignment: {str(e)}")
+        #             return jsonify({'message': str(e), 'status': 500})
+
+        #     def update_all_role_form_assignments(self, role_master_id, new_form_master_id):
+                
+        #         role_form_assignments = RoleVsFormMasterData.query.filter_by(role_master_id=role_master_id).all()
+        #         for assignment in role_form_assignments:
+        #             assignment.form_master_id = new_form_master_id
+                    
+        #         db.session.commit()
                 
         @self.rolevsform_ns.route('/edit/<int:id>')
         class RolevsFormEdit(Resource):

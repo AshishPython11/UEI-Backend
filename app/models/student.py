@@ -194,4 +194,38 @@ class NewStudentAcademicHistory(db.Model):
     institute_id = db.Column(db.Integer, db.ForeignKey('tbl_institutions.institution_id'), nullable=False)
     course_id = db.Column(db.Integer, db.ForeignKey(CourseMaster.course_id), nullable=False)
     class_id = db.Column(db.Integer, db.ForeignKey('tbl_class_master.class_id'), nullable=False)
+
+class SchoolAcademicHistory(db.Model):
+    __tablename__ = 'school_academic_history'
     
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('tbl_student_login.student_id'), nullable=False)
+    institution_type = db.Column(db.String(50), nullable=False)  
+    board = db.Column(db.String(255), nullable=True)  
+    state_for_stateboard = db.Column(db.String(255), nullable=True)
+    class_id = db.Column(db.Integer, db.ForeignKey('tbl_class_master.class_id'), nullable=False) 
+    class_or_course = db.Column(db.String(255), nullable=True)  
+    created_at = db.Column(db.DateTime, default=datetime.now())
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now(), onupdate=datetime.now())
+    is_active = db.Column(db.Boolean, default=True)
+    is_deleted = db.Column(db.Boolean, default=False)
+    created_by = db.Column(db.String, nullable=True)
+    updated_by = db.Column(db.String, nullable=True)
+
+class CollegeAcademicHistory(db.Model):
+    __tablename__ = 'college_academic_history'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('tbl_student_login.student_id'), nullable=False)
+    institution_type = db.Column(db.String(50), nullable=False)  
+    institute_id = db.Column(db.Integer, db.ForeignKey('tbl_institutions.institution_id'), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey(CourseMaster.course_id), nullable=False) 
+    learning_style = db.Column(db.String(255), nullable=True)
+    year_or_semester = db.Column(db.String(50), nullable=True)
+    university_name = db.Column(db.String(255), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.now())
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now(), onupdate=datetime.now())
+    is_active = db.Column(db.Boolean, default=True)
+    is_deleted = db.Column(db.Boolean, default=False)
+    created_by = db.Column(db.String, nullable=True)
+    updated_by = db.Column(db.String, nullable=True)

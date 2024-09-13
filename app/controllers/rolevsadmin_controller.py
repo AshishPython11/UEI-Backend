@@ -4,7 +4,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.models.adminuser import AdminBasicInformation
 from app import db, api, authorizations,logger
 from flask_restx import Api, Namespace, Resource, fields
-from app.models.role import RoleMasterData, RoleVsAdminMaster,ManageRole
+from app.models.role import RoleMasterData, RoleVsAdminMaster,ManageRole,RoleVsFormMasterData
 from sqlalchemy import desc
 class RolevsAdminController:
     def __init__(self,api):
@@ -119,12 +119,14 @@ class RolevsAdminController:
                         except Exception as e:
                             logger.error(f"Error occurred: {str(e)}") 
                             print(f"Error occurred: {str(e)}")
-                            return jsonify({'message': e.message, 'status': 500})
+                            return jsonify({'message': str(e), 'status': 500})
                 except Exception as e:
                     db.session.rollback()
                     logger.error(f"Error adding rolevsadmin information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
-                
+       
+
+        
         @self.rolevsadmin_ns.route('/edit/<int:id>')
         class RolevsAdminEdit(Resource):
             @self.rolevsadmin_ns.doc('rolevsadmin/edit', security='jwt')
