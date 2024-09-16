@@ -2,7 +2,7 @@ import json
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.models.adminuser import AdminBasicInformation
-from app import db, api, authorizations,logger
+from app import db, api, authorizations
 from flask_restx import Api, Namespace, Resource, fields
 from app.models.role import MenuMasterData, SubMenuMasterData
 from sqlalchemy import desc
@@ -65,14 +65,14 @@ class SubMenuController:
                         submenus_data.append(submenu_data)
                     
                     if not submenus_data:
-                        logger.warning("No Submenu found")
+                
                         return jsonify({'message': 'No Submenu found', 'status': 404})
                     else:
-                        logger.info("Submenus found Successfully")
+                
                         return jsonify({'message': 'Submenus found Successfully', 'status': 200, 'data': submenus_data})
                 except Exception as e:
                     
-                    logger.error(f"Error fetching submenu information: {str(e)}")
+                   
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.submenu_ns.route('/add')
@@ -88,23 +88,23 @@ class SubMenuController:
                     priority = data.get('priority')
                     current_user_id = get_jwt_identity()
                     if not menu_name :
-                        logger.warning("No menu_name found")
+                        
                         return jsonify({'message': 'Please Provide SubMenu name', 'status': 201})
                     if not menu_master_id :
-                        logger.warning("No menu_master_id found")
+                     
                         return jsonify({'message': 'Please Provide Menu Id', 'status': 201})
                     if not priority :
-                        logger.warning("No priority found")
+                 
                         return jsonify({'message': 'Please Provide Priority', 'status': 201})
                     else:
                         submenu = SubMenuMasterData(menu_name=menu_name,priority=priority,menu_master_id=menu_master_id,is_active=1,created_by=current_user_id)
                         db.session.add(submenu)
                         db.session.commit()
-                        logger.info("Submenus created Successfully")
+           
                         return jsonify({'message': 'SubMenu created successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding submenu information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
                 
         @self.submenu_ns.route('/edit/<int:id>')
@@ -120,15 +120,15 @@ class SubMenuController:
                     priority = data.get('priority')
                     current_user_id = get_jwt_identity()
                     if not menu_name :
-                        logger.warning("No menu_name found")
+    
                         return jsonify({'message': 'Please Provide SubMenu name', 'status': 201})
                     if not priority :
-                        logger.warning("No priority found")
+             
                         return jsonify({'message': 'Please Provide Priority', 'status': 201})
                     else:
                         submenu = SubMenuMasterData.query.get(id)
                         if not submenu:
-                            logger.warning("No Submenu found")
+                 
                             return jsonify({'message': 'SubMenu not found', 'status': 404})
                         else:
                             submenu.menu_name = menu_name
@@ -137,11 +137,10 @@ class SubMenuController:
                             submenu.created_by = current_user_id
                             
                             db.session.commit()
-                            logger.info("Submenus updated Successfully")
+              
                             return jsonify({'message': 'SubMenu updated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error editing submenu information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
                     
             @self.submenu_ns.doc('submenu/get', security='jwt')
@@ -150,7 +149,6 @@ class SubMenuController:
                 try:
                     submenu = SubMenuMasterData.query.get(id)
                     if not submenu:
-                        logger.warning("No Submenu found")
                         return jsonify({'message': 'SubMenu not found', 'status': 404})
                     else:
                         submenu_data = {
@@ -164,11 +162,8 @@ class SubMenuController:
                             'updated_at':submenu.updated_at,
                         }
                         print(submenu_data)
-                        logger.info("Submenus found Successfully")
                         return jsonify({'message': 'SubMenu found Successfully', 'status': 200,'data':submenu_data})
                 except Exception as e:
-                    
-                    logger.error(f"Error fetching submenu information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
         @self.submenu_ns.route('delete/<int:id>')
         class SubMenuDelete(Resource):
@@ -178,17 +173,13 @@ class SubMenuController:
                     try:
                         submenu_entity = SubMenuMasterData.query.get(id)
                         if not submenu_entity:
-                            logger.warning("No Submenu found")
                             return jsonify({'message': 'SubMenu not found', 'status': 404})
                         else:
                       
                             submenu_entity.is_deleted = True
                             db.session.commit()
-                            logger.info("Submenus deleted Successfully")
                             return jsonify({'message': 'SubMenu deleted successfully', 'status': 200})
                     except Exception as e:
-                    
-                        logger.error(f"Error deleting submenu information: {str(e)}")
                         return jsonify({'message': str(e), 'status': 500})
                     
         @self.submenu_ns.route('/activate/<int:id>')
@@ -199,16 +190,13 @@ class SubMenuController:
                 try:
                     submenu = SubMenuMasterData.query.get(id)
                     if not submenu:
-                        logger.warning("No Submenu found")
                         return jsonify({'message': 'SubMenu not found', 'status': 404})
                     else:
                         submenu.is_active = 1
                         db.session.commit()
-                        logger.info("Submenus activated Successfully")
                         return jsonify({'message': 'SubMenu activated successfully', 'status': 200})
                 except Exception as e:
                         db.session.rollback()
-                        logger.error(f"Error activating submenu information: {str(e)}")
                         return jsonify({'message': str(e), 'status': 500})
 
         @self.submenu_ns.route('/deactivate/<int:id>')
@@ -219,17 +207,14 @@ class SubMenuController:
                 try:
                     submenu = SubMenuMasterData.query.get(id)
                     if not submenu:
-                        logger.warning("No Submenu found")
                         return jsonify({'message': 'SubMenu not found', 'status': 404})
                     else:
                         submenu.is_active =0
 
                         db.session.commit()
-                        logger.info("Submenus deactivated Successfully")
                         return jsonify({'message': 'SubMenu deactivated successfully', 'status': 200})
                 except Exception as e:
                         db.session.rollback()
-                        logger.error(f"Error deactivating  submenu information: {str(e)}")
                         return jsonify({'message': str(e), 'status': 500})
 
         

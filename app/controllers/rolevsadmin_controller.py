@@ -2,7 +2,7 @@ import json
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.models.adminuser import AdminBasicInformation
-from app import db, api, authorizations,logger
+from app import db, api, authorizations
 from flask_restx import Api, Namespace, Resource, fields
 from app.models.role import RoleMasterData, RoleVsAdminMaster,ManageRole,RoleVsFormMasterData
 from sqlalchemy import desc
@@ -67,14 +67,13 @@ class RolevsAdminController:
                         rolevsadmines_data.append(rolevsadmin_data)
                     
                     if not rolevsadmines_data:
-                        logger.warning("No RolevsUser found") 
+       
                         return jsonify({'message': 'No RolevsUser found', 'status': 404})
                     else:
-                        logger.info("RolevsUser found Successfully")
+              
                         return jsonify({'message': 'RolevsUser found Successfully', 'status': 200, 'data': rolevsadmines_data})
                 except Exception as e:
-                    
-                    logger.error(f"Error fetching rolevsadmin information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
         # @self.rolevsadmin_ns.route('/add')
         # class RolevsAdminAdd(Resource):
@@ -137,12 +136,14 @@ class RolevsAdminController:
                     role_master_id = str(data.get('role_master_id'))
                     current_user_id = get_jwt_identity()
 
+
                     if not admin_id:
                         logger.warning("No admin id found")
                         return jsonify({'message': 'Please Provide Admin Id', 'status': 201})
                     if not role_master_id:
                         logger.warning("No role_master id found")
                         return jsonify({'message': 'Please Provide Role Master Id', 'status': 201})
+
                     else:
                         try:
                            
@@ -174,18 +175,14 @@ class RolevsAdminController:
                                     )
                                 db.session.commit()
 
+
                             logger.info("RolevsUser created Successfully")
                             return jsonify({'message': 'RolevsUser Data created successfully', 'status': 200})
 
                         except Exception as e:
                             logger.error(f"Error occurred: {str(e)}")
-                            print(f"Error occurred: {str(e)}")
-                            return jsonify({'message': str(e), 'status': 500})
 
-                except Exception as e:
-                    db.session.rollback()
-                    logger.error(f"Error adding rolevsadmin information: {str(e)}")
-                    return jsonify({'message': str(e), 'status': 500})
+                            return jsonify({'message': str(e), 'status': 500})
         
         @self.rolevsadmin_ns.route('/edit/<int:id>')
         class RolevsAdminEdit(Resource):
@@ -199,15 +196,15 @@ class RolevsAdminController:
                     role_master_id = str(data.get('role_master_id'))
                     current_user_id = get_jwt_identity()
                     if not admin_id :
-                        logger.warning("No admin_id found") 
+              
                         return jsonify({'message': 'Please Provide Admin Id', 'status': 201})
                     if not role_master_id :
-                        logger.warning("No role_master id found") 
+            
                         return jsonify({'message': 'Please Role Master Id', 'status': 201})
                     else:
                         form = RoleVsAdminMaster.query.get(id)
                         if not form:
-                            logger.warning("No RolevsUser found") 
+                       
                             return jsonify({'message': 'RolevsUser Data  not found', 'status': 404})
                         else:
                             form.admin_id = admin_id
@@ -221,11 +218,11 @@ class RolevsAdminController:
                                 manage_role.admin_id = admin_id
                                 manage_role.is_active = 1
                                 manage_role.is_delete = False
-                            logger.info("RolevsUser updated Successfully")
+            
                             return jsonify({'message': 'RolevsUser Data  updated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error editing rolevsadmin information: {str(e)}")
+              
                     return jsonify({'message': str(e), 'status': 500})
 
                     
@@ -235,7 +232,7 @@ class RolevsAdminController:
                 try:
                     form = RoleVsAdminMaster.query.get(id)
                     if not form:
-                        logger.warning("No RolevsUser found") 
+                 
                         return jsonify({'message': 'RolevsUser Data  not found', 'status': 404})
                     else:
                         form_data = {
@@ -248,11 +245,10 @@ class RolevsAdminController:
                             'updated_at':form.updated_at,
                         }
                         print(form_data)
-                        logger.info("RolevsUser found Successfully")
+   
                         return jsonify({'message': 'RolevsUser Data found Successfully', 'status': 200,'data':form_data})
                 except Exception as e:
-                  
-                    logger.error(f"Error fetching rolevsadmin information: {str(e)}")
+ 
                     return jsonify({'message': str(e), 'status': 500})
                 
             
@@ -264,17 +260,16 @@ class RolevsAdminController:
                     try:
                         formvsadmin_entity = RoleVsAdminMaster.query.get(id)
                         if not formvsadmin_entity:
-                            logger.warning("No RolevsUser found") 
+                       
                             return jsonify({'message': 'RolevsUser not found', 'status': 404})
                         else:
                        
                             formvsadmin_entity.is_deleted=True
                             db.session.commit()
-                            logger.info("RolevsUser Data deleted Successfully")
+                   
                             return jsonify({'message': 'RolevsUser deleted successfully', 'status': 200})
                     except Exception as e:
-                    
-                        logger.error(f"Error deleting rolevsadmin information: {str(e)}")
+
                         return jsonify({'message': str(e), 'status': 500})
         @self.rolevsadmin_ns.route('/activate/<int:id>')
         class RolevsAdminActivate(Resource):
@@ -284,16 +279,16 @@ class RolevsAdminController:
                 try:
                     rolevsadmin = RoleVsAdminMaster.query.get(id)
                     if not rolevsadmin:
-                        logger.warning("No RolevsUser found") 
+  
                         return jsonify({'message': 'RolevsUser Data not found', 'status': 404})
 
                     rolevsadmin.is_active = 1
                     db.session.commit()
-                    logger.info("RolevsUser activated Successfully")
+           
                     return jsonify({'message': 'RolevsUser Data activated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error activating rolevsadmin information: {str(e)}")
+    
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.rolevsadmin_ns.route('/deactivate/<int:id>')
@@ -304,16 +299,16 @@ class RolevsAdminController:
                 try:
                     rolevsadmin = RoleVsAdminMaster.query.get(id)
                     if not rolevsadmin:
-                        logger.warning("No RolevsUser found") 
+     
                         return jsonify({'message': 'RolevsUser Data not found', 'status': 404})
 
                     rolevsadmin.is_active = 0
                     db.session.commit()
-                    logger.info("RolevsUser deactivated Successfully")
+
                     return jsonify({'message': 'RolevsUser Data deactivated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error deactivating rolevsadmin information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
 
         

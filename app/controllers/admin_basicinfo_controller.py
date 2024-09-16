@@ -2,7 +2,7 @@ from datetime import datetime
 import json
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from app import db, api, authorizations,logger
+from app import db, api, authorizations
 from flask_restx import Api, Namespace, Resource, fields
 from app.models.adminuser import AdminAddress, AdminBasicInformation, AdminContact, AdminDescription, AdminLanguageKnown, AdminLogin, AdminProfession
 
@@ -62,14 +62,11 @@ class AdminBasicInformationController:
                         admin_basicinfoes_data.append(admin_basicinfo_data)
                     
                     if not admin_basicinfoes_data:
-                        logger.info('No Admin Basic Information found')
                         return jsonify({'message': 'No Admin Basic Information found', 'status': 404})
                     else:
-                        logger.info('Admin Basic Informations found successfully')
                         return jsonify({'message': 'Admin Basic Informations found Successfully', 'status': 200, 'data': admin_basicinfoes_data})
                 except Exception as e:
                 
-                    logger.error(f"Error fetching Admin basic information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
                 
         @self.admin_basicinfo_ns.route('/alldata')
@@ -101,14 +98,10 @@ class AdminBasicInformationController:
                         admin_basicinfoes_data.append(admin_basicinfo_data)
                     
                     if not admin_basicinfoes_data:
-                        logger.info('No Admin Basic Information found')
                         return jsonify({'message': 'No Admin Basic Information found', 'status': 404})
                     else:
-                        logger.info('Admin Basic Informations found successfully')
                         return jsonify({'message': 'Admin Basic Informations found Successfully', 'status': 200, 'data': admin_basicinfoes_data})
                 except Exception as e:
-                
-                    logger.error(f"Error fetching Admin basic information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
         @self.admin_basicinfo_ns.route('/add')
         class AdminBasicInformationAdd(Resource):
@@ -137,39 +130,29 @@ class AdminBasicInformationController:
                     current_user_id = get_jwt_identity()
                     
                     if not department_id :
-                        logger.warning('Department Id is missing')
                         return jsonify({'message': 'Please Provide Department Id', 'status': 201})
                     if not first_name :
-                        logger.warning('First Name is missing')
                         return jsonify({'message': 'Please Provide First Name', 'status': 201})
                     if not last_name :
-                        logger.warning('Last Name is missing')
                         return jsonify({'message': 'Please Provide Last Name', 'status': 201})
                     if not gender :
-                        logger.warning('gender is missing') 
                         return jsonify({'message': 'Please Provide Gender', 'status': 201})
                     if not dob :
-                        logger.warning('Date of Birth is missing')
                         return jsonify({'message': 'Please Provide Date of Birth', 'status': 201})
                     if not father_name :
-                        logger.warning('Father Name is missing')
                         return jsonify({'message': 'Please Provide Father Name', 'status': 201})
                     if not mother_name :
-                        logger.warning('Mother Name is missing')
                         return jsonify({'message': 'Please Provide Mother Name', 'status': 201})
                  
                     if not admin_login_id:
-                        logger.warning('Admin Login Id is missing')
                         return jsonify({'message': 'Please Provide Logged Admin Id', 'status': 201})
                     else:
                         admin_basicinfo = AdminBasicInformation(department_id=department_id,first_name=first_name,last_name=last_name,gender=gender,dob=dob,father_name=father_name,mother_name=mother_name,guardian_name=guardian_name,is_kyc_verified=is_kyc_verified,pic_path=pic_path,admin_registration_no=admin_registration_no,last_modified_datetime=datetime.now(),system_datetime=datetime.now(),is_active=1,created_by=current_user_id,admin_login_id=admin_login_id)
                         db.session.add(admin_basicinfo)
                         db.session.commit()
-                        logger.info(f'Admin Basic Information added successfully')
                         return jsonify({'message': 'Admin Basic Information created successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error in adding Admin basic information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
                 
         @self.admin_basicinfo_ns.route('/edit/<int:id>')
@@ -193,35 +176,26 @@ class AdminBasicInformationController:
                     admin_login_id = data.get('admin_login_id')
                     current_user_id = get_jwt_identity()
                     if not department_id :
-                        logger.warning('Department Id is missing')
                         return jsonify({'message': 'Please Provide Department Id', 'status': 201})
                     if not first_name :
-                        logger.warning('first_name is missing')
                         return jsonify({'message': 'Please Provide First Name', 'status': 201})
                     if not last_name :
-                        logger.warning('last_name is missing')
                         return jsonify({'message': 'Please Provide Last Name', 'status': 201})
                     if not gender :
-                        logger.warning('gender is missing')
                         return jsonify({'message': 'Please Provide Gender', 'status': 201})
                     if not dob :
-                        logger.warning('dob is missing')
                         return jsonify({'message': 'Please Provide Date of Birth', 'status': 201})
                     if not father_name :
-                        logger.warning('father_name is missing')
                         return jsonify({'message': 'Please Provide Father Name', 'status': 201})
                     if not mother_name :
-                        logger.warning('mother_name is missing')
                         return jsonify({'message': 'Please Provide Mother Name', 'status': 201})
                    
                     if not admin_login_id:
-                        logger.warning('admin_login_id is missing')
                         return jsonify({'message': 'Please Provide Logged Admin Id', 'status': 201})
                     else:
                         
                         admin_basicinfo = AdminBasicInformation.query.filter_by(admin_login_id=id).first()
                         if not admin_basicinfo:
-                            logger.warning('Admin Basic Information not found')
                             return jsonify({'message': 'Admin Basic Information not found', 'status': 404})
                         else:
                             admin_basicinfo.department_id = department_id
@@ -237,11 +211,9 @@ class AdminBasicInformationController:
                             admin_basicinfo.updated_by = current_user_id
                             admin_basicinfo.admin_login_id = admin_login_id
                             db.session.commit()
-                            logger.info(f'Admin Basic Information updated successfully with ID: {id}')
                             return jsonify({'message': 'Admin Basic Information updated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error editing Admin basic information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
                     
             @self.admin_basicinfo_ns.doc('admin_basicinfo/get', security='jwt')
@@ -251,7 +223,6 @@ class AdminBasicInformationController:
               
                     admin_basicinfo = AdminBasicInformation.query.filter_by(admin_login_id=id).first()
                     if not admin_basicinfo:
-                        logger.warning(f'Admin Basic Information with ID: {id} not found')
                         return jsonify({'message': 'Admin Basic Information not found', 'status': 404})
                     else:
                         admin_basicinfo_data = {
@@ -272,11 +243,8 @@ class AdminBasicInformationController:
                             
                         }
                         print(admin_basicinfo_data)
-                        logger.info(f'Adminbasic information retrieved successfully with ID: {id}')
                         return jsonify({'message': 'Admin Basic Information found Successfully', 'status': 200,'data':admin_basicinfo_data})
                 except Exception as e:
-                   
-                    logger.error(f"Error fetching Admin basic information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.admin_basicinfo_ns.route('/getProfile/<int:id>')
@@ -288,7 +256,6 @@ class AdminBasicInformationController:
                         admin_login = AdminLogin.query.get(id)
                         admin = AdminBasicInformation.query.filter_by(admin_login_id=id).first()
                         if not admin:
-                            logger.warning(f'Admin Basic Information with ID: {id} not found')
                             return jsonify({'message': 'Admin not found', 'status': 404})
                         else:
                             admin_address = AdminAddress.query.filter_by(admin_id=id).order_by(AdminAddress.admin_address_id.desc()).first()
@@ -392,11 +359,8 @@ class AdminBasicInformationController:
                                 'basic_info':admin_basic_information_data,
                                 'userid':admin_login.userid
                             }
-                            logger.info(f'Admin Profile retrieved successfully with ID: {id}')
                             return jsonify({'message': 'Admin found Successfully', 'status': 200,'data':admin_data}) 
                     except Exception as e:
-                    
-                        logger.error(f"Error in adding Admin basic information: {str(e)}")
                         return jsonify({'message': str(e), 'status': 500})
                         
         @self.admin_basicinfo_ns.route('/activate/<int:id>')
@@ -407,16 +371,13 @@ class AdminBasicInformationController:
                 try:
                     admin_basicinfo = AdminBasicInformation.query.get(id)
                     if not admin_basicinfo:
-                        logger.warning(f'Admin Basic Information with ID: {id} not found')
                         return jsonify({'message': 'Admin Basic Information not found', 'status': 404})
                     else:
                         admin_basicinfo.is_active = 1
                         db.session.commit()
-                        logger.info(f'Admin Basic Information activated successfully with ID: {id}')
                         return jsonify({'message': 'Admin Basic Information activated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error activating Admin basic information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.admin_basicinfo_ns.route('/deactivate/<int:id>')
@@ -427,15 +388,12 @@ class AdminBasicInformationController:
                 try:
                     admin_basicinfo = AdminBasicInformation.query.get(id)
                     if not admin_basicinfo:
-                        logger.warning(f'Admin Basic Information with ID: {id} not found')
                         return jsonify({'message': 'Admin Basic Information not found', 'status': 404})
                     else:
                         admin_basicinfo.is_active = 0
                         db.session.commit()
-                        logger.info(f'Admin Basic Information deactivated successfully with ID: {id}')
                         return jsonify({'message': 'Admin Basic Information deactivated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error deactivating Admin basic information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
         self.api.add_namespace(self.admin_basicinfo_ns)

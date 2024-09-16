@@ -70,14 +70,13 @@ class RolevsFormController:
                         rolevsformes_data.append(rolevsform_data)
                     
                     if not rolevsformes_data:
-                        logger.warning("No RoleVsForm found")
+             
                         return jsonify({'message': 'No RoleVsForm found', 'status': 404})
                     else:
-                        logger.info("Rolevsform found Successfully")
+           
                         return jsonify({'message': 'RoleVsForms found Successfully', 'status': 200, 'data': rolevsformes_data})
                 except Exception as e:
-                 
-                    logger.error(f"Error fetching rolevsform information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
         # @self.rolevsform_ns.route('/add')
         # class RolevsFormAdd(Resource):
@@ -136,6 +135,7 @@ class RolevsFormController:
                     is_update = data.get('is_update', True)
                     current_user_id = get_jwt_identity()
 
+
                     if not form_master_id:
                         logger.warning("No form_master_id found")
                         return jsonify({'message': 'Please Provide Form ID', 'status': 400})
@@ -153,6 +153,7 @@ class RolevsFormController:
                     )
                     db.session.add(new_association)
                     db.session.commit()
+
 
                  
                     assigned_admins = RoleVsAdminMaster.query.filter_by(role_master_id=role_master_id).all()
@@ -190,6 +191,12 @@ class RolevsFormController:
                     db.session.rollback()
                     logger.error(f"Error adding rolevsform information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})       
+
+                    
+               
+      
+                
+
         @self.rolevsform_ns.route('/edit/<int:id>')
         class RolevsFormEdit(Resource):
             @self.rolevsform_ns.doc('rolevsform/edit', security='jwt')
@@ -205,16 +212,16 @@ class RolevsFormController:
                     is_update = data.get('is_update')
                     current_user_id = get_jwt_identity()
                     if not form_master_id :
-                        logger.warning("No form_master_id found")
+        
                         return jsonify({'message': 'Please Provide From Id', 'status': 201})
                     if not role_master_id :
-                        logger.warning("No role_master_id found")
+    
                         return jsonify({'message': 'Please Provide Role Id', 'status': 201})
                  
                     else:
                         form = RoleVsFormMasterData.query.get(id)
                         if not form:
-                            logger.warning("No RoleVsForm found")
+                  
                             return jsonify({'message': 'RolevsForm Data  not found', 'status': 404})
                         else:
                             form.form_master_id = form_master_id
@@ -231,11 +238,11 @@ class RolevsFormController:
                                     manage_role.is_search = is_search
                                     manage_role.is_save = is_save
                                     manage_role.is_update = is_update
-                            logger.info("Rolevsform updated Successfully")
+               
                             return jsonify({'message': 'RolevsForm Data  updated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error editing rolevsform information: {str(e)}")
+             
                     return jsonify({'message': str(e), 'status': 500})
                             
             @self.rolevsform_ns.doc('rolevsform/get', security='jwt')
@@ -244,7 +251,7 @@ class RolevsFormController:
                 try:
                     form = RoleVsFormMasterData.query.get(id)
                     if not form:
-                        logger.warning("No RoleVsForm found")
+      
                         return jsonify({'message': 'RolevsForm Data  not found', 'status': 404})
                     else:
                         form_data = {
@@ -261,11 +268,10 @@ class RolevsFormController:
                             
                         }
                         print(form_data)
-                        logger.info("Rolevsform found Successfully")
+
                         return jsonify({'message': 'RolevsForm Data found Successfully', 'status': 200,'data':form_data})
                 except Exception as e:
-                    
-                    logger.error(f"Error fetching rolevsform information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
         @self.rolevsform_ns.route('delete/<int:id>')
         class RolevsFormDelete(Resource):
@@ -275,17 +281,16 @@ class RolevsFormController:
                     try:
                         form_entity = RoleVsFormMasterData.query.get(id)
                         if not form_entity:
-                            logger.warning("No RoleVsForm found")
+          
                             return jsonify({'message': 'form not found', 'status': 404})
                         else:
                           
                             form_entity.is_deleted = True
                             db.session.commit()
-                            logger.info("Rolevsform deleted Successfully")
+              
                             return jsonify({'message': 'Rolevsform deleted successfully', 'status': 200})
                     except Exception as e:
-                        
-                        logger.error(f"Error deleting rolevsform information: {str(e)}")
+  
                         return jsonify({'message': str(e), 'status': 500})
         @self.rolevsform_ns.route('/activate/<int:id>')
         class RolevsformActivate(Resource):
@@ -295,16 +300,16 @@ class RolevsFormController:
                 try:
                     student_academic_history = RoleVsFormMasterData.query.get(id)
                     if not student_academic_history:
-                        logger.warning("No RoleVsForm found")
+  
                         return jsonify({'message': 'Rolevsform not found', 'status': 404})
                     else:
                         student_academic_history.is_active = 1
                         db.session.commit()
-                        logger.info("Rolevsform activated Successfully")
+
                         return jsonify({'message': 'Rolevsform activated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error activating rolevsform information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.rolevsform_ns.route('/deactivate/<int:id>')
@@ -315,16 +320,16 @@ class RolevsFormController:
                 try:
                     student_academic_history = RoleVsFormMasterData.query.get(id)
                     if not student_academic_history:
-                        logger.warning("No RoleVsForm found")
+        
                         return jsonify({'message': 'Rolevsform not found', 'status': 404})
                     else:
                         student_academic_history.is_active = 0
                         db.session.commit()
-                        logger.info("Rolevsform deactivated Successfully")
+             
                         return jsonify({'message': 'Rolevsform deactivated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error deactivating rolevsform information: {str(e)}")
+         
                     return jsonify({'message': str(e), 'status': 500})
 
         

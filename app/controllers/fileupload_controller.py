@@ -6,8 +6,8 @@ import os
 from flask import url_for
 import base64
 import json
-from app import logger
-UPLOAD_FOLDER = 'uploads/student'
+
+UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads', 'student')
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 current_path = os.getcwd()
 full_path = os.path.join(current_path, UPLOAD_FOLDER)
@@ -40,10 +40,10 @@ class UploadFileController:
                     file.save(file_path)
                     
                     file_url =  full_path + '/' + filename
-                    logger.info(f'File uploaded successfully: {filename}')
+               
                     return file_url
                 else:
-                    logger.warning('File type not allowed')
+                
                     return jsonify({'error': 'File type not allowed'})
                 
             @self.upload_file_ns.doc('upload_file/upload', security='jwt', parser=self.upload_parser)
@@ -56,7 +56,7 @@ class UploadFileController:
                         os.makedirs(full_path)
                  
                     if 'file' not in request.files:
-                        logger.warning('No file part in the request')
+            
                         return jsonify({'error': 'No file part'})
                     else:
                         file_url = self.save_file_and_return_url(file)
@@ -65,8 +65,7 @@ class UploadFileController:
                         }
                         return jsonify({'message': 'File uploaded successfully', 'status': 200,'data':data})
                 except Exception as e:
-                    
-                    logger.error(f"Error adding file information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
         @self.upload_file_ns.route('/get_image/<file_name>')
         class GetFile(Resource):
@@ -75,10 +74,10 @@ class UploadFileController:
                     with open(file_path, 'rb') as f:
                         encoded_bytes = base64.b64encode(f.read())
                         encoded_string = encoded_bytes.decode('utf-8')
-                    logger.info(f'File read and encoded successfully: {file_path}')
+
                     return encoded_string
                 else:
-                    logger.warning(f'File not found: {file_path}')
+    
                     return None  
 
             @self.upload_file_ns.doc('upload_file/get', security='jwt')
@@ -92,13 +91,12 @@ class UploadFileController:
                                 file_content_with_prefix = f"data:image/png;base64,{file_content}"
                                 json_data = json.dumps({"encoded_data": file_content})
                                 print("working")
-                                logger.info(f'File fetched successfully: {file_name}')
+    
                                 return jsonify({'message': 'File fetch successfully', 'status': 200,'data':file_content_with_prefix})
                             return jsonify({'error': 'File not found'})
                         return jsonify({'error': 'Please provide filename'})
                     except Exception as e:
-                    
-                        logger.error(f"Error fetching File Information: {str(e)}")
+
                         return jsonify({'message': str(e), 'status': 500})
 
 

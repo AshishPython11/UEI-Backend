@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from app import db,app,api,authorizations,logger
+from app import db,app,api,authorizations
 from flask_restx import  Api, Namespace, Resource, fields
 from app.models.adminuser import AdminBasicInformation, SubjectMaster
 from sqlalchemy import desc
@@ -57,14 +57,14 @@ class SubjectController:
                         subjects_data.append(subject_data)
                     
                     if not subjects_data:
-                        logger.warning("Subject not found")
+                
                         return jsonify({'message': 'No Subject found', 'status': 404})
                     else:
-                        logger.info("Subjects found Successfully")
+                        
                         return jsonify({'message': 'Subjects found Successfully', 'status': 200, 'data': subjects_data})
                 except Exception as e:
                   
-                    logger.error(f"Error fetching subject information: {str(e)}")
+    
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.subject_ns.route('/add')
@@ -79,22 +79,22 @@ class SubjectController:
                     current_user_id = get_jwt_identity()
                     print(data)
                     if not subject_name :
-                        logger.warning("Subject name not found")
+             
                         return jsonify({'message': 'Please Provide Subject name','status':201})
                     else:
                         existing_subject = SubjectMaster.query.filter_by(subject_name=subject_name).first()
 
                         if existing_subject:
-                            logger.warning("Subject already exists")
+             
                             return jsonify({'message': 'Subject already exists', 'status': 409})
                         subject =  SubjectMaster(subject_name=subject_name,is_active = 1,created_by=current_user_id)
                         db.session.add(subject)
                         db.session.commit()
-                        logger.info("Subjects created Successfully")
+                    
                         return jsonify({'message': 'Subject created successfully','status':200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding subject information: {str(e)}")
+        
                     return jsonify({'message': str(e), 'status': 500})
                     
         @self.subject_ns.route('/edit/<int:id>')
@@ -108,27 +108,27 @@ class SubjectController:
                     subject_name = data.get('subject_name')
                     current_user_id = get_jwt_identity()
                     if not subject_name:
-                        logger.warning("Subject name not found")
+                        
                         return jsonify({'message': 'Please provide subject name', 'status': 400})
                     else:
                         subject = SubjectMaster.query.get(id)
                     if not subject:
-                        logger.warning("Subject not found")
+                      
                         return jsonify({'message': 'Subject not found', 'status': 404})
                     else:
                         existing_subject = SubjectMaster.query.filter_by(subject_name=subject_name).first()
 
                         if existing_subject:
-                            logger.warning("Subject already exists")
+                     
                             return jsonify({'message': 'Subject already exists', 'status': 409})
                         subject.subject_name = subject_name
                         subject.updeted_by = current_user_id
                         db.session.commit()
-                        logger.info("Subjects updated Successfully")
+            
                         return jsonify({'message': 'Subject updated successfully', 'status':200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error editing subject information: {str(e)}")
+                   
                     return jsonify({'message': str(e), 'status': 500})
                          
             @self.subject_ns.doc('subject/get', security='jwt')
@@ -137,7 +137,7 @@ class SubjectController:
                 try:
                     subject = SubjectMaster.query.get(id) 
                     if not subject:
-                        logger.warning("Subject not found")
+                  
                         return jsonify({'message': 'Subject not found', 'status': 404})
                     else: 
                         subject_data = {
@@ -148,11 +148,10 @@ class SubjectController:
                             'created_at':subject.created_at,
                             'updated_at':subject.updated_at,
                         }
-                        logger.info("Subjects found Successfully")
+
                         return jsonify({'message': 'Subject found Successfully', 'status': 200,'data':subject_data})
                 except Exception as e:
-                    
-                    logger.error(f"Error fetching subject information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
             
         @self.subject_ns.route('delete/<int:id>')
@@ -163,17 +162,16 @@ class SubjectController:
                     try:
                         subject_entity = SubjectMaster.query.get(id)
                         if not subject_entity:
-                            logger.warning("Subject not found")
+                 
                             return jsonify({'message': 'Subject not found', 'status': 404})
                         else:
                             
                             subject_entity.is_deleted=True
                             db.session.commit()
-                            logger.info("Subjects deleted Successfully")
+                        
                             return jsonify({'message': 'Subject deleted successfully', 'status': 200})
                     except Exception as e:
-                      
-                        logger.error(f"Error delelting subject information: {str(e)}")
+  
                         return jsonify({'message': str(e), 'status': 500})
                     
         @self.subject_ns.route('/activate/<int:id>')
@@ -184,16 +182,16 @@ class SubjectController:
                 try:
                     subject = SubjectMaster.query.get(id)
                     if not subject:
-                        logger.warning("Subject not found")
+            
                         return jsonify({'message': 'Subject not found', 'status': 404})
 
                     subject.is_active = 1
                     db.session.commit()
-                    logger.info("Subjects activated Successfully")
+
                     return jsonify({'message': 'Subject activated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error activating subject information: {str(e)}")
+     
                     return jsonify({'message': str(e), 'status': 500})
         @self.subject_ns.route('/deactivate/<int:id>')
         class SubjectDeactivate(Resource):
@@ -203,16 +201,16 @@ class SubjectController:
                 try:
                     subject = SubjectMaster.query.get(id)
                     if not subject:
-                        logger.warning("Subject not found")
+                  
                         return jsonify({'message': 'Subject not found', 'status': 404})
 
                     subject.is_active = 0
                     db.session.commit()
-                    logger.info("Subjects deactivated Successfully")
+          
                     return jsonify({'message': 'Subject deactivated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error deactivating subject information: {str(e)}")
+           
                     return jsonify({'message': str(e), 'status': 500})
                 
 
