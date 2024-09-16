@@ -2,9 +2,9 @@ import json
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.models.adminuser import AdminBasicInformation
-from app import db, api, authorizations
+from app import db, api, authorizations,logger
 from flask_restx import Api, Namespace, Resource, fields
-from app.models.role import RoleMasterData, RoleVsAdminMaster,ManageRole
+from app.models.role import RoleMasterData, RoleVsAdminMaster,ManageRole,RoleVsFormMasterData
 from sqlalchemy import desc
 class RolevsAdminController:
     def __init__(self,api):
@@ -75,6 +75,55 @@ class RolevsAdminController:
                 except Exception as e:
 
                     return jsonify({'message': str(e), 'status': 500})
+        # @self.rolevsadmin_ns.route('/add')
+        # class RolevsAdminAdd(Resource):
+        #     @self.rolevsadmin_ns.doc('rolevsadmin/add', security='jwt')
+        #     @self.api.expect(self.rolevsadmin_model)
+        #     @jwt_required()
+        #     def post(self):
+        #         try:
+        #             data = request.json
+        #             admin_id = str(data.get('admin_id'))
+        #             role_master_id = str(data.get('role_master_id'))
+        #             current_user_id = get_jwt_identity()
+        #             if not admin_id :
+        #                 logger.warning("No admin id found") 
+        #                 return jsonify({'message': 'Please Provide Admin Id', 'status': 201})
+        #             if not role_master_id :
+        #                 logger.warning("No role_master id found") 
+        #                 return jsonify({'message': 'Please Role Master Id', 'status': 201})
+        #             else:
+        #                 try:
+        #                     form = RoleVsAdminMaster(admin_id=admin_id,role_master_id=role_master_id,is_active=1,created_by=current_user_id)
+                         
+        #                     db.session.add(form)
+        #                     db.session.commit()
+        #                     manage_roles = ManageRole.query.filter_by(role_master_id=role_master_id).all()
+        #                     for manage_role in manage_roles:
+        #                         if manage_role:
+        #                             manage_role.admin_id=admin_id,
+        #                             manage_role.is_active = 1
+        #                             manage_role.is_delete = False
+        #                         else:
+                                
+        #                             manage_role = ManageRole(
+        #                                 admin_id=admin_id,
+        #                                 role_master_id=role_master_id,
+        #                                 is_active=1,
+        #                                 is_delete=False
+        #                             )
+        #                         db.session.commit()
+        #                     logger.info("RolevsUser created Successfully")
+        #                     return jsonify({'message': 'RolevsUser Data  created successfully', 'status': 200})
+        #                 except Exception as e:
+        #                     logger.error(f"Error occurred: {str(e)}") 
+        #                     print(f"Error occurred: {str(e)}")
+        #                     return jsonify({'message': str(e), 'status': 500})
+        #         except Exception as e:
+        #             db.session.rollback()
+        #             logger.error(f"Error adding rolevsadmin information: {str(e)}")
+        #             return jsonify({'message': str(e), 'status': 500})
+       
         @self.rolevsadmin_ns.route('/add')
         class RolevsAdminAdd(Resource):
             @self.rolevsadmin_ns.doc('rolevsadmin/add', security='jwt')
@@ -86,26 +135,38 @@ class RolevsAdminController:
                     admin_id = str(data.get('admin_id'))
                     role_master_id = str(data.get('role_master_id'))
                     current_user_id = get_jwt_identity()
-                    if not admin_id :
-             
+
+
+                    if not admin_id:
+                        logger.warning("No admin id found")
                         return jsonify({'message': 'Please Provide Admin Id', 'status': 201})
-                    if not role_master_id :
-              
-                        return jsonify({'message': 'Please Role Master Id', 'status': 201})
+                    if not role_master_id:
+                        logger.warning("No role_master id found")
+                        return jsonify({'message': 'Please Provide Role Master Id', 'status': 201})
+
                     else:
                         try:
-                            form = RoleVsAdminMaster(admin_id=admin_id,role_master_id=role_master_id,is_active=1,created_by=current_user_id)
-                         
+                           
+                            form = RoleVsAdminMaster(
+                                admin_id=admin_id,
+                                role_master_id=role_master_id,
+                                is_active=1,
+                                created_by=current_user_id
+                            )
+
                             db.session.add(form)
-                          
+                            db.session.commit()
+
                             manage_roles = ManageRole.query.filter_by(role_master_id=role_master_id).all()
+
                             for manage_role in manage_roles:
                                 if manage_role:
-                                    manage_role.admin_id=admin_id,
+                                 
+                                    manage_role.admin_id = admin_id  
                                     manage_role.is_active = 1
                                     manage_role.is_delete = False
                                 else:
-                                
+                                  
                                     manage_role = ManageRole(
                                         admin_id=admin_id,
                                         role_master_id=role_master_id,
@@ -113,17 +174,20 @@ class RolevsAdminController:
                                         is_delete=False
                                     )
                                 db.session.commit()
-                   
-                            return jsonify({'message': 'RolevsUser Data  created successfully', 'status': 200})
-                        except Exception as e:
-              
-                            print(f"Error occurred: {str(e)}")
-                            return jsonify({'message': e.message, 'status': 500})
-                except Exception as e:
-                    db.session.rollback()
 
-                    return jsonify({'message': str(e), 'status': 500})
-                
+
+                            logger.info("RolevsUser created Successfully")
+                            return jsonify({'message': 'RolevsUser Data created successfully', 'status': 200})
+                        except Exception as e:
+                            logger.error(f"Error occurred: {str(e)}")
+
+                            return jsonify({'message': str(e), 'status': 500})
+
+                except Exception as e:
+                            logger.error(f"Error occurred: {str(e)}")
+
+                            return jsonify({'message': str(e), 'status': 500})
+        
         @self.rolevsadmin_ns.route('/edit/<int:id>')
         class RolevsAdminEdit(Resource):
             @self.rolevsadmin_ns.doc('rolevsadmin/edit', security='jwt')

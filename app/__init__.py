@@ -122,6 +122,8 @@ from app.controllers.class_controller import ClassController
 from app.controllers.student_profile_controller import ProfileController
 from app.controllers.feedback_controller import FeedbackController
 from app.controllers.new_student_academic_history_controller import NewStudentAcademicHistoryController
+from app.controllers.school_academic_history_controller import SchoolAcademicHistoryController
+from app.controllers.clg_academic_history_controller import CollegeAcademicHistoryController
 # Instantiate controllers
 auth_controller = AuthController(api)
 subject_controller = SubjectController(api)
@@ -158,6 +160,8 @@ class_controller=ClassController(api)
 student_profile_controller=ProfileController(api)
 feedback_controller=FeedbackController(api)
 new_academic_history=NewStudentAcademicHistoryController(api)
+school_academic_history=SchoolAcademicHistoryController(api)
+college_academic_history=CollegeAcademicHistoryController(api)
 # Register blueprints
 app.register_blueprint(auth_controller.auth_bp)
 app.register_blueprint(subject_controller.subject_bp)
@@ -194,6 +198,8 @@ app.register_blueprint(class_controller.class_bp)
 app.register_blueprint(student_profile_controller.profile_bp)
 app.register_blueprint(feedback_controller.feedback_bp)
 app.register_blueprint(new_academic_history.new_student_academic_history_bp)
+app.register_blueprint(school_academic_history.school_academic_history_bp)
+app.register_blueprint(college_academic_history.college_academic_history_bp)
 # api.init_app(app)
 
 # Route for serving Swagger JSON
