@@ -58,7 +58,7 @@ class AuthController:
            
 
             def send_change_password_email(self, email, password):
-                reset_password_link = f"http://example.com/changepassword?email={email}&password={password}"
+                reset_password_link = f"https://qaweb.gyansetu.ai/changepassword?email={email}&password={password}"
                 html_content = render_template('forgotpassword.html', reset_password_link=reset_password_link)
                 msg = Message('Reset Your Password', sender=app.config.get('MAIL_USERNAME'), recipients=[email])
                 msg.html = html_content
