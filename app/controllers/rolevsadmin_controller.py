@@ -2,7 +2,7 @@ import json
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.models.adminuser import AdminBasicInformation
-from app import db, api, authorizations
+from app import db, api, authorizations,logger
 from flask_restx import Api, Namespace, Resource, fields
 from app.models.role import RoleMasterData, RoleVsAdminMaster,ManageRole,RoleVsFormMasterData
 from sqlalchemy import desc
@@ -178,8 +178,12 @@ class RolevsAdminController:
 
                             logger.info("RolevsUser created Successfully")
                             return jsonify({'message': 'RolevsUser Data created successfully', 'status': 200})
-
                         except Exception as e:
+                            logger.error(f"Error occurred: {str(e)}")
+
+                            return jsonify({'message': str(e), 'status': 500})
+
+                except Exception as e:
                             logger.error(f"Error occurred: {str(e)}")
 
                             return jsonify({'message': str(e), 'status': 500})
