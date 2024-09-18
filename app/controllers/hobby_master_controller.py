@@ -192,7 +192,6 @@ class HobbyController:
                 try:
                     hobby = Hobby.query.get(id)
                     if not hobby:
-          
                         return jsonify({'message': 'Hobby not found', 'status': 404})
                     else:
                         hobby.is_active = 0
