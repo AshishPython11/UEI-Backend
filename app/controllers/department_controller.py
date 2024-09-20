@@ -88,10 +88,10 @@ class DepartmentController:
                     
                     if not departments_data:
                     
-                        return jsonify({'message': 'No Admin Addresses found', 'status': 404})
+                        return jsonify({'message': 'No Department found', 'status': 404})
                     else:
                       
-                        return jsonify({'message': 'Admin Addresses found Successfully', 'status': 200, 'data': departments_data})
+                        return jsonify({'message': 'Department found Successfully', 'status': 200, 'data': departments_data})
                 except Exception as e:
 
                     return jsonify({'message': str(e), 'status': 500})

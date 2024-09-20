@@ -1,6 +1,7 @@
 from datetime import datetime,timedelta
 import random
-from flask import Blueprint, render_template, request, jsonify
+import os
+from flask import Blueprint, render_template, request, jsonify,session,url_for
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
 from app.models.student import StudentLogin
@@ -9,11 +10,26 @@ from app.models.log import ChangePwdLog,LoginLog
 from flask_restx import Api, Namespace, Resource, fields
 from app import db,api,authorizations,app
 import jwt
+from authlib.integrations.flask_client import OAuth 
 from flask_jwt_extended import JWTManager,jwt_required, unset_jwt_cookies
 from flask_mail import Mail, Message
 import string
+import json
 import secrets
 mail = Mail(app)
+with open('uei_key.json') as f:
+    client_secrets = json.load(f)
+oauth = OAuth(app)
+google = oauth.register(
+                name='google',
+                client_id=client_secrets['web']['client_id'],
+                client_secret=client_secrets['web']['client_secret'],
+                access_token_url=client_secrets['web']['token_uri'],
+                authorize_url=client_secrets['web']['auth_uri'],
+                userinfo_endpoint='https://openidconnect.googleapis.com/v1/userinfo',
+                client_kwargs={'scope': 'openid email profile'},
+                server_metadata_url='https://accounts.google.com/.well-known/openid-configuration'
+            )
 class AuthController:
     def __init__(self,api):
         self.api = api
@@ -373,6 +389,49 @@ class AuthController:
                     db.session.rollback()
                   
                     return jsonify({'message': str(e), 'status': 500})
+        
+                
+                
+                # email = user_info['email']
+
+                # student = StudentLogin.query.filter_by(userid=email, is_active=1).first()
+                # admin = AdminLogin.query.filter_by(userid=email, is_active=1).first()
+
+                # if student:
+                #     id = student.student_id
+                #     user_type = 'student'
+                # elif admin:
+                #     id = admin.admin_id
+                #     user_type = 'admin'
+                # else:
+                #     return jsonify({'message': 'No user associated with this Google account', 'status': 404})
+
+                # access_token = create_access_token(identity=id)
+                # bearer_token = f"Bearer {access_token}"
+
+    
+                # login_data = LoginLog(
+                #     student_id=id if user_type == 'student' else None,
+                #     admin_id=id if user_type == 'admin' else None,
+                #     userid=email,
+                #     login_time=datetime.now(),
+                #     ipaddress=request.remote_addr,
+                #     is_active=1
+                # )
+                # db.session.add(login_data)
+                # db.session.commit()
+
+                # userdata = {
+                #     'id': id,
+                #     'userid': email,
+                #     'user_type': user_type
+                # }
+
+                # return jsonify({'message': 'Google Login Successful', 'status': 200})
+
+            # except Exception as e:
+            #     # db.session.rollback()
+            #     return jsonify({'message': f'Google login failed: {e}', 'status': 500})
 
         self.api.add_namespace(self.auth_ns)
 
