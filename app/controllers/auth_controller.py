@@ -1,7 +1,7 @@
 from datetime import datetime,timedelta
 import random
 import os
-from flask import Blueprint, render_template, request, jsonify,session,url_for
+from flask import Blueprint, render_template, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
 from app.models.student import StudentLogin
@@ -10,7 +10,6 @@ from app.models.log import ChangePwdLog,LoginLog
 from flask_restx import Api, Namespace, Resource, fields
 from app import db,api,authorizations,app
 import jwt
-from authlib.integrations.flask_client import OAuth 
 from flask_jwt_extended import JWTManager,jwt_required, unset_jwt_cookies
 from flask_mail import Mail, Message
 import string
