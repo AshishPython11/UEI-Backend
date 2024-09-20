@@ -415,6 +415,8 @@ class ChatController:
             
             def contains_exclusion(self, text):
                 exclusion_statements = ["I'm sorry", "I apologize","However,I don't have real time access","As an AI created by gyan setu, my responses are based on the 'BE' course and 'Python' subject only.","I'm unable to provide a detailed answer for this topic."]
+                if isinstance(text, list):
+                     text = ' '.join(text)
                 normalized_text = text.lower()
                 for statement in exclusion_statements:
                     if statement.lower() in normalized_text:
