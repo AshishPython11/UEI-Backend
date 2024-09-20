@@ -17,19 +17,7 @@ import string
 import json
 import secrets
 mail = Mail(app)
-with open('uei_key.json') as f:
-    client_secrets = json.load(f)
-oauth = OAuth(app)
-google = oauth.register(
-                name='google',
-                client_id=client_secrets['web']['client_id'],
-                client_secret=client_secrets['web']['client_secret'],
-                access_token_url=client_secrets['web']['token_uri'],
-                authorize_url=client_secrets['web']['auth_uri'],
-                userinfo_endpoint='https://openidconnect.googleapis.com/v1/userinfo',
-                client_kwargs={'scope': 'openid email profile'},
-                server_metadata_url='https://accounts.google.com/.well-known/openid-configuration'
-            )
+
 class AuthController:
     def __init__(self,api):
         self.api = api
