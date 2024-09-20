@@ -389,49 +389,6 @@ class AuthController:
                     db.session.rollback()
                   
                     return jsonify({'message': str(e), 'status': 500})
-        
-                
-                
-                # email = user_info['email']
-
-                # student = StudentLogin.query.filter_by(userid=email, is_active=1).first()
-                # admin = AdminLogin.query.filter_by(userid=email, is_active=1).first()
-
-                # if student:
-                #     id = student.student_id
-                #     user_type = 'student'
-                # elif admin:
-                #     id = admin.admin_id
-                #     user_type = 'admin'
-                # else:
-                #     return jsonify({'message': 'No user associated with this Google account', 'status': 404})
-
-                # access_token = create_access_token(identity=id)
-                # bearer_token = f"Bearer {access_token}"
-
-    
-                # login_data = LoginLog(
-                #     student_id=id if user_type == 'student' else None,
-                #     admin_id=id if user_type == 'admin' else None,
-                #     userid=email,
-                #     login_time=datetime.now(),
-                #     ipaddress=request.remote_addr,
-                #     is_active=1
-                # )
-                # db.session.add(login_data)
-                # db.session.commit()
-
-                # userdata = {
-                #     'id': id,
-                #     'userid': email,
-                #     'user_type': user_type
-                # }
-
-                # return jsonify({'message': 'Google Login Successful', 'status': 200})
-
-            # except Exception as e:
-            #     # db.session.rollback()
-            #     return jsonify({'message': f'Google login failed: {e}', 'status': 500})
 
         self.api.add_namespace(self.auth_ns)
 
