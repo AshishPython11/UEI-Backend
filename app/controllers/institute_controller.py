@@ -115,9 +115,9 @@ class InstituteController:
                         return jsonify({'message': 'Please Provide Institution name', 'status': 201})
                   
                     else:
-                        existing_institute = Institution.query.filter_by(institution_name=institution_name).first()
-
-                        if existing_institute:
+                        existing_institution = Institution.query.filter_by(institution_name=data['institution_name']).first()
+                        if existing_institution:
+                            
                    
                             return jsonify({'message': 'Institute already exists', 'status': 409})
                         institution = Institution(institution_name=institution_name,entity_id=entity_id,address=address,state=state,country=country,city=city,district=district,pincode=pincode,website_url=website_url,email_id=email_id,mobile_no=mobile_no,is_active=1,created_by=current_user_id)

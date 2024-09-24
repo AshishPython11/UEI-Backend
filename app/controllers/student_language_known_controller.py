@@ -59,7 +59,7 @@ class StudentLanguageKnownController:
                         return jsonify({'message': 'No Student Language Known found', 'status': 404})
                     else:
 
-                        return jsonify({'message': 'Student Language Known  found Successfully', 'status': 200, 'data': student_language_knowns_data})
+                        return jsonify({'message': 'Student Language Known found Successfully', 'status': 200, 'data': student_language_knowns_data})
                 except Exception as e:
     
                     return jsonify({'message': str(e), 'status': 500})
@@ -88,7 +88,7 @@ class StudentLanguageKnownController:
                         return jsonify({'message': 'No Student Language Known found', 'status': 404})
                     else:
                
-                        return jsonify({'message': 'Student Language Known  found Successfully', 'status': 200, 'data': student_language_knowns_data})
+                        return jsonify({'message': 'Student Language Known found Successfully', 'status': 200, 'data': student_language_knowns_data})
                 except Exception as e:
 
                     return jsonify({'message': str(e), 'status': 500})

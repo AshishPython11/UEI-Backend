@@ -544,62 +544,59 @@ class StudentController:
                     current_user_id = get_jwt_identity()
                     pic_path = data.get('pic_path')
                     mobile_no_call = data.get('mobile_no_call')
+                    email_id = data.get('email_id')  # Extract email_id
 
+                    # Input validation
                     if not first_name:
-                    
                         return jsonify({'message': 'Please Provide First Name', 'status': 201})
                     if not last_name:
-                
                         return jsonify({'message': 'Please Provide Last Name', 'status': 201})
                     if not gender:
-                    
                         return jsonify({'message': 'Please Provide Gender', 'status': 201})
                     if not dob:
-                  
                         return jsonify({'message': 'Please Provide Date of Birth', 'status': 201})
                     if not father_name:
-              
                         return jsonify({'message': 'Please Provide Father Name', 'status': 201})
                     if not mother_name:
-                    
                         return jsonify({'message': 'Please Provide Mother Name', 'status': 201})
-                    else:
-                        student = Student.query.filter_by(student_id=id).first()
-                        if not student:
-                   
-                            return jsonify({'message': 'Student not found', 'status': 404})
-                        else:
-                            student.aim = aim
-                            student.first_name = first_name
-                            student.last_name = last_name
-                            student.gender = gender
-                            student.dob = dob
-                            student.father_name = father_name
-                            student.mother_name = mother_name
-                            student.guardian_name = guardian_name
-                            student.is_kyc_verified = False  
-                            student.pic_path = pic_path
-                            student.student_login_id = student_login_id
-                            student.updated_by = current_user_id
-                            student.updated_at = datetime.now() 
 
-                            if mobile_no_call:
-                                contact = Contact.query.filter_by(student_id=id).first()
-                                if not contact:
-                                
-                                    
-                                    contact = Contact(student_id=student.student_id, mobile_no_call=mobile_no_call)
-                                    db.session.add(contact)
-                                else:
-   
-                                    contact.mobile_no_call = mobile_no_call
-                            db.session.commit()
-                        
-                            return jsonify({'message': 'Student updated successfully', 'status': 200})
+                    # Fetch the student record
+                    student = Student.query.filter_by(student_id=id).first()
+                    if not student:
+                        return jsonify({'message': 'Student not found', 'status': 404})
+
+                    # Update student fields
+                    student.aim = aim
+                    student.first_name = first_name
+                    student.last_name = last_name
+                    student.gender = gender
+                    student.dob = dob
+                    student.father_name = father_name
+                    student.mother_name = mother_name
+                    student.guardian_name = guardian_name
+                    student.is_kyc_verified = is_kyc_verified  # Update this if needed
+                    student.pic_path = pic_path
+                    student.student_login_id = student_login_id
+                    student.updated_by = current_user_id
+                    student.updated_at = datetime.now()
+
+                    # Handle contact information
+                    contact = Contact.query.filter_by(student_id=id).first()
+                    if not contact:
+                        contact = Contact(student_id=student.student_id, mobile_no_call=mobile_no_call, email_id=email_id)  # Add email_id here
+                        db.session.add(contact)
+                    else:
+                        contact.mobile_no_call = mobile_no_call
+                        contact.email_id = email_id  # Update email_id if the contact already exists
+
+                    db.session.commit()
+                    return jsonify({'message': 'Student updated successfully', 'status': 200})
+
                 except Exception as e:
-                        db.session.rollback()
+                    db.session.rollback()
+                    return jsonify({'message': str(e), 'status': 500})
              
-                        return jsonify({'message': str(e), 'status': 500})
+                       
         @self.student_ns.route('delete/<int:id>')
         class StudentDelete(Resource):
             @self.student_ns.doc('student/delete', security='jwt')

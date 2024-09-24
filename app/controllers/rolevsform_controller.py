@@ -106,7 +106,7 @@ class RolevsFormController:
                         db.session.add(form)
                         db.session.commit()
 
-                        return jsonify({'message': 'RolevsForm Data  created successfully', 'status': 200})
+                        return jsonify({'message': 'RolevsForm Data created successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
 
@@ -154,7 +154,7 @@ class RolevsFormController:
                                     manage_role.is_save = is_save
                                     manage_role.is_update = is_update
                
-                            return jsonify({'message': 'RolevsForm Data  updated successfully', 'status': 200})
+                            return jsonify({'message': 'RolevsForm Data updated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
              

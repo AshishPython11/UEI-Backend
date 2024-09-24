@@ -114,7 +114,7 @@ class RolevsAdminController:
                                     )
                                 db.session.commit()
                    
-                            return jsonify({'message': 'RolevsUser Data  created successfully', 'status': 200})
+                            return jsonify({'message': 'RolevsUser Data created successfully', 'status': 200})
                         except Exception as e:
               
                             print(f"Error occurred: {str(e)}")
@@ -159,7 +159,7 @@ class RolevsAdminController:
                                 manage_role.is_active = 1
                                 manage_role.is_delete = False
             
-                            return jsonify({'message': 'RolevsUser Data  updated successfully', 'status': 200})
+                            return jsonify({'message': 'RolevsUser Data updated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
               
