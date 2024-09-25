@@ -53,8 +53,9 @@ def auth_header(test_client):
     yield {'Authorization': access_token, 'student_id': student_id,'user_id':user_id}
     user_to_delete = StudentLogin.query.filter_by(userid=unique_email).first()
     if user_to_delete:
-        db.session.query(LoginLog).filter_by(student_id=user_to_delete.student_id).delete()
-        db.session.delete(user_to_delete)
+        db.session.query(ChangePwdLog).filter_by(student_id=user_to_delete.student_id).delete()  # Delete related logs
+        db.session.query(LoginLog).filter_by(student_id=user_to_delete.student_id).delete()  # Delete login logs
+        db.session.delete(user_to_delete)  # Now delete the student login
         db.session.commit()
 
 def test_logout(auth_header, test_client):
@@ -80,122 +81,78 @@ def test_deactivate_student(test_client, auth_header):
     response = test_client.put(f'/auth/deactivate/{student_id}', headers=auth_header)
     assert response.status_code == 200
     assert response.json['message'] == 'User deactivated successfully'
+def test_forgot_password_without_mail_setup(test_client, auth_header):
+    # Extracting user_id from the header for the logged-in student
+    user_email = auth_header['user_id']
+    print(user_email)
+    response = test_client.post('/auth/forgotpassword', json={
+        'email': user_email,
+        'user_type': 'student'
+    })
 
-# def test_login_with_unregistered_email(test_client):
-#     response = test_client.post('/auth/login', json={
-#         "userid": "unryiuuiuuyuegistered@example.com",
-#         "password": "passiuiyuword",
-#         "user_type": "student"
-#     })
-#     data = response.get_json()
-#     print(f"unregistered data{data}")
-#     assert data['message'] == "User does not exist"
+    assert response.status_code == 200
+    assert response.json['message'] == 'Failed to send reset password email'
+
+def test_change_password(test_client, auth_header):
+    user_email = auth_header['user_id']
     
+    # Change the password
+    response = test_client.post('/auth/changepassword', json={
+        'email': user_email,
+        'old_password': 'password',  # Original password
+        'new_password': 'newpassword123',  # New password
+        'user_type': 'student'
+    })
 
+    assert response.status_code == 200
+    assert response.json['message'] == 'Password changed successfully'
 
-
-# def test_change_password_incorrect_old_password(auth_header, test_client):
-#     response = test_client.post('/auth/changepassword', headers=auth_header, json={
-#         "email": "student@example.com",  # Use a valid email for testing
-#         "old_password": "wrongpassword",
-#         "new_password": "newpassword",
-#         "user_type": "student"
-#     })
-
-#     data = response.get_json()
-#     assert data['message'] == "Incorrect old password"
-
+    # Now try to log in with the new password
+    login_response = test_client.post('/auth/login', json={
+        'userid': user_email,
+        'password': 'newpassword123',  # New password
+        'user_type': 'student'
+    })
     
-# def seed_data():
-#     admin_user = AdminLogin(userid=faker.unique.email(), password='admin123', is_active=1)
-#     db.session.add(admin_user)
-#     db.session.commit()
+    assert login_response.status_code == 200
+
+def test_reset_password(test_client, auth_header):
+    user_email = auth_header['user_id']
     
-#     return {
-#         'admin_id': admin_user.admin_id,
-#         'userid': admin_user.userid,
-#         'password':admin_user.password,
-#     }
+    response = test_client.post('/auth/resetpassword', json={
+        'email': user_email,
+        'new_password': 'resetpassword123',  # New password
+        'conf_password': 'resetpassword123',  # Confirm password
+        'user_type': 'student'
+    })
 
-# def test_signup(test_client):
-#     payload = {
-#         "userid": faker.unique.email(),
-#         "password": "admin123",
-#         "user_type": "admin"
-#     }
+    assert response.status_code == 200
+    assert response.json['message'] == 'Password changed successfully'
+
+    # Optional: Log in with the reset password to verify
+    login_response = test_client.post('/auth/login', json={
+        'userid': user_email,
+        'password': 'resetpassword123',  # Use reset password
+        'user_type': 'student'
+    })
     
-#     response = test_client.post('/auth/signup', json=payload)
-#     assert response.status_code == 200
-#     data = response.get_json()
-#     assert 'User created successfully' in data['message']
+    assert login_response.status_code == 200
+# import pytest
+# from unittest.mock import patch
+# from flask import jsonify
 
-
-# def test_login(test_client, auth_headers):
-#     payload = {
-#         "userid": seed_ids['userid'],  
-#         "password":seed_ids['password'], 
-#         "user_type": "admin"
-#     }
+# def test_forgot_password_success(test_client, auth_header):
+#     user_email = auth_header['user_id']  # Use a registered email for testing
     
-#     response = test_client.post('/auth/login', json=payload)
-#     assert response.status_code == 200
-#     data = response.get_json()
-#     assert 'User Logged In Successfully' in data['message']
-#     assert 'token' in data
+#     # Mock the send_reset_email method to avoid sending actual emails
+#     with patch('app.controllers.auth_controller.AuthController.ForgotPassword.send_reset_email') as mock_send_reset_email:
+#         mock_send_reset_email.return_value = None  # Mocked method does nothing
+        
+#         response = test_client.post('/auth/forgotpassword', json={
+#             'email': user_email,
+#             'user_type': 'student'
+#         })
+        
+#         assert response.status_code == 200
+#         assert response.json['message'] == 'Reset password instructions sent to email'
 
-
-# def test_logout(test_client, auth_headers):
-#     response = test_client.post('/auth/logout', headers=auth_headers['admin_auth'])
-#     assert response.status_code == 200
-#     data = response.get_json()
-#     assert 'User logged out successfully' in data['message']
-
-
-# def test_forgot_password(test_client, auth_headers):
-#     payload = {
-#         "email": seed_ids['userid'], 
-#         "user_type": "admin"
-#     }
-    
-#     response = test_client.post('/auth/forgotpassword', json=payload)
-#     assert response.status_code == 200
-#     data = response.get_json()
-#     assert 'Reset password instructions sent to email' in data['message']
-
-
-# def test_change_password(test_client, auth_headers):
-#     payload = {
-#         "email": seed_ids['userid'],   
-#         "old_password": "admin123",
-#         "new_password": "newpassword123",
-#         "user_type": "admin"
-#     }
-
-#     response = test_client.post('/auth/changepassword', json=payload, headers=auth_headers['admin_auth'])
-#     assert response.status_code == 200
-#     data = response.get_json()
-#     assert 'Password changed successfully' in data['message']
-
-# def test_invalid_login(test_client):
-#     payload = {
-#         "userid": faker.unique.user_name(),  
-#         "password": "wrongpassword",
-#         "user_type": "admin"
-#     }
-
-#     response = test_client.post('/auth/login', json=payload)
-#     assert response.status_code == 404
-#     data = response.get_json()
-#     assert 'Invalid userid or password' in data['message']
-
-# def test_signup_existing_user(test_client, auth_headers):
-#     payload = {
-#         "userid": seed_ids['userid'],
-#         "password": "admin123",
-#         "user_type": "admin"
-#     }
-
-#     response = test_client.post('/auth/signup', json=payload)
-#     assert response.status_code == 400
-#     data = response.get_json()
-#     assert 'Userid already exists' in data['message']

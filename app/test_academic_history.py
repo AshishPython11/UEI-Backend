@@ -7,7 +7,7 @@ from app.models.student import ClassMaster,CourseMaster,NewStudentAcademicHistor
 from app.models.adminuser import Institution
 import time
 from faker import Faker
-
+import uuid
 faker = Faker()
 
 @pytest.fixture(scope='module')
@@ -16,41 +16,33 @@ def test_client():
     with app.test_client() as testing_client:
         with app.app_context():
             db.create_all()
-              # Seed once for the module
+             
         yield testing_client
         with app.app_context():
-            cleanup_seed_data()  # Cleanup after all tests
+            cleanup_seed_data()  
             db.session.remove()
 @pytest.fixture
 def auth_header(test_client):
     unique_email = faker.unique.email()
 
-    # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
-        "userid": unique_email,  # Unique email for signup
-        "password": "password",  # Assuming a fixed password
+        "userid": unique_email,  
+        "password": "password",  
         "user_type": "student"
     })
 
     assert signup_response.status_code == 200, f"Signup failed with status code {signup_response.status_code}"
     assert signup_response.json['status'] == 200, f"Signup error: {signup_response.json['message']}"
 
-    # Now, attempt to log in using the unique email directly
     login_response = test_client.post('/auth/login', json={
-        "userid": unique_email,  # Use the same unique email
-        "password": "password",  # Same password
+        "userid": unique_email, 
+        "password": "password", 
         "user_type": "student"
     })
 
     assert login_response.status_code == 200, f"Login failed with status code {login_response.status_code}"
 
-    # response = test_client.post('/auth/login', json={
-    #     "userid": "1",
-    #     "password": "111",
-    #     "user_type": "student"
-    # })
 
-    # assert response.status_code == 200, f"Login failed with status code {response.status_code}"
     
     data = login_response.json
     if 'token' not in data:
@@ -59,38 +51,35 @@ def auth_header(test_client):
     access_token = data['token']
     student_id = data['data']['id'] 
     global seed_ids
-    seed_ids = seed_data(student_id)  # Extracting student ID
+    seed_ids = seed_data(student_id) 
     yield {'Authorization': access_token, 'student_id': student_id}
     cleanup_seed_data()
 
-    # Fetch the user to delete based on the unique email
     user_to_delete = StudentLogin.query.filter_by(userid=unique_email).first()
     if user_to_delete:
-        # First, delete any logs related to the user from LoginLog
+ 
         db.session.query(LoginLog).filter_by(student_id=user_to_delete.student_id).delete()
 
         db.session.delete(user_to_delete)
 
-        # Commit the changes to reflect the deletions
         db.session.commit()
 def seed_data(student_id):
-    # Seed data for testing
+ 
     student_login = StudentLogin.query.filter_by(student_id=student_id).first()
     if not student_login:
         raise ValueError("Admin login with userid 'admin123' not found")
     student_id=student_login.student_id
-    institution = Institution(institution_name=faker.unique.company(), is_active=1)
-    course = CourseMaster(course_name=faker.unique.word(), is_active=1)
-    class_master = ClassMaster(class_name=faker.word(), is_active=True)
+    institution = Institution(institution_name=f'{faker.unique.company()}-{uuid.uuid4()}', is_active=1)
+    course = CourseMaster(course_name=f'{faker.unique.word()}-{uuid.uuid4()}', is_active=1)
+    class_master = ClassMaster(class_name=f'{faker.unique.word()}-{uuid.uuid4()}', is_active=True)
     
     db.session.add(institution)
     db.session.add(course)
     db.session.add(class_master)
     db.session.commit()
-    
-    # Create an academic history entry
+
     academic_history = NewStudentAcademicHistory(
-        student_id=student_id,  # Assuming a valid student ID exists
+        student_id=student_id, 
         institution_type='School',
         board='CBSE',
         state_for_stateboard='State A',
@@ -98,7 +87,7 @@ def seed_data(student_id):
         course_id=course.course_id,
         class_id=class_master.class_id,
         year_or_semester='2023',
-        created_by=student_id,  # Replace with the admin ID as needed
+        created_by=student_id, 
         updated_by=student_id,
         learning_style='Visual'
     )
@@ -113,16 +102,13 @@ def seed_data(student_id):
         'academic_history_id': academic_history.id
     }
 def cleanup_seed_data():
-    # Delete academic histories referencing the class
+   
     NewStudentAcademicHistory.query.filter_by(class_id=seed_ids['class_id']).delete()
-    
-    # Now, safely delete the class
+
     ClassMaster.query.filter_by(class_id=seed_ids['class_id']).delete()
-    
-    # Delete courses
+
     CourseMaster.query.filter_by(course_id=seed_ids['course_id']).delete()
-    
-    # Delete institutions
+
     Institution.query.filter_by(institution_id=seed_ids['institution_id']).delete()
     
     db.session.commit()
@@ -160,24 +146,24 @@ def test_add_multiple_academic_histories(test_client, auth_header):
     histories = {
         'histories': [
             {
-                'student_id': str(auth_header['student_id']),  # Ensure this is a string
+                'student_id': str(auth_header['student_id']), 
                 'institution_type': 'College',
                 'board': 'ICSE',
                 'state_for_stateboard': 'State',
-                'institute_id': str(seed_ids['institution_id']),  # Ensure this is a string
-                'course_id': str(seed_ids['course_id']),  # Ensure this is a string
-                'class_id': str(seed_ids['class_id']),  # Ensure this is a string
+                'institute_id': str(seed_ids['institution_id']), 
+                'course_id': str(seed_ids['course_id']),  
+                'class_id': str(seed_ids['class_id']),  
                 'year': '2023',
                 'learning_style': 'Auditory'
             },
             {
-                'student_id': str(auth_header['student_id']),  # Ensure this is a string
+                'student_id': str(auth_header['student_id']), 
                 'institution_type': 'School',
                 'board': 'CBSE',
                 'state_for_stateboard': 'State',
-                'institute_id': str(seed_ids['institution_id']),  # Ensure this is a string
-                'course_id': str(seed_ids['course_id']),  # Ensure this is a string
-                'class_id': str(seed_ids['class_id']),  # Ensure this is a string
+                'institute_id': str(seed_ids['institution_id']),  
+                'course_id': str(seed_ids['course_id']),  
+                'class_id': str(seed_ids['class_id']),  
                 'year': '2024',
                 'learning_style': 'Visual'
             }
@@ -195,20 +181,20 @@ def test_edit_multiple_academic_histories(test_client, auth_header):
     histories = {     
         'histories': [
             {
-                'id': seed_ids['academic_history_id'],  # Ensure this ID exists in the database
-                'student_id': str(auth_header['student_id']),  # Convert to string
+                'id': seed_ids['academic_history_id'],  
+                'student_id': str(auth_header['student_id']),  
                 'institution_type': 'College',
                 'board': 'ICSE',
                 'state_for_stateboard': 'State',
-                'institute_id': str(seed_ids['institution_id']),  # Ensure this is a string
-                'course_id': str(seed_ids['course_id']),  # Ensure this is a string
-                'class_id': str(seed_ids['class_id']),  # Ensure this is a string
+                'institute_id': str(seed_ids['institution_id']),  
+                'course_id': str(seed_ids['course_id']),  
+                'class_id': str(seed_ids['class_id']),  
                 'year': '2023',
                 'learning_style': 'Auditory'
             },
             {
-                'id': seed_ids['academic_history_id'],  # Ensure this ID exists in the database
-                'student_id': str(auth_header['student_id']),  # Convert to string
+                'id': seed_ids['academic_history_id'],  
+                'student_id': str(auth_header['student_id']),  
                 'institution_type': 'School',
                 'board': 'CBSE',
                 'state_for_stateboard': 'State',
@@ -222,24 +208,23 @@ def test_edit_multiple_academic_histories(test_client, auth_header):
     }
     response = test_client.put('/new_student_academic_history/multiple_academic_history/edit', headers=auth_header, json=histories)
     
-    # Print the response data for debugging
-    print(response.get_data(as_text=True))  # Print the response content
+   
+    print(response.get_data(as_text=True))  
     assert response.status_code == 200
 
 
 
 def test_edit_academic_history(test_client, auth_header):
-    academic_history_id = seed_ids['academic_history_id'] # Use a valid ID from your database
+    academic_history_id = seed_ids['academic_history_id'] 
     updated_data = {
         'student_id': str(auth_header['student_id']),
         'institution_type': 'School',
         'board': 'CBSE',
         'state_for_stateboard': 'Updated State',
-        'institute_id': str(seed_ids['institution_id']),  # Ensure this is a string
-        'course_id': str(seed_ids['course_id']),  # Ensure this is a string
-        'class_id': str(seed_ids['class_id']), # Adjust according to your seeded data
+        'institute_id': str(seed_ids['institution_id']), 
+        'course_id': str(seed_ids['course_id']),  
         'learning_style': 'Visual',
-          # Adjust according to your seeded data
+        'class_id': str(seed_ids['class_id']),
         'year': '2023'
     }
     response = test_client.put(f'/new_student_academic_history/edit/{academic_history_id}', headers=auth_header, json=updated_data)
@@ -250,7 +235,7 @@ def test_edit_academic_history(test_client, auth_header):
     assert data['message'] == 'Academic History updated successfully'
 
 def test_get_academic_history(test_client, auth_header):
-    student_id=auth_header['student_id'] # Use the authenticated student ID
+    student_id=auth_header['student_id']
     response = test_client.get(f'/new_student_academic_history/get/{student_id}', headers=auth_header)
     assert response.status_code == 200
     data = response.get_json()
@@ -258,21 +243,21 @@ def test_get_academic_history(test_client, auth_header):
     assert isinstance(data['data'], list)
 
 def test_delete_academic_history(test_client, auth_header):
-    academic_history_id = seed_ids['academic_history_id']  # Use a valid ID from your database
+    academic_history_id = seed_ids['academic_history_id'] 
     response = test_client.delete(f'/new_student_academic_history/delete/{academic_history_id}', headers=auth_header)
     assert response.status_code == 200
     data = response.get_json()
     assert data['message'] == 'Academic History deleted successfully'
 
 def test_activate_academic_history(test_client, auth_header):
-    academic_history_id = seed_ids['academic_history_id'] # Use a valid ID from your database
+    academic_history_id = seed_ids['academic_history_id'] 
     response = test_client.put(f'/new_student_academic_history/activate/{academic_history_id}', headers=auth_header)
     assert response.status_code == 200
     data = response.get_json()
     assert data['message'] == 'Academic History activated successfully'
 
 def test_deactivate_academic_history(test_client, auth_header):
-    academic_history_id = seed_ids['academic_history_id'] # Use a valid ID from your database
+    academic_history_id = seed_ids['academic_history_id'] 
     response = test_client.put(f'/new_student_academic_history/deactivate/{academic_history_id}', headers=auth_header)
     assert response.status_code == 200
     data = response.get_json()

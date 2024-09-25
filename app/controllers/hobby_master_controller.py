@@ -70,52 +70,7 @@ class HobbyController:
                 except Exception as e:
                     return jsonify({'message': str(e), 'status': 500})
 
-        # @self.hobby_ns.route('/list')
-        # class HobbyList(Resource):
-        #     @self.hobby_ns.doc('hobby/list', security='jwt')
-        #     @jwt_required()
-        #     def get(self):
-        #         try:
-             
-        #             hobbyes = Hobby.query.filter_by(is_deleted=False).order_by(desc(Hobby.updated_at)).all()
-        #             hobbyes_data = []
-                    
-        #             for hobby in hobbyes:
-        #                 created_by = 'Admin'
-        #                 updated_by = 'Admin'
-        #                 if hobby.created_by is not None:
-        #                     createadmindata = AdminBasicInformation.query.filter_by(admin_login_id = hobby.created_by).first()
-        #                     if createadmindata is not None:
-        #                         created_by = createadmindata.first_name
-        #                     else :
-        #                         created_by = 'Admin'
-        #                 if hobby.updated_by is not None:   
-        #                     updateadmindata = AdminBasicInformation.query.filter_by(admin_login_id = hobby.updated_by).first()
-        #                     if updateadmindata is not None:
-        #                         updated_by = updateadmindata.first_name
-        #                     else :
-        #                         updated_by = 'Admin'
-        #                 hobby_data = {
-        #                     'id': hobby.hobby_id,
-        #                     'hobby_name': hobby.hobby_name,
-        #                     'is_active': hobby.is_active,
-        #                     'is_deleted': hobby.is_deleted, 
-        #                     'created_at':hobby.created_at,
-        #                     'updated_at':hobby.updated_at,
-        #                     'created_by':created_by,
-        #                     'updated_by':updated_by,
-        #                 }
-        #                 hobbyes_data.append(hobby_data)
-                    
-        #             if not hobbyes_data:
-           
-        #                 return jsonify({'message': 'No Hobby found', 'status': 404})
-        #             else:
-  
-        #                 return jsonify({'message': 'Hobbies found Successfully', 'status': 200, 'data': hobbyes_data})
-        #         except Exception as e:
- 
-        #             return jsonify({'message': str(e), 'status': 500})
+        
         @self.hobby_ns.route('/add')
         class HobbyAdd(Resource):
             @self.hobby_ns.doc('hobby/add', security='jwt')
