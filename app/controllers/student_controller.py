@@ -116,6 +116,8 @@ class StudentController:
                 except Exception as e:
 
                     return jsonify({'message': str(e), 'status': 500})
+        from flask import session
+
         @self.student_ns.route('/add')
         class StudentAdd(Resource):
             @self.student_ns.doc('student/add', security='jwt')
@@ -123,20 +125,39 @@ class StudentController:
             @jwt_required()
             def post(self):
                 try:
+                    
+                    google_user_info = session.get('profile', {})
+                    print(google_user_info)
+
                     data = request.json
                     last_data = Student.query.order_by(Student.student_id.desc()).first()
                     last_id = last_data.student_id if last_data else 0
 
+                    
+                    if google_user_info:
+                        print("Google user logged in.")
+                        google_email = google_user_info.get('email')
+                        google_first_name = google_user_info.get('given_name')
+                        google_last_name = google_user_info.get('family_name') or google_user_info.get('name')
+                        google_pic = google_user_info.get('picture')
+
+                        first_name = google_first_name  
+                        last_name = google_last_name    
+                        pic_path = google_pic           
+                    else:
+                        print("Normal user logged in.")
+
+                        first_name = data.get('first_name')
+                        last_name = data.get('last_name')
+                        pic_path = data.get('pic_path')
+
                     aim = data.get('aim')
-                    first_name = data.get('first_name')
-                    last_name = data.get('last_name')
                     gender = data.get('gender')
                     dob = data.get('dob')
                     father_name = data.get('father_name')
                     mother_name = data.get('mother_name')
                     guardian_name = data.get('guardian_name')
                     is_kyc_verified = data.get('is_kyc_verified')
-                    pic_path = data.get('pic_path')
                     student_login_id = data.get('student_login_id')
 
                     today_date = datetime.now().strftime('%Y%m%d')
@@ -144,31 +165,25 @@ class StudentController:
                     student_registration_no = series_number
                     current_user_id = get_jwt_identity()
 
-                   
-                    if not first_name:
-                      
-                        return jsonify({'message': 'Please Provide First Name', 'status': 201})
-                    if not last_name:
-                      
-                        return jsonify({'message': 'Please Provide Last Name', 'status': 201})
+                    # Validation checks
+                    # if not first_name:
+                    #     return jsonify({'message': 'Please Provide First Name', 'status': 201})
+                    # if not last_name:
+                    #     return jsonify({'message': 'Please Provide Last Name', 'status': 201})
                     if not gender:
-                    
                         return jsonify({'message': 'Please Provide Gender', 'status': 201})
                     if not dob:
-                  
                         return jsonify({'message': 'Please Provide Date of Birth', 'status': 201})
                     if not father_name:
-                  
                         return jsonify({'message': 'Please Provide Father Name', 'status': 201})
                     if not mother_name:
-                      
                         return jsonify({'message': 'Please Provide Mother Name', 'status': 201})
 
-                
                     student = Student.query.filter_by(student_login_id=student_login_id).first()
-                    
+
                     if student:
-                        student.aim=aim
+                        
+                        student.aim = aim
                         student.first_name = first_name
                         student.last_name = last_name
                         student.gender = gender
@@ -177,13 +192,12 @@ class StudentController:
                         student.mother_name = mother_name
                         student.guardian_name = guardian_name
                         student.is_kyc_verified = is_kyc_verified
-                        student.pic_path = pic_path if pic_path else student.pic_path  # Update pic_path if provided
+                        student.pic_path = pic_path if pic_path else student.pic_path  
                         student.last_modified_datetime = datetime.now()
                         student.system_datetime = datetime.now()
                         student.updated_by = current_user_id
-                                
                     else:
-                    
+                      
                         student = Student(
                             aim=aim,
                             first_name=first_name,
@@ -195,7 +209,6 @@ class StudentController:
                             guardian_name=guardian_name,
                             is_kyc_verified=is_kyc_verified,
                             pic_path=pic_path,
-                          
                             student_registration_no=student_registration_no,
                             last_modified_datetime=datetime.now(),
                             system_datetime=datetime.now(),
@@ -206,13 +219,109 @@ class StudentController:
                         db.session.add(student)
 
                     db.session.commit()
-                 
+
                     return jsonify({'message': 'Student record processed successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-              
                     return jsonify({'message': str(e), 'status': 500})
+
+
+        # @self.student_ns.route('/add')
+        # class StudentAdd(Resource):
+        #     @self.student_ns.doc('student/add', security='jwt')
+        #     @self.api.expect(self.student_model)
+        #     @jwt_required()
+        #     def post(self):
+        #         try:
+        #             data = request.json
+        #             last_data = Student.query.order_by(Student.student_id.desc()).first()
+        #             last_id = last_data.student_id if last_data else 0
+
+        #             aim = data.get('aim')
+        #             first_name = data.get('first_name')
+        #             last_name = data.get('last_name')
+        #             gender = data.get('gender')
+        #             dob = data.get('dob')
+        #             father_name = data.get('father_name')
+        #             mother_name = data.get('mother_name')
+        #             guardian_name = data.get('guardian_name')
+        #             is_kyc_verified = data.get('is_kyc_verified')
+        #             pic_path = data.get('pic_path')
+        #             student_login_id = data.get('student_login_id')
+
+        #             today_date = datetime.now().strftime('%Y%m%d')
+        #             series_number = f"{today_date}{last_id + 1:06d}"
+        #             student_registration_no = series_number
+        #             current_user_id = get_jwt_identity()
+
+                   
+        #             if not first_name:
+                      
+        #                 return jsonify({'message': 'Please Provide First Name', 'status': 201})
+        #             if not last_name:
+                      
+        #                 return jsonify({'message': 'Please Provide Last Name', 'status': 201})
+        #             if not gender:
+                    
+        #                 return jsonify({'message': 'Please Provide Gender', 'status': 201})
+        #             if not dob:
+                  
+        #                 return jsonify({'message': 'Please Provide Date of Birth', 'status': 201})
+        #             if not father_name:
+                  
+        #                 return jsonify({'message': 'Please Provide Father Name', 'status': 201})
+        #             if not mother_name:
+                      
+        #                 return jsonify({'message': 'Please Provide Mother Name', 'status': 201})
+
                 
+        #             student = Student.query.filter_by(student_login_id=student_login_id).first()
+                    
+        #             if student:
+        #                 student.aim=aim
+        #                 student.first_name = first_name
+        #                 student.last_name = last_name
+        #                 student.gender = gender
+        #                 student.dob = dob
+        #                 student.father_name = father_name
+        #                 student.mother_name = mother_name
+        #                 student.guardian_name = guardian_name
+        #                 student.is_kyc_verified = is_kyc_verified
+        #                 student.pic_path = pic_path if pic_path else student.pic_path  # Update pic_path if provided
+        #                 student.last_modified_datetime = datetime.now()
+        #                 student.system_datetime = datetime.now()
+        #                 student.updated_by = current_user_id
+                                
+        #             else:
+                    
+        #                 student = Student(
+        #                     aim=aim,
+        #                     first_name=first_name,
+        #                     last_name=last_name,
+        #                     gender=gender,
+        #                     dob=dob,
+        #                     father_name=father_name,
+        #                     mother_name=mother_name,
+        #                     guardian_name=guardian_name,
+        #                     is_kyc_verified=is_kyc_verified,
+        #                     pic_path=pic_path,
+                          
+        #                     student_registration_no=student_registration_no,
+        #                     last_modified_datetime=datetime.now(),
+        #                     system_datetime=datetime.now(),
+        #                     student_login_id=student_login_id,
+        #                     is_active=1,
+        #                     created_by=current_user_id
+        #                 )
+        #                 db.session.add(student)
+
+        #             db.session.commit()
+                 
+        #             return jsonify({'message': 'Student record processed successfully', 'status': 200})
+        #         except Exception as e:
+        #             db.session.rollback()
+              
+        #             return jsonify({'message': str(e), 'status': 500})
         @self.student_ns.route('/add/store_profile_picture')
         class StoreProfilePicture(Resource):
             @self.student_ns.doc('store_profile_picture', security='jwt')
@@ -224,31 +333,73 @@ class StudentController:
                     student_login_id = data.get('student_login_id')
                     pic_path = data.get('pic_path')
                     current_user_id = get_jwt_identity()
+
                     if not student_login_id:
-                  
                         return jsonify({'message': 'Student Login ID is required', 'status': 400})
-                    if not pic_path:
-                  
-                        return jsonify({'message': 'Picture Path is required', 'status': 400})
+                    # if not pic_path:
+                    #     return jsonify({'message': 'Picture Path is required', 'status': 400})
 
                     student = StudentLogin.query.filter_by(student_id=student_login_id).first()
                     if not student:
-                 
                         return jsonify({'message': 'Student not found', 'status': 404})
+
                     newstudent = Student.query.filter_by(student_login_id=student_login_id).first()
-                    
-                    newstudent.pic_path = pic_path
-                    db.session.commit()
+
                   
+                    google_user_info = session.get('profile', {})
+                    if google_user_info:
+                      
+                        if pic_path == "":
+                            newstudent.pic_path = google_user_info.get('picture', newstudent.pic_path)
+                        else:
+                            
+                            newstudent.pic_path = pic_path
+
+                    db.session.commit()
+
                     return jsonify({
                         'message': 'Profile picture path stored successfully',
                         'status': 200,
-                    
                     })
                 except Exception as e:
                     db.session.rollback()
+                    return jsonify({'message': str(e), 'status': 500})    
+        # @self.student_ns.route('/add/store_profile_picture')
+        # class StoreProfilePicture(Resource):
+        #     @self.student_ns.doc('store_profile_picture', security='jwt')
+        #     @self.api.expect(self.student_model)
+        #     @jwt_required()
+        #     def post(self):
+        #         try:
+        #             data = request.json
+        #             student_login_id = data.get('student_login_id')
+        #             pic_path = data.get('pic_path')
+        #             current_user_id = get_jwt_identity()
+        #             if not student_login_id:
+                  
+        #                 return jsonify({'message': 'Student Login ID is required', 'status': 400})
+        #             if not pic_path:
+                  
+        #                 return jsonify({'message': 'Picture Path is required', 'status': 400})
+
+        #             student = StudentLogin.query.filter_by(student_id=student_login_id).first()
+        #             if not student:
+                 
+        #                 return jsonify({'message': 'Student not found', 'status': 404})
+        #             newstudent = Student.query.filter_by(student_login_id=student_login_id).first()
+                    
+        #             newstudent.pic_path = pic_path
+        #             db.session.commit()
+                  
+        #             return jsonify({
+        #                 'message': 'Profile picture path stored successfully',
+        #                 'status': 200,
+                    
+        #             })
+        #         except Exception as e:
+        #             db.session.rollback()
              
-                    return jsonify({'message': str(e), 'status': 500})
+        #             return jsonify({'message': str(e), 'status': 500})
 
         @self.student_ns.route('/get/<int:id>')
         class StudentGetByLoginId(Resource):
