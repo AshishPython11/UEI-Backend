@@ -47,3 +47,5 @@ class LoginLog(db.Model,TimestampMixin):
     updated_by = db.Column(db.String, nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.now())
     updated_at = db.Column(db.DateTime, nullable=False, default=datetime.now(), onupdate=datetime.now())
+
+
