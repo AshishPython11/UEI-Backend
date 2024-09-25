@@ -1,12 +1,12 @@
 # import pytest
-# from flask import Flask
+# from flask import Flask, jsonify
 # from flask_jwt_extended import create_access_token
 # from app import app, db
-# from app.models.student import Contact, StudentAddress, Student, ClassMaster,CourseMaster,NewStudentAcademicHistory,StudentLogin
+# from app.models.student import Contact, StudentAddress, Student, StudentLogin, StudentHobby, SubjectPreference, NewStudentAcademicHistory, LanguageKnown,LanguageMaster
 # from faker import Faker
-# from app.models.adminuser import Institution
 # from datetime import datetime
-# import json
+# from sqlalchemy import func
+
 # faker = Faker()
 
 # @pytest.fixture(scope='module')
@@ -15,73 +15,54 @@
 #     with app.test_client() as testing_client:
 #         with app.app_context():
 #             db.create_all()
-#             global seed_ids
-#             seed_ids = seed_data()  # Seed data once for the module
 #         yield testing_client
 #         with app.app_context():
-#             cleanup_seed_data()  # Cleanup after all tests
 #             db.session.remove()
 
 # @pytest.fixture
 # def auth_header(test_client):
-#     response = test_client.post('/auth/login', json={
-#         "userid": "1",
-#         "password": "111",
+#     unique_email = faker.unique.email()
+
+#     # Sign up a new user
+#     signup_response = test_client.post('/auth/signup', json={
+#         "userid": unique_email,
+#         "password": "password",
 #         "user_type": "student"
 #     })
-#     assert response.status_code == 200, f"Login failed with status code {response.status_code}"
-    
-#     data = response.json
-#     if 'token' not in data:
-#         pytest.fail(f"Login response missing 'token': {data}")
-    
+#     assert signup_response.status_code == 200, f"Signup failed with status code {signup_response.status_code}"
+
+#     # Log in using the unique email
+#     login_response = test_client.post('/auth/login', json={
+#         "userid": unique_email,
+#         "password": "password",
+#         "user_type": "student"
+#     })
+#     assert login_response.status_code == 200, f"Login failed with status code {login_response.status_code}"
+
+#     data = login_response.json
+#     assert 'token' in data, f"Login response missing 'token': {data}"
+
 #     access_token = data['token']
 #     student_id = data['data']['id']
-#     return {'Authorization': access_token, 'student_id': student_id}
+#     global seed_ids
+#     seed_ids = seed_data(student_id)  # Seed data for the student
+#     yield {'Authorization': f'Bearer {access_token}', 'student_id': student_id}
+#     cleanup_seed_data()
 
-# def seed_data():
-#     student_login = StudentLogin.query.filter_by(userid='1').first()
-#     if not student_login:
-#         raise ValueError("Student login with userid '1' not found")
-
-#     # Create a student
-#     student = Student(
-        
-#         first_name=faker.first_name(),
-#         last_name=faker.last_name(),
-#         gender='Male',
-#         dob=faker.date_of_birth(),
-#         father_name=faker.name(),
-#         mother_name=faker.name(),
-#         guardian_name=faker.name(),
-#         student_login_id=student_login.student_id,
-#         is_kyc_verified=1,
-#         system_datetime=datetime.now(),
-#         pic_path='path/to/test/image.png',
-#         last_modified_datetime=datetime.now(),
-#         student_registration_no=faker.uuid4(),
-#         created_by=1,
-#         is_active=1
-#     )
-#     db.session.add(student)
-#     db.session.commit()
-
-#     student_id = student.student_login_id
-
-#     # Create a contact
+# def seed_data(student_id):
+#     """ Seed random data for the student. """
+#     # Seed Contact data
 #     contact = Contact(
 #         student_id=student_id,
-#         mobile_isd_call=faker.phone_number(),
+#         mobile_isd_call=faker.country_code(),
 #         mobile_no_call=faker.phone_number(),
-#         mobile_isd_watsapp=faker.phone_number(),
-#         mobile_no_watsapp=faker.phone_number(),
-#         email_id=faker.email(),
-#         is_active=1
+#         mobile_isd_watsapp=faker.country_code(),
+#         email_id=faker.email()
 #     )
 #     db.session.add(contact)
-    
-#     # Create an address
-#     student_address = StudentAddress(
+
+#     # Seed Address data
+#     address = StudentAddress(
 #         student_id=student_id,
 #         address1=faker.address(),
 #         address2=faker.address(),
@@ -90,69 +71,78 @@
 #         city=faker.city(),
 #         district=faker.city(),
 #         pincode=faker.postcode(),
-#         address_type=faker.word(),
-#         is_active=1,
-#         created_by=student_id  # Assuming 'admin' is the admin ID or email
+#         address_type='home'
 #     )
-#     db.session.add(student_address)
-#     institution = Institution(institution_name=faker.unique.company(), is_active=1)
-#     course = CourseMaster(course_name=faker.unique.word(), is_active=1)
-#     class_master = ClassMaster(class_name=faker.unique.word(), is_active=True)
-    
-#     db.session.add(institution)
-#     db.session.add(course)
-#     db.session.add(class_master)
-#     db.session.commit()
-    
-#     # Create academic history
-#     academic_history = NewStudentAcademicHistory(
-#         student_id=student_id,  # Assuming a valid student ID exists
-#         institution_type='School',
-#         board='CBSE',
-#         state_for_stateboard='State A',
-#         institute_id=institution.institution_id,
-#         course_id=course.course_id,
-#         class_id=class_master.class_id,
-#         year_or_semester='2023',
-#         created_by=student_id,  # Replace with the admin ID as needed
-#         updated_by=student_id,
-#         learning_style='Visual'
-#     )
-    
-#     db.session.add(academic_history)
-    
-#     db.session.commit()
+#     db.session.add(address)
 
+#     # Seed Academic history
+#     academic = NewStudentAcademicHistory(
+#         student_id=student_id,
+#         institution_type=faker.word(),
+#         course_id=faker.random_int(),  # Ensure this is a valid course_id in your tests
+#         learning_style="visual",
+#         created_by=faker.name(),
+#         updated_by=faker.name(),
+#     )
+#     db.session.add(academic)
+
+#     # Seed Hobby
+#     hobby = StudentHobby(student_id=student_id, hobby_id=faker.random_int())
+#     db.session.add(hobby)
+
+#     # Seed Subject Preference
+#     subject_pref = SubjectPreference(
+#         student_id=student_id,
+#         course_id=faker.random_int(),
+#         subject_id=faker.random_int(),
+#         preference="high",
+#         score_in_percentage=faker.random_int(min=50, max=100)
+#     )
+#     db.session.add(subject_pref)
+
+#     # Seed Language Known
+#     # Fetch a valid language_id from the tbl_language_master
+#     language_id = db.session.query(LanguageMaster.language_id).order_by(func.random()).first()
+#     if language_id:
+#         language = LanguageKnown(
+#             student_id=student_id,
+#             language_id=language_id[0],  # Extracting the id from the tuple
+#             proficiency="fluent"
+#         )
+#         db.session.add(language)
+#     else:
+#         print("No valid language found. Skipping Language Known seeding.")
+
+#     db.session.commit()
 #     return {
-#         'student_id': student_id,
-#         'contact_id': contact.contact_id,  # Assuming contact has an ID field
-#         'address_id': student_address.address_id,  # Assuming address has an ID field
-#         'academic_history_id': academic_history.id   # Returning the student ID
+#         "contact": contact.id,
+#         "address": address.id,
+#         "academic": academic.id,
+#         "hobby": hobby.id,
+#         "subject_pref": subject_pref.id,
+#         "language": language.id if 'language' in locals() else None  # Include only if language was added
 #     }
 
 # def cleanup_seed_data():
-#     # Cleanup the seeded profile data
-#     Student.query.filter_by(student_login_id=seed_ids['student_id']).delete()
-#     Contact.query.filter_by(student_id=seed_ids['student_id']).delete()
-#     StudentAddress.query.filter_by(student_id=seed_ids['student_id']).delete()
-#     NewStudentAcademicHistory.query.filter_by(student_id=seed_ids['student_id']).delete()
+#     """ Clean up the seeded data. """
+#     db.session.query(Contact).filter(Contact.id.in_(seed_ids.values())).delete(synchronize_session=False)
+#     db.session.query(StudentAddress).filter(StudentAddress.id.in_(seed_ids.values())).delete(synchronize_session=False)
+#     db.session.query(NewStudentAcademicHistory).filter(NewStudentAcademicHistory.id.in_(seed_ids.values())).delete(synchronize_session=False)
+#     db.session.query(StudentHobby).filter(StudentHobby.id.in_(seed_ids.values())).delete(synchronize_session=False)
+#     db.session.query(SubjectPreference).filter(SubjectPreference.id.in_(seed_ids.values())).delete(synchronize_session=False)
+#     db.session.query(LanguageKnown).filter(LanguageKnown.id.in_(seed_ids.values())).delete(synchronize_session=False)
 #     db.session.commit()
-# def test_calculate_completion_full(test_client,auth_header):
 
-#     # Make a request to the /student-list endpoint
-#     response = test_client.get('/calculate-completion/student-list', headers=auth_header)
-#     print("Response Data:", response.data)
+# def test_student_list_completion(test_client, auth_header):
+#     """ Test the /student-list API for completion calculation. """
+#     response = test_client.get('/student-list', headers=auth_header)
+    
+#     assert response.status_code == 200, f"Expected status code 200 but got {response.status_code}"
+    
+#     data = response.json
+#     assert 'results' in data, "Response missing 'results'"
+#     assert 'overall_percentage' in data, "Response missing 'overall_percentage'"
 
-#     # Check if the response is empty
-#     assert response.data, "Empty response received"
+#     print(f"Results: {data['results']}")
+#     print(f"Overall Percentage: {data['overall_percentage']}")
 
-#     # If response contains data, try decoding
-#     # data = json.loads(response.data)
-    
-#     data = json.loads(response.data)
-    
-#     # Assert that the status code is 200 (OK)
-#     assert response.status_code == 200
-    
-#     # Assert that the overall percentage is calculated correctly for the seeded data
-    
