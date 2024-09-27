@@ -2,13 +2,14 @@ from datetime import datetime
 from .student import Student
 from .adminuser import AdminBasicInformation,TimestampMixin
 from app import db
-
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
 
 class RoleVsAdminMaster(db.Model,TimestampMixin):
     __tablename__ = 'tbl_role_vs_admin_master'
-    role_admin_master_id = db.Column(db.Integer, primary_key=True,autoincrement=True)
-    admin_id = db.Column(db.Integer, db.ForeignKey(AdminBasicInformation.admin_id), nullable=False)  # References admin_basic_information table
-    role_master_id = db.Column(db.Integer, db.ForeignKey('tbl_role_master_data.role_master_id'), nullable=False)  # References role_master table
+    role_admin_master_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    admin_id = db.Column(UUID(as_uuid=True), db.ForeignKey(AdminBasicInformation.admin_id), nullable=False)  # References admin_basic_information table
+    role_master_id = db.Column(UUID(as_uuid=True), db.ForeignKey('tbl_role_master_data.role_master_id'), nullable=False)  # References role_master table
     is_active = db.Column(db.Integer, default=1, nullable=False)
     created_by = db.Column(db.String, nullable=True)
     updated_by = db.Column(db.String, nullable=True)
@@ -19,8 +20,8 @@ class RoleVsAdminMaster(db.Model,TimestampMixin):
 
 class Role(db.Model,TimestampMixin):
     __tablename__ = 'tbl_role'
-    role_id = db.Column(db.Integer, primary_key=True,autoincrement=True)
-    student_id = db.Column(db.Integer, db.ForeignKey(Student.student_id), nullable=False)
+    role_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    student_id = db.Column(UUID(as_uuid=True), db.ForeignKey(Student.student_id), nullable=False)
     role_name = db.Column(db.String(255))
     log_datetime = db.Column(db.DateTime, nullable=False)
     is_active = db.Column(db.Integer, default=1, nullable=False)
@@ -36,7 +37,7 @@ class Role(db.Model,TimestampMixin):
 
 class MenuMaster(db.Model,TimestampMixin):
     __tablename__ = 'tbl_menu_master'
-    menu_master_id = db.Column(db.Integer, primary_key=True,autoincrement=True)
+    menu_master_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     # application_type_id = db.Column(db.Integer, nullable=False)
     # menu_type_id = db.Column(db.Integer, nullable=False)
     menu_name = db.Column(db.String(255))
@@ -52,7 +53,7 @@ class MenuMaster(db.Model,TimestampMixin):
 
 class MenuMasterData(db.Model,TimestampMixin):
     __tablename__ = 'tbl_menu_master_data'
-    menu_master_id = db.Column(db.Integer, primary_key=True,autoincrement=True)
+    menu_master_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     # application_type_id = db.Column(db.Integer, nullable=False)
     # menu_type_id = db.Column(db.Integer, nullable=False)
     menu_name = db.Column(db.String(255))
@@ -68,8 +69,8 @@ class MenuMasterData(db.Model,TimestampMixin):
 
 class SubMenuMaster(db.Model,TimestampMixin):
     __tablename__ = 'tbl_submenu_master'
-    submenu_master_id = db.Column(db.Integer, primary_key=True,autoincrement=True)
-    menu_master_id = db.Column(db.Integer, db.ForeignKey('tbl_menu_master.menu_master_id'), nullable=False)
+    submenu_master_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    menu_master_id = db.Column(UUID(as_uuid=True), db.ForeignKey('tbl_menu_master.menu_master_id'), nullable=False)
     # application_type_id = db.Column(db.Integer, nullable=False)
     # menu_type_id = db.Column(db.Integer, nullable=False)
     menu_name = db.Column(db.String(255))
@@ -83,8 +84,8 @@ class SubMenuMaster(db.Model,TimestampMixin):
 
 class SubMenuMasterData(db.Model,TimestampMixin):
     __tablename__ = 'tbl_submenu_master_data'
-    submenu_master_id = db.Column(db.Integer, primary_key=True,autoincrement=True)
-    menu_master_id = db.Column(db.Integer, db.ForeignKey('tbl_menu_master_data.menu_master_id'), nullable=False)
+    submenu_master_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    menu_master_id = db.Column(UUID(as_uuid=True), db.ForeignKey('tbl_menu_master_data.menu_master_id'), nullable=False)
     # application_type_id = db.Column(db.Integer, nullable=False)
     # menu_type_id = db.Column(db.Integer, nullable=False)
     menu_name = db.Column(db.String(255))
@@ -99,7 +100,7 @@ class SubMenuMasterData(db.Model,TimestampMixin):
 
 class RoleMaster(db.Model,TimestampMixin):
     __tablename__ = 'tbl_role_master'
-    role_master_id = db.Column(db.Integer, primary_key=True,autoincrement=True)
+    role_master_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     role_name = db.Column(db.String(255))
     is_active = db.Column(db.Boolean,default=1)
     created_by = db.Column(db.String, nullable=True)
@@ -111,7 +112,7 @@ class RoleMaster(db.Model,TimestampMixin):
 
 class RoleMasterData(db.Model,TimestampMixin):
     __tablename__ = 'tbl_role_master_data'
-    role_master_id = db.Column(db.Integer, primary_key=True,autoincrement=True)
+    role_master_id =db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     role_name = db.Column(db.String(255))
     is_active = db.Column(db.Integer, default=1,nullable=False)
     created_by = db.Column(db.String, nullable=True)
@@ -122,9 +123,9 @@ class RoleMasterData(db.Model,TimestampMixin):
 
 class FormMaster(db.Model,TimestampMixin):
     __tablename__ = 'tbl_form_master'
-    form_master_id = db.Column(db.Integer, primary_key=True,autoincrement=True)
-    menu_master_id = db.Column(db.Integer, db.ForeignKey('tbl_menu_master.menu_master_id'), nullable=False)  # References menu_master table
-    sub_menu_master_id = db.Column(db.Integer, db.ForeignKey('tbl_submenu_master.submenu_master_id'), nullable=True)  # References menu_master table
+    form_master_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    menu_master_id = db.Column(UUID(as_uuid=True), db.ForeignKey('tbl_menu_master.menu_master_id'), nullable=False)  # References menu_master table
+    sub_menu_master_id = db.Column(UUID(as_uuid=True), db.ForeignKey('tbl_submenu_master.submenu_master_id'), nullable=True)  # References menu_master table
     form_name = db.Column(db.String(255))
     form_url = db.Column(db.String(255))
     form_description = db.Column(db.String(255),nullable=True)
@@ -139,9 +140,9 @@ class FormMaster(db.Model,TimestampMixin):
 
 class FormMasterData(db.Model,TimestampMixin):
     __tablename__ = 'tbl_form_master_data'
-    form_master_id = db.Column(db.Integer, primary_key=True,autoincrement=True)
-    menu_master_id = db.Column(db.Integer, db.ForeignKey('tbl_menu_master_data.menu_master_id'), nullable=False)  # References menu_master table
-    sub_menu_master_id = db.Column(db.Integer, db.ForeignKey('tbl_submenu_master_data.submenu_master_id'), nullable=True)  # References menu_master table
+    form_master_id =db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    menu_master_id = db.Column(UUID(as_uuid=True), db.ForeignKey('tbl_menu_master_data.menu_master_id'), nullable=False)  # References menu_master table
+    sub_menu_master_id = db.Column(UUID(as_uuid=True), db.ForeignKey('tbl_submenu_master_data.submenu_master_id'), nullable=True)  # References menu_master table
     form_name = db.Column(db.String(255))
     form_url = db.Column(db.String(255))
     form_description = db.Column(db.String(255),nullable=True)
@@ -155,9 +156,9 @@ class FormMasterData(db.Model,TimestampMixin):
 
 class RoleVsFormMaster(db.Model,TimestampMixin):
     __tablename__ = 'tbl_role_vs_form_master'
-    role_form_master_id = db.Column(db.Integer, primary_key=True,autoincrement=True)
-    form_master_id = db.Column(db.Integer, db.ForeignKey('tbl_form_master_data.form_master_id'), nullable=False)  # References form_master table
-    role_master_id = db.Column(db.Integer, db.ForeignKey('tbl_role_master_data.role_master_id'), nullable=False)  # References role_master table
+    role_form_master_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    form_master_id = db.Column(UUID(as_uuid=True), db.ForeignKey('tbl_form_master_data.form_master_id'), nullable=False)  # References form_master table
+    role_master_id = db.Column(UUID(as_uuid=True), db.ForeignKey('tbl_role_master_data.role_master_id'), nullable=False)  # References role_master table
     is_search = db.Column(db.Boolean)
     is_save = db.Column(db.Boolean)
     is_update = db.Column(db.Boolean,default=1)
@@ -171,9 +172,9 @@ class RoleVsFormMaster(db.Model,TimestampMixin):
 
 class RoleVsFormMasterData(db.Model,TimestampMixin):
     __tablename__ = 'tbl_role_vs_form_master_data'
-    role_form_master_id = db.Column(db.Integer, primary_key=True,autoincrement=True)
-    form_master_id = db.Column(db.Integer, db.ForeignKey('tbl_form_master_data.form_master_id'), nullable=False)  # References form_master table
-    role_master_id = db.Column(db.Integer, db.ForeignKey('tbl_role_master_data.role_master_id'), nullable=False)  # References role_master table
+    role_form_master_id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    form_master_id = db.Column(UUID(as_uuid=True), db.ForeignKey('tbl_form_master_data.form_master_id'), nullable=False)  # References form_master table
+    role_master_id = db.Column(UUID(as_uuid=True), db.ForeignKey('tbl_role_master_data.role_master_id'), nullable=False)  # References role_master table
     is_search = db.Column(db.Boolean)
     is_save = db.Column(db.Boolean)
     is_update = db.Column(db.Boolean,default=1)
@@ -188,7 +189,7 @@ class RoleVsFormMasterData(db.Model,TimestampMixin):
 
 class ManageRole(db.Model,TimestampMixin):
     __tablename__ = 'tbl_manage_role'
-    manage_role_id=db.Column(db.Integer,primary_key=True)
+    manage_role_id=db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     role_master_id = db.Column(db.String(255))
     form_master_id = db.Column(db.String(255))
     is_search = db.Column(db.Boolean, default=True)

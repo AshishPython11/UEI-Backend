@@ -2,13 +2,14 @@ from datetime import datetime
 from .student import StudentLogin,Student
 from .adminuser import AdminBasicInformation,AdminLogin,TimestampMixin
 from app import db
-
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
 
 class ChangePwdLog(db.Model,TimestampMixin):
     __tablename__ = 'tbl_change_pwd_log'
-    id = db.Column(db.Integer, primary_key=True,autoincrement=True)
-    admin_id = db.Column(db.Integer,db.ForeignKey(AdminLogin.admin_id),nullable=True)
-    student_id = db.Column(db.Integer, db.ForeignKey(StudentLogin.student_id),nullable=True)
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    admin_id = db.Column(UUID(as_uuid=True),db.ForeignKey(AdminLogin.admin_id),nullable=True)
+    student_id = db.Column(UUID(as_uuid=True), db.ForeignKey(StudentLogin.student_id),nullable=True)
     old_pwd = db.Column(db.String(255), nullable=False)
     new_pwd = db.Column(db.String(255), nullable=False)
     log_system_datetime = db.Column(db.DateTime, nullable=False)
@@ -20,9 +21,9 @@ class ChangePwdLog(db.Model,TimestampMixin):
 
 class EditLog(db.Model,TimestampMixin):
     __tablename__ = 'tbl_edit_log'
-    id = db.Column(db.Integer, primary_key=True,autoincrement=True)
-    admin_id = db.Column(db.Integer,db.ForeignKey(AdminLogin.admin_id),nullable=True)
-    student_id = db.Column(db.Integer, db.ForeignKey(StudentLogin.student_id),nullable=True)
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    admin_id = db.Column(UUID(as_uuid=True),db.ForeignKey(AdminLogin.admin_id),nullable=True)
+    student_id = db.Column(UUID(as_uuid=True), db.ForeignKey(StudentLogin.student_id),nullable=True)
     user_type = db.Column(db.Integer, nullable=False)
     user_id = db.Column(db.Integer, nullable=False)
     remarks = db.Column(db.String(255))
@@ -36,9 +37,9 @@ class EditLog(db.Model,TimestampMixin):
 
 class LoginLog(db.Model,TimestampMixin):
     __tablename__ = 'tbl_login_log'
-    id = db.Column(db.Integer, primary_key=True,autoincrement=True)
-    student_id = db.Column(db.Integer, db.ForeignKey(StudentLogin.student_id), nullable=True)
-    admin_id = db.Column(db.Integer, db.ForeignKey(AdminLogin.admin_id), nullable=True)
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    student_id = db.Column(UUID(as_uuid=True), db.ForeignKey(StudentLogin.student_id), nullable=True)
+    admin_id = db.Column(UUID(as_uuid=True), db.ForeignKey(AdminLogin.admin_id), nullable=True)
     userid = db.Column(db.String(255), nullable=False)
     login_time = db.Column(db.DateTime, nullable=False)
     ipaddress = db.Column(db.String(255), nullable=False)

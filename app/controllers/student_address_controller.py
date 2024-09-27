@@ -177,8 +177,8 @@ class StudentAddressController:
 
                         return jsonify({'message': 'Please Provide Student Id', 'status': 201})
                     if not address1 :
-                        if address_type ==='current':
-                            return jsonify({'message': 'Please Provide Address 1', 'status': 201})
+                        
+                        return jsonify({'message': 'Please Provide Address 1', 'status': 201})
                     if not address2 :
         
                         return jsonify({'message': 'Please Provide Address 2', 'status': 201})
