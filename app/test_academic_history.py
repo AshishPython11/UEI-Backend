@@ -6,6 +6,7 @@ from app.models.log import *
 from app.models.student import ClassMaster,CourseMaster,NewStudentAcademicHistory,StudentLogin
 from app.models.adminuser import Institution
 import time
+import random
 from faker import Faker
 import uuid
 faker = Faker()
@@ -23,7 +24,7 @@ def test_client():
             db.session.remove()
 @pytest.fixture
 def auth_header(test_client):
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     signup_response = test_client.post('/auth/signup', json={
         "userid": unique_email,  
@@ -262,3 +263,99 @@ def test_deactivate_academic_history(test_client, auth_header):
     assert response.status_code == 200
     data = response.get_json()
     assert data['message'] == 'Academic History deactivated successfully'
+
+def test_add_academic_history_missing_student_id(test_client, auth_header):
+    response = test_client.post('/new_student_academic_history/add', json={
+        'institution_type': 'School',
+        'board': 'CBSE',
+        'state_for_stateboard': 'State',
+        'class_id': seed_ids['class_id'],
+        'year': '2024',
+        'institute_id': seed_ids['institution_id'],
+        'course_id': seed_ids['course_id'],
+        'learning_style': 'Visual'
+    }, headers=auth_header)
+
+    assert response.json['message'] == "'student_id'"
+    
+
+
+def test_add_academic_history_missing_institution_type(test_client, auth_header):
+    response = test_client.post('/new_student_academic_history/add', json={
+        'student_id':  auth_header['student_id'],
+        'board': 'CBSE',
+        'state_for_stateboard': 'State',
+        'class_id': seed_ids['class_id'],
+        'year': '2024',
+        'institute_id': seed_ids['institution_id'],
+        'course_id': seed_ids['course_id'],
+        'learning_style': 'Visual'
+    }, headers=auth_header)
+
+    assert response.json['message'] == "'institution_type'"
+    
+
+
+def test_add_academic_history_invalid_class_id(test_client, auth_header):
+    response = test_client.post('/new_student_academic_history/add', json={
+        'student_id': auth_header['student_id'],
+        'institution_type': 'School',
+        'board': 'CBSE',
+        'state_for_stateboard': 'State',
+        'class_id': 'invalid_id',  # Invalid class ID
+        'year': '2024',
+        'institute_id': seed_ids['institution_id'],
+        'course_id': seed_ids['course_id'],
+        'learning_style': 'Visual'
+    }, headers=auth_header)
+    print(response.data)
+    assert response.json['message'] == 'invalid literal for int() with base 10: \'invalid_id\''
+    
+
+def test_add_academic_history_missing_student_id(test_client, auth_header):
+    response = test_client.put(f'/new_student_academic_history/edit/{auth_header['student_id']}', json={
+        'institution_type': 'School',
+        'board': 'CBSE',
+        'state_for_stateboard': 'State',
+        'class_id': seed_ids['class_id'],
+        'year': '2024',
+        'institute_id': seed_ids['institution_id'],
+        'course_id': seed_ids['course_id'],
+        'learning_style': 'Visual'
+    }, headers=auth_header)
+
+    assert response.json['message'] == "Input payload validation failed"
+    
+
+
+def test_add_academic_history_missing_institution_type(test_client, auth_header):
+    response = test_client.put(f'/new_student_academic_history/edit/{auth_header['student_id']}', json={
+        'student_id':  auth_header['student_id'],
+        'board': 'CBSE',
+        'state_for_stateboard': 'State',
+        'class_id': seed_ids['class_id'],
+        'year': '2024',
+        'institute_id': seed_ids['institution_id'],
+        'course_id': seed_ids['course_id'],
+        'learning_style': 'Visual'
+    }, headers=auth_header)
+
+    assert response.json['message'] == "Input payload validation failed"
+    
+
+
+def test_add_academic_history_invalid_class_id(test_client, auth_header):
+    response = test_client.put(f'/new_student_academic_history/edit/{auth_header['student_id']}', json={
+        'student_id': auth_header['student_id'],
+        'institution_type': 'School',
+        'board': 'CBSE',
+        'state_for_stateboard': 'State',
+        'class_id': 'invalid_id',  
+        'year': '2024',
+        'institute_id': seed_ids['institution_id'],
+        'course_id': seed_ids['course_id'],
+        'learning_style': 'Visual'
+    }, headers=auth_header)
+    print(response.data)
+    assert response.json['message'] == 'Input payload validation failed'
+    

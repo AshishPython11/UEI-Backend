@@ -5,6 +5,8 @@ from app import app, db
 from app.models.log import *
 from app.models.student import StudentLogin,ClassMaster
 from datetime import datetime
+import random
+import uuid
 from faker import Faker
 faker=Faker()
 @pytest.fixture(scope='module')
@@ -26,7 +28,7 @@ def auth_header(test_client):
 #   "password": "admin123",
 #   "user_type": "admin"
 # })
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
@@ -92,10 +94,12 @@ def seed_data(student_id):
     student_id = student_login.student_id
     
     
-   
+    base_class_name = 'faker seed'
+    unique_suffix = str(int(time.time()))  # Appends current timestamp as a suffix
+    faker_seed = f"{base_class_name}_{unique_suffix}"
         # If it doesn't exist, create the class
     class_master = ClassMaster(
-            class_name=faker.word(),
+            class_name=faker_seed,
             is_active=True,
             is_deleted=False,
             created_by='1',
@@ -130,10 +134,12 @@ def test_class_add_success(test_client, auth_header):
     # base_class_name = 'Unique Class Name'
     # unique_suffix = str(int(time.time())) 
     # unique_class_name = f"{base_class_name}_{unique_suffix}"
-
+    base_class_name = 'faker'
+    unique_suffix = str(int(time.time()))  # Appends current timestamp as a suffix
+    faker_name = f"{base_class_name}_{unique_suffix}"
    
     response = test_client.post('/class/add', json={
-        'class_name': faker.word()
+        'class_name': faker_name
     }, headers=auth_header)
 
     assert response.status_code == 200
@@ -190,3 +196,26 @@ def test_class_deactivate_success(test_client, auth_header):
     assert response.status_code == 200
     response_json = response.get_json()
     assert response_json['message'] == 'Class Deactivated Successfully'
+
+def test_add_class_missing_class_name(test_client, auth_header):
+    response = test_client.post('/class/add', json={}, headers=auth_header)
+    
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide Class Name'
+
+def test_edit_class_missing_class_name(test_client, auth_header):
+    response = test_client.put(f'/class/edit/{seed_ids["class_master_id"]}', json={
+        # No class_name provided
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Class Name'
+    
+
+
+def test_edit_class_not_found(test_client, auth_header):
+    response = test_client.put(f'/class/edit/9997896523', json={
+        'class_name': 'New Class Name'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Class Not Found'
+    

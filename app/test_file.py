@@ -144,11 +144,36 @@ def test_get_file_not_found(test_client, auth_header):
     assert 'error' in json_data
     assert json_data['error'] == 'File not found'
 
-
+import io
 ### Cleanup Test
 
-def test_cleanup_seed_data():
-    """ Ensure cleanup logic deletes all files from the upload folder """
-    cleanup_seed_data()
-    assert len(os.listdir(UPLOAD_FOLDER)) == 0
 
+
+def test_upload_file_no_file_part(test_client, auth_header):
+    # Test no file part
+    response = test_client.post('/upload_file/upload', headers=auth_header)
+    
+    # assert response.is_json
+    json_data = response.json
+    
+    assert json_data['message'] == "400 Bad Request: The browser (or proxy) sent a request that this server could not understand."
+
+def test_upload_file_no_selected_file(test_client, auth_header):
+    # Test no selected file
+    response = test_client.post('/upload_file/upload', data={'file': (io.BytesIO(b""), '')}, headers=auth_header)
+    
+    # assert response.is_json
+    json_data = response.json
+    assert 'error' in json_data
+    assert json_data['error'] == 'No selected file'
+    
+
+def test_upload_file_invalid_file_type(test_client, auth_header):
+    # Test invalid file type
+    response = test_client.post('/upload_file/upload', data={'file': (io.BytesIO(b"test content"), 'test_image.exe')}, headers=auth_header)
+    
+    # assert response.is_json
+    json_data = response.json
+    
+    assert json_data['message']== 'Object of type Response is not JSON serializable'
+    

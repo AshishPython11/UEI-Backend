@@ -6,6 +6,7 @@ from app.models.log import *
 from app.models.student import StudentLogin
 from app.models.chatbot import Chatbot,ChatCache,ChatConversionData,CustomChatData
 from datetime import datetime
+import random
 from faker import Faker
 faker=Faker()
 @pytest.fixture(scope='module')
@@ -27,7 +28,7 @@ def auth_header(test_client):
 #   "password": "admin123",
 #   "user_type": "admin"
 # })
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
@@ -202,3 +203,12 @@ def test_chat_data_store_success(test_client, auth_header):
     response = test_client.post('/Chatbot/chat_data_store', json=data, headers=auth_header)
 
     assert response.status_code == 200
+def test_chatbot_add_missing_student_id(test_client, auth_header):
+    response = test_client.post('/chatbot/add', json={
+        'chat_question': 'What is the weather today?',
+        'response': 'It is sunny today.'
+    }, headers=auth_header)
+
+    
+    
+    assert response.status_code == 404

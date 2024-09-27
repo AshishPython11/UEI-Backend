@@ -5,7 +5,7 @@ from app import app, db
 from app.models.student import LanguageKnown,StudentLogin,LanguageMaster
 from app.models.log import LoginLog
 from faker import Faker
-
+import random
 
 faker = Faker()
 
@@ -23,7 +23,7 @@ def test_client():
 
 @pytest.fixture
 def auth_header(test_client):
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
@@ -220,6 +220,224 @@ def test_student_multiple_language_known_edit(test_client, auth_header):
 
 
 
+def test_add_student_language_missing_student_id(test_client, auth_header):
+    response = test_client.post(
+        '/student_language_known/add',
+        json={
+            'language_id': seed_ids['language_master_id'],
+            'proficiency': 'Fluent'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide Student Id'
+   
+
+def test_add_student_language_missing_language_id(test_client, auth_header):
+    response = test_client.post(
+        '/student_language_known/add',
+        json={
+            'student_id': auth_header['student_id'],
+            'proficiency': 'Fluent'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide Language Id'
+   
+
+def test_add_student_language_missing_proficiency(test_client, auth_header):
+    response = test_client.post(
+        '/student_language_known/add',
+        json={
+            'student_id': auth_header['student_id'],
+            'language_id': seed_ids['language_master_id']
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide Proficiency'
+   
+def test_edit_multiple_languages_payload_not_array(test_client, auth_header):
+    response = test_client.put(
+        '/student_language_known/multiple_language/edit',
+        json={"languages": "not an array"},
+        headers=auth_header
+    )
+
+    assert response.is_json
+    # assert response.status_code == 400
+    assert response.json['message'] == 'Input payload validation failed' 
 
 
 
+
+
+
+
+
+
+
+def test_edit_student_language_known_missing_student_id(test_client, auth_header):
+    response = test_client.put(f'/student_language_known/edit/{seed_ids['language_known_id']}', json={
+        'language_id': seed_ids['language_master_id'],
+        'proficiency': 'Fluent'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Student Id'
+
+
+def test_edit_student_language_known_missing_language_id(test_client, auth_header):
+    response = test_client.put(f'/student_language_known/edit/{seed_ids['language_known_id']}', json={
+        'student_id': auth_header['student_id'],
+        'proficiency': 'Fluent'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Language Id'
+
+
+def test_edit_student_language_known_missing_proficiency(test_client, auth_header):
+    response = test_client.put(f'/student_language_known/edit/{seed_ids['language_known_id']}', json={
+        'student_id': auth_header['student_id'],
+        'language_id': seed_ids['language_master_id']
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Proficiency'
+
+
+def test_edit_student_multiple_language_known_missing_record_id(test_client, auth_header):
+    response = test_client.put('/student_language_known/multiple_language/edit', json={
+        'languages': [
+            {
+                'student_id': auth_header['student_id'],
+                'language_id': seed_ids['language_master_id'],
+                'proficiency': 'Fluent'
+            }
+        ]
+    }, headers=auth_header)
+
+    assert response.is_json
+    assert response.json['message'] == 'Input payload validation failed'
+
+
+def test_edit_student_multiple_language_known_missing_student_id(test_client, auth_header):
+    response = test_client.put('/student_language_known/multiple_language/edit', json={
+        'languages': [
+            {
+                'id': 1,
+                'language_id': seed_ids['language_master_id'],
+                'proficiency': 'Fluent'
+            }
+        ]
+    }, headers=auth_header)
+
+    assert response.is_json
+    assert response.json['message'] == 'Input payload validation failed'
+
+
+def test_edit_student_multiple_language_known_missing_language_id(test_client, auth_header):
+    response = test_client.put('/student_language_known/multiple_language/edit', json={
+        'languages': [
+            {
+                'id': 1,
+                'student_id': auth_header['student_id'],
+                'proficiency': 'Fluent'
+            }
+        ]
+    }, headers=auth_header)
+
+    assert response.is_json
+    assert response.json['message'] == 'Input payload validation failed'
+
+
+def test_edit_student_multiple_language_known_missing_proficiency(test_client, auth_header):
+    response = test_client.put('/student_language_known/multiple_language/edit', json={
+        'languages': [
+            {
+                'id': 1,
+                'student_id': auth_header['student_id'],
+                'language_id': seed_ids['language_master_id']
+            }
+        ]
+    }, headers=auth_header)
+
+    assert response.is_json
+    assert response.json['message'] == 'Input payload validation failed'
+
+
+def test_edit_student_multiple_language_known_invalid_payload(test_client, auth_header):
+    response = test_client.put('/student_language_known/multiple_language/edit', json={
+        'languages': 'invalid_payload'  # not a list
+    }, headers=auth_header)
+
+    assert response.is_json
+    assert response.json['message'] == 'Input payload validation failed'
+
+
+def test_add_student_multiple_language_known_missing_record_id(test_client, auth_header):
+    response = test_client.post('/student_language_known/multiple/add', json={
+        'languages': [
+            {
+                'student_id': auth_header['student_id'],
+                'language_id': seed_ids['language_master_id'],
+                'proficiency': 'Fluent'
+            }
+        ]
+    }, headers=auth_header)
+
+    assert response.is_json
+    assert response.json['message'] == 'Input payload validation failed'
+
+
+def test_add_student_multiple_language_known_missing_student_id(test_client, auth_header):
+    response = test_client.post('/student_language_known/multiple/add', json={
+        'languages': [
+            {
+                'id': 1,
+                'language_id': seed_ids['language_master_id'],
+                'proficiency': 'Fluent'
+            }
+        ]
+    }, headers=auth_header)
+
+    assert response.is_json
+    assert response.json['message'] == 'Input payload validation failed'
+
+
+def test_add_student_multiple_language_known_missing_language_id(test_client, auth_header):
+    response = test_client.post('/student_language_known/multiple/add', json={
+        'languages': [
+            {
+                'id': 1,
+                'student_id': auth_header['student_id'],
+                'proficiency': 'Fluent'
+            }
+        ]
+    }, headers=auth_header)
+
+    assert response.is_json
+    assert response.json['message'] == 'Input payload validation failed'
+
+
+def test_add_student_multiple_language_known_missing_proficiency(test_client, auth_header):
+    response = test_client.post('/student_language_known/multiple/add', json={
+        'languages': [
+            {
+                'id': 1,
+                'student_id': auth_header['student_id'],
+                'language_id': seed_ids['language_master_id']
+            }
+        ]
+    }, headers=auth_header)
+
+    assert response.is_json
+    assert response.json['message'] == 'Input payload validation failed'
+
+
+def test_add_student_multiple_language_known_invalid_payload(test_client, auth_header):
+    response = test_client.post('/student_language_known/multiple/add', json={
+        'languages': 'invalid_payload'  # not a list
+    }, headers=auth_header)
+
+    assert response.is_json
+    assert response.json['message'] == 'Input payload validation failed'

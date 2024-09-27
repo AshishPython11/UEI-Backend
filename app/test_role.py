@@ -7,7 +7,7 @@ from app.models.role import RoleMasterData
 from faker import Faker
 from app.models.student import StudentLogin
 from app.models.log import LoginLog
-
+import random
 faker = Faker()
 
 @pytest.fixture(scope='module')
@@ -25,7 +25,7 @@ def test_client():
 
 @pytest.fixture
 def auth_header(test_client):
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
@@ -141,3 +141,14 @@ def test_delete_role(test_client, auth_header):
     assert response.status_code == 200
     data = response.get_json()
     assert 'Role deleted successfully' in data['message']
+def test_add_role_missing_name(test_client, auth_header):
+    response = test_client.post('/role/add', json={}, headers=auth_header)
+    # assert response.status_code == 201
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide Role name'
+
+def test_edit_role_missing_name(test_client, auth_header):
+    response = test_client.put(f'/role/edit/{seed_ids["role_master_id"]}', json={}, headers=auth_header)
+    # assert response.status_code == 201
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide Role name'

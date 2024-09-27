@@ -3,7 +3,7 @@ from faker import Faker
 from app import db,app
 from app.models.student import  StudentLogin, StudentHobby,Hobby
 from app.models.log import *
-
+import random
 from flask_jwt_extended import create_access_token
 from datetime import datetime
 faker = Faker()
@@ -21,7 +21,7 @@ def test_client():
 
 @pytest.fixture
 def auth_header(test_client):
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
@@ -203,6 +203,44 @@ def test_multiple_hobby_edit_success(auth_header, test_client):
     assert response.status_code == 200, f"Expected 200, got {response.status_code}"
     
 
+def test_add_student_hobby_missing_student_id(test_client, auth_header):
+    response = test_client.post(
+        '/student_hobby/add',
+        json={'hobby_id': seed_ids['hobby_id']},  # No student_id provided
+        headers=auth_header
+    )
+
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide Student Id'
+    
+
+def test_add_student_hobby_missing_hobby_id(test_client, auth_header):
+    response = test_client.post(
+        '/student_hobby/add',
+        json={'student_id': auth_header['student_id']},  # No hobby_id provided
+        headers=auth_header
+    )
+
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide Hobby Id'
+   
 
 
+def test_edit_student_hobby_missing_student_id(test_client, auth_header):
+    student_hobby = StudentHobby.query.filter_by(student_id=auth_header['student_id']).first()
+    response = test_client.put(f'/student_hobby/edit/{student_hobby.id}', 
+                                headers=auth_header, 
+                                json={"hobby_id": seed_ids['hobby_id']})
 
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide Student Id'
+    
+
+def test_edit_student_hobby_missing_hobby_id(test_client, auth_header):
+    student_hobby = StudentHobby.query.filter_by(student_id=auth_header['student_id']).first()
+    response = test_client.put(f'/student_hobby/edit/{student_hobby.id}', 
+                                headers=auth_header, 
+                                json={"student_id": auth_header['student_id']})
+
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide Hobby Id'

@@ -3,6 +3,7 @@ from faker import Faker
 import pytest
 from faker import Faker
 from app import db,app
+import random
 from app.models.student import  StudentLogin, SubjectMaster,SubjectPreference,CourseMaster
 from datetime import datetime
 from app.models.student import StudentLogin
@@ -24,7 +25,7 @@ def test_client():
 
 @pytest.fixture
 def auth_headers(test_client):
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
@@ -322,3 +323,163 @@ def test_subject_preference_deactivate(test_client,auth_headers):
     assert response.status_code == 200
     data = response.get_json()
     assert data['message'] == 'Subject Preference deactivated successfully'
+
+def test_subject_preference_add_missing_student_id(test_client, auth_headers):
+    # Test adding subject preference without student_id
+    response = test_client.post('/subject_preference/add', json={
+        "course_id": seed_ids['course_id'],
+        "subject_id": seed_ids['subject_id'],
+        "preference": "High",
+        "score_in_percentage": 85
+    }, headers=auth_headers)
+
+    assert response.is_json
+    
+    assert response.json['message'] == 'Please Provide Admin Id'
+
+
+def test_subject_preference_add_missing_course_id(test_client, auth_headers):
+    # Test adding subject preference without course_id
+    response = test_client.post('/subject_preference/add', json={
+        "student_id": auth_headers['student_id'],
+        "subject_id": seed_ids['subject_id'],
+        "preference": "High",
+        "score_in_percentage": 85
+    }, headers=auth_headers)
+
+    assert response.is_json
+    
+    assert response.json['message'] == 'Please Provide Course Id'
+
+
+def test_subject_preference_add_missing_subject_id(test_client, auth_headers):
+    # Test adding subject preference without subject_id
+    response = test_client.post('/subject_preference/add', json={
+        "student_id": auth_headers['student_id'],
+        "course_id": seed_ids['course_id'],
+        "preference": "High",
+        "score_in_percentage": 85
+    }, headers=auth_headers)
+
+    assert response.is_json
+    
+    assert response.json['message'] == 'Please Provide Subject Id'
+
+
+def test_subject_preference_add_missing_preference(test_client, auth_headers):
+    # Test adding subject preference without preference
+    response = test_client.post('/subject_preference/add', json={
+        "student_id": auth_headers['student_id'],
+        "course_id": seed_ids['course_id'],
+        "subject_id": seed_ids['subject_id'],
+        "score_in_percentage": 85
+    }, headers=auth_headers)
+
+    assert response.is_json
+    
+    assert response.json['message'] == 'Please Provide Preference'
+
+
+def test_subject_preference_add_missing_score_in_percentage(test_client, auth_headers):
+    # Test adding subject preference without score_in_percentage
+    response = test_client.post('/subject_preference/add', json={
+        "student_id": auth_headers['student_id'],
+        "course_id": seed_ids['course_id'],
+        "subject_id": seed_ids['subject_id'],
+        "preference": "High"
+    }, headers=auth_headers)
+
+    assert response.is_json
+    
+    assert response.json['message'] == 'Please Provide Score in percentage'
+def test_multiple_subject_preference_add_with_non_array_payload(test_client, auth_headers):
+    response = test_client.post('/subject_preference/multiple_subject/add', json={"preferences": "not an array"}, headers=auth_headers)
+    assert response.is_json
+    # assert response.status_code == 400
+    assert response.json['message'] == 'Input payload validation failed'  # Adjust based on your actual validation logic
+    # assert 'preferences' in response.json['errors'] 
+def test_multiple_subject_preference_edit_with_non_array_payload(test_client, auth_headers):
+    response = test_client.put('/subject_preference/multiple_subject/edit', json={"preferences": "not an array"}, headers=auth_headers)
+    assert response.is_json
+    # assert response.status_code == 400
+    assert response.json['message'] == 'Input payload validation failed' 
+
+
+def test_subject_preference_edit_missing_subject_preference_id(test_client, auth_headers):
+    # Test editing subject preference without subject_preference_id
+    response = test_client.put(f'/subject_preference/edit/{seed_ids['subject_preference_id']}', json={
+        "student_id": auth_headers['student_id'],
+        "course_id": seed_ids['course_id'],
+        "subject_id": seed_ids['subject_id'],
+        "preference": "High",
+        "score_in_percentage": 85
+    }, headers=auth_headers)
+
+    assert response.is_json
+    assert response.json['message'] == 'Subject Preference updated successfully'
+
+
+def test_subject_preference_edit_missing_student_id(test_client, auth_headers):
+    # Test editing subject preference without student_id
+    response = test_client.put(f'/subject_preference/edit/{seed_ids['subject_preference_id']}', json={
+        "course_id": seed_ids['course_id'],
+        "subject_id": seed_ids['subject_id'],
+        "preference": "High",
+        "score_in_percentage": 85
+    }, headers=auth_headers)
+
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide Admin Id'
+
+
+def test_subject_preference_edit_missing_course_id(test_client, auth_headers):
+    # Test editing subject preference without course_id
+    response = test_client.put(f'/subject_preference/edit/{seed_ids['subject_preference_id']}', json={
+        "student_id": auth_headers['student_id'],
+        "subject_id": seed_ids['subject_id'],
+        "preference": "High",
+        "score_in_percentage": 85
+    }, headers=auth_headers)
+
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide Course Id'
+
+
+def test_subject_preference_edit_missing_subject_id(test_client, auth_headers):
+    # Test editing subject preference without subject_id
+    response = test_client.put(f'/subject_preference/edit/{seed_ids['subject_preference_id']}', json={
+        "student_id": auth_headers['student_id'],
+        "course_id": seed_ids['course_id'],
+        "preference": "High",
+        "score_in_percentage": 85
+    }, headers=auth_headers)
+
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide Subject Id'
+
+
+def test_subject_preference_edit_missing_preference(test_client, auth_headers):
+    # Test editing subject preference without preference
+    response = test_client.put(f'/subject_preference/edit/{seed_ids['subject_preference_id']}', json={
+        "student_id": auth_headers['student_id'],
+        "course_id": seed_ids['course_id'],
+        "subject_id": seed_ids['subject_id'],
+        "score_in_percentage": 85
+    }, headers=auth_headers)
+
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide Preference'
+
+
+def test_subject_preference_edit_missing_score_in_percentage(test_client, auth_headers):
+    # Test editing subject preference without score_in_percentage
+    response = test_client.put(f'/subject_preference/edit/{seed_ids['subject_preference_id']}', json={
+        "student_id": auth_headers['student_id'],
+        "course_id": seed_ids['course_id'],
+        "subject_id": seed_ids['subject_id'],
+        "preference": "High"
+    }, headers=auth_headers)
+
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide Score in percentage'
+

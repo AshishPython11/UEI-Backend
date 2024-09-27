@@ -122,3 +122,15 @@ def test_entity_deactivate(test_client, auth_header):
     response = test_client.put(f'/entity/deactivate/{entity_id}', headers=auth_header)
     assert response.status_code == 200
     assert 'Entity deactivated successfully' in response.json['message']
+def test_add_entity_missing_entity_type(test_client, auth_header):
+    response = test_client.post('/entity/add', json={}, headers=auth_header)
+    
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide Entity type'
+
+
+def test_edit_entity_missing_entity_type(test_client, auth_header):
+    response = test_client.put(f'/entity/edit/{seed_ids['entity_id']}', json={}, headers=auth_header)
+    
+    assert response.is_json
+    assert response.json['message'] == 'Please provide entity type'

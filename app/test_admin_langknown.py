@@ -5,6 +5,7 @@ from flask_jwt_extended import create_access_token
 from app import app, db
 from faker import Faker
 faker=Faker()
+import random
 from app.models.log import *
 from app.models.adminuser import AdminLanguageKnown,LanguageMaster,AdminLogin
 
@@ -27,7 +28,7 @@ def auth_header(test_client):
 #   "password": "admin123",
 #   "user_type": "admin"
 # })
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
@@ -252,3 +253,199 @@ def test_multiple_edit_admin_language_known(test_client, auth_header):
     assert response.status_code == 200
     # data = response.json
     # assert data['message'] == 'Admin language Known Updated successfully'
+def test_add_admin_language_known_missing_admin_id(test_client, auth_header):
+    response = test_client.post('/admin_language_known/add', json={
+        'language_id': 1,
+        'proficiency': 'Fluent'
+    }, headers=auth_header)
+
+    
+    assert response.json['message'] == 'Please Provide Admin Id'
+def test_add_admin_language_known_missing_language_id(test_client, auth_header):
+    response = test_client.post('/admin_language_known/add', json={
+        'admin_id': auth_header['admin_id'],
+        'proficiency': 'Fluent'
+    }, headers=auth_header)
+
+    
+    assert response.json['message'] == 'Please Provide Language Id'
+def test_add_admin_language_known_missing_proficiency(test_client, auth_header):
+    response = test_client.post('/admin_language_known/add', json={
+        'admin_id': auth_header['admin_id'],
+        'language_id': 1
+    }, headers=auth_header)
+
+    
+    assert response.json['message'] == 'Please Provide Proficiency'
+def test_edit_admin_language_known_missing_admin_id(test_client, auth_header):
+    response = test_client.put(f'/admin_language_known/edit/{auth_header['admin_id']}', json={
+        'language_id': 1,
+        'proficiency': 'Fluent'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Admin Id'
+
+
+def test_edit_admin_language_known_missing_language_id(test_client, auth_header):
+    response = test_client.put(f'/admin_language_known/edit/{auth_header['admin_id']}', json={
+        'admin_id': auth_header['admin_id'],
+        'proficiency': 'Fluent'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Language Id'
+
+
+def test_edit_admin_language_known_missing_proficiency(test_client, auth_header):
+    response = test_client.put(f'/admin_language_known/edit/{auth_header['admin_id']}', json={
+        'admin_id': auth_header['admin_id'],
+        'language_id': 1
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Proficiency'
+
+def test_edit_admin_multiple_language_known_missing_record_id(test_client, auth_header):
+    response = test_client.put('/admin_language_known/multiple_language/edit', json={
+        'languages': [
+            {
+                'admin_id': auth_header['admin_id'],
+                'language_id': seed_ids['language_id'],
+                'proficiency': 'Fluent'
+            }
+        ]
+    }, headers=auth_header)
+
+    assert response.is_json
+    # assert response.status_code == 400
+    assert response.json['message'] == 'Input payload validation failed' 
+
+
+def test_edit_admin_multiple_language_known_missing_admin_id(test_client, auth_header):
+    response = test_client.put('/admin_language_known/multiple_language/edit', json={
+        'languages': [
+            {
+                'id': 1,
+                'language_id': seed_ids['language_id'],
+                'proficiency': 'Fluent'
+            }
+        ]
+    }, headers=auth_header)
+
+    assert response.is_json
+    # assert response.status_code == 400
+    assert response.json['message'] == 'Input payload validation failed' 
+
+
+def test_edit_admin_multiple_language_known_missing_language_id(test_client, auth_header):
+    response = test_client.put('/admin_language_known/multiple_language/edit', json={
+        'languages': [
+            {
+                'id': 1,
+                'admin_id': auth_header['admin_id'],
+                'proficiency': 'Fluent'
+            }
+        ]
+    }, headers=auth_header)
+
+    assert response.is_json
+    # assert response.status_code == 400
+    assert response.json['message'] == 'Input payload validation failed' 
+
+
+def test_edit_admin_multiple_language_known_missing_proficiency(test_client, auth_header):
+    response = test_client.put('/admin_language_known/multiple_language/edit', json={
+        'languages': [
+            {
+                'id': 1,
+                'admin_id': auth_header['admin_id'],
+                'language_id': seed_ids['language_id']
+            }
+        ]
+    }, headers=auth_header)
+
+    assert response.is_json
+    # assert response.status_code == 400
+    assert response.json['message'] == 'Input payload validation failed' 
+
+
+def test_edit_admin_multiple_language_known_invalid_payload(test_client, auth_header):
+    response = test_client.put('/admin_language_known/multiple_language/edit', json={
+        'languages': 'invalid_payload'  # not a list
+    }, headers=auth_header)
+
+    assert response.is_json
+    # assert response.status_code == 400
+    assert response.json['message'] == 'Input payload validation failed' 
+
+
+def test_add_admin_multiple_language_known_missing_record_id(test_client, auth_header):
+    response = test_client.post('/admin_language_known/multiple/add', json={
+        'languages': [
+            {
+                'admin_id': auth_header['admin_id'],
+                'language_id': seed_ids['language_id'],
+                'proficiency': 'Fluent'
+            }
+        ]
+    }, headers=auth_header)
+
+    assert response.is_json
+    # assert response.status_code == 400
+    assert response.json['message'] == 'Input payload validation failed' 
+
+
+def test_add_admin_multiple_language_known_missing_admin_id(test_client, auth_header):
+    response = test_client.post('/admin_language_known/multiple/add', json={
+        'languages': [
+            {
+                'id': 1,
+                'language_id': seed_ids['language_id'],
+                'proficiency': 'Fluent'
+            }
+        ]
+    }, headers=auth_header)
+
+    assert response.is_json
+    # assert response.status_code == 400
+    assert response.json['message'] == 'Input payload validation failed' 
+
+
+def test_add_admin_multiple_language_known_missing_language_id(test_client, auth_header):
+    response = test_client.post('/admin_language_known/multiple/add', json={
+        'languages': [
+            {
+                'id': 1,
+                'admin_id': auth_header['admin_id'],
+                'proficiency': 'Fluent'
+            }
+        ]
+    }, headers=auth_header)
+
+    assert response.is_json
+    # assert response.status_code == 400
+    assert response.json['message'] == 'Input payload validation failed' 
+
+
+def test_add_admin_multiple_language_known_missing_proficiency(test_client, auth_header):
+    response = test_client.post('/admin_language_known/multiple/add', json={
+        'languages': [
+            {
+                'id': 1,
+                'admin_id': auth_header['admin_id'],
+                'language_id': seed_ids['language_id']
+            }
+        ]
+    }, headers=auth_header)
+
+    assert response.is_json
+    # assert response.status_code == 400
+    assert response.json['message'] == 'Input payload validation failed' 
+
+
+def test_add_admin_multiple_language_known_invalid_payload(test_client, auth_header):
+    response = test_client.post('/admin_language_known/multiple/add', json={
+        'languages': 'invalid_payload'  # not a list
+    }, headers=auth_header)
+
+    assert response.is_json
+    # assert response.status_code == 400
+    assert response.json['message'] == 'Input payload validation failed' 

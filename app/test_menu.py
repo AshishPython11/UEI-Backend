@@ -8,7 +8,7 @@ import time
 from app.models.student import StudentLogin
 from app.models.log import LoginLog
 from faker import Faker
-
+import random
 faker = Faker()
 
 @pytest.fixture(scope='module')
@@ -30,7 +30,7 @@ def auth_header(test_client):
 #   "password": "admin123",
 #   "user_type": "admin"
 # })
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
@@ -244,5 +244,49 @@ def test_list_menus_by_admin(test_client, auth_header):
         assert 'Menus found successfully' in data['message']
         assert isinstance(data['data'], list)
 
+def test_menu_add_missing_menu_name(test_client, auth_header):
+    # Test adding a menu without a menu name
+    response = test_client.post('/menu/add', json={
+        "priority": 1
+    }, headers=auth_header)
 
-     # Check for expected error message
+    assert response.is_json
+   
+    assert response.json['message'] == 'Please Provide Menu name'
+
+
+def test_menu_add_missing_priority(test_client, auth_header):
+    # Test adding a menu without a priority
+    response = test_client.post('/menu/add', json={
+        "menu_name": "Main Menu"
+    }, headers=auth_header)
+
+    assert response.is_json
+    
+    assert response.json['message'] == 'Please Provide Priority'
+
+def test_edit_menu_missing_name(test_client, auth_header):
+    # Create a sample menu for testing
+      # Assuming the API returns the menu ID
+
+    # Attempt to update the menu without the menu name
+    response = test_client.put(f'/menu/edit/{seed_ids["menu_id"]}', json={
+        'priority': 2
+    }, headers=auth_header)
+
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide Menu name'
+   
+
+
+def test_edit_menu_missing_priority(test_client, auth_header):
+    # Create a sample menu for testing
+   
+    # Attempt to update the menu without the priority
+    response = test_client.put(f'/menu/edit/{seed_ids["menu_id"]}', json={
+        'menu_name': faker.word()
+    }, headers=auth_header)
+
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide Priority'
+    

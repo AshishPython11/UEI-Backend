@@ -8,6 +8,7 @@ from app.models.student import StudentLogin
 from app.models.log import LoginLog
 from faker import Faker
 
+import random
 faker = Faker()
 
 @pytest.fixture(scope='module')
@@ -29,7 +30,7 @@ def auth_header(test_client):
 #   "password": "admin123",
 #   "user_type": "admin"
 # })
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
@@ -73,7 +74,7 @@ def auth_header(test_client):
 def seed_data():
 
     
-    language_name = faker.unique.word()  # Ensure unique language name
+    language_name = faker.unique.language_name()  # Ensure unique language name
     language = LanguageMaster(
         language_name=language_name,
         description=faker.sentence(),
@@ -165,3 +166,26 @@ def test_delete_language(test_client, auth_header):
     assert response.status_code == 200
     data = response.get_json()
     assert 'Language deleted successfully' in data['message']
+
+def test_language_add_missing_language_name(test_client, auth_header):
+    # Test adding a language without a language name
+    response = test_client.post('/language/add', json={
+        "description": "A description of the language",
+        "icon": "icon_url"
+    }, headers=auth_header)
+
+    assert response.is_json
+   
+    assert response.json['message'] == 'Please Provide Language name'
+
+
+def test_language_edit_missing_language_name(test_client, auth_header):
+    # Test adding a language without a language name
+    response = test_client.put(f'/language/edit/{seed_ids['language_id']}', json={
+        "description": "A description of the language",
+        "icon": "icon_url"
+    }, headers=auth_header)
+
+    assert response.is_json
+   
+    assert response.json['message'] == 'Please provide language name'

@@ -5,6 +5,7 @@ from app import app, db
 from app.models.student import StudentLogin
 from faker import Faker
 from app.models.log import *
+import random
 from app.models.adminuser import AdminDescription, AdminLogin
 from faker import Faker
 faker=Faker()
@@ -27,7 +28,7 @@ def auth_header(test_client):
 #   "password": "admin123",
 #   "user_type": "admin"
 # })
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
@@ -222,6 +223,21 @@ def test_store_chat_success(test_client, auth_header):
     assert response_json['message'] == 'Chat data stored successfully'
 
 
+def test_chat_conversation_missing_question(test_client, auth_header):
+    response = test_client.post('/chatconversation', json={
+        'prompt': 'Sample prompt'
+    }, headers=auth_header)
 
     
+    assert response.status_code == 404
+
+def test_chat_conversation_missing_prompt(test_client, auth_header):
+    response = test_client.post('/chatconversation', json={
+        'prompt':'',
+        'question': 'Sample question'
+    }, headers=auth_header)
+
+    assert response.status_code == 404
+    
+  
     # Restore the original method

@@ -4,6 +4,7 @@ from flask_jwt_extended import create_access_token
 from app import app, db
 from app.models.student import Contact, StudentAddress, Student, ClassMaster,CourseMaster,NewStudentAcademicHistory,StudentLogin
 from faker import Faker
+import random
 from app.models.adminuser import Institution
 from app.models.log import *
 from datetime import datetime
@@ -23,7 +24,7 @@ def test_client():
 
 @pytest.fixture
 def auth_header(test_client):
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={

@@ -1,10 +1,11 @@
 import pytest
 from faker import Faker
 from app import db,app
-from app.models.student import  StudentLogin, SubjectMaster
+from app.models.student import  StudentLogin, SubjectMaster,SubjectPreference
 from flask_jwt_extended import create_access_token
 from datetime import datetime
 from app.models.log import *
+import random
 faker = Faker()
 @pytest.fixture(scope='module')
 def test_client():
@@ -20,7 +21,7 @@ def test_client():
 
 @pytest.fixture
 def auth_headers(test_client):
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
@@ -106,7 +107,11 @@ def seed_data(student_id):
 
 def cleanup_seed_data():
     # Cleanup the seeded subject data
+    db.session.query(SubjectPreference).filter_by(subject_id=seed_ids['subject_id']).delete()
+
+    # Now delete the seeded subject data from tbl_subject_master
     SubjectMaster.query.filter_by(subject_id=seed_ids['subject_id']).delete()
+    
     db.session.commit()
 
 def test_list_subjects(test_client, auth_headers):
@@ -151,3 +156,23 @@ def test_deactivate_subject(test_client, auth_headers):
     response = test_client.put(f'subject/deactivate/{seed_ids["subject_id"]}', headers=auth_headers)
     assert response.status_code == 200
     assert response.json['message'] == 'Subject deactivated successfully'
+def test_add_subject_missing_subject_name(test_client, auth_headers):
+    response = test_client.post(
+        '/subject/add',
+        json={},  # No subject_name provided
+        headers=auth_headers
+    )
+
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide Subject name'
+
+
+def test_edit_subject_missing_subject_name(test_client, auth_headers):
+    response = test_client.put(
+        f'subject/edit/{seed_ids["subject_id"]}',
+        json={},  # No subject_name provided
+        headers=auth_headers
+    )
+
+    assert response.is_json
+    assert response.json['message'] == 'Please provide subject name'

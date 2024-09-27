@@ -6,7 +6,7 @@ from app.models.student import StudentAddress,StudentLogin
 from faker import Faker
 from app.models.student import StudentLogin
 from app.models.log import LoginLog
-
+import random
 faker = Faker()
 
 @pytest.fixture(scope='module')
@@ -23,7 +23,8 @@ def test_client():
 
 @pytest.fixture
 def auth_header(test_client):
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
+
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
@@ -191,3 +192,306 @@ def test_deactivate_student_address(test_client, auth_header):
     response = test_client.put(f'/student_address/deactivate/{student_id}',headers=auth_header)
     assert response.status_code == 200
     assert response.json['message'] == 'Student Address deactivated successfully'
+
+def test_add_student_address_missing_student_id(test_client, auth_header):
+    response = test_client.post(
+        '/student_address/add',
+        json={
+            'address1': '123 Main St',
+            'address2': 'Apt 4B',
+            'country': 'USA',
+            'state': 'California',
+            'city': 'Los Angeles',
+            'district': 'LA County',
+            'pincode': '90001',
+            'address_type': 'Permanent'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide Student Id'
+    
+
+def test_add_student_address_missing_address1(test_client, auth_header):
+    response = test_client.post(
+        '/student_address/add',
+        json={
+            'student_id': auth_header['student_id'],
+            'address2': 'Apt 4B',
+            'country': 'USA',
+            'state': 'California',
+            'city': 'Los Angeles',
+            'district': 'LA County',
+            'pincode': '90001',
+            'address_type': 'Permanent'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide Address 1'
+   
+
+def test_add_student_address_missing_country(test_client, auth_header):
+    response = test_client.post(
+        '/student_address/add',
+        json={
+            'student_id': auth_header['student_id'],
+            'address1': '123 Main St',
+            'address2': 'Apt 4B',
+            'state': 'California',
+            'city': 'Los Angeles',
+            'district': 'LA County',
+            'pincode': '90001',
+            'address_type': 'Permanent'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide Country'
+   
+
+def test_add_student_address_missing_state(test_client, auth_header):
+    response = test_client.post(
+        '/student_address/add',
+        json={
+            'student_id': auth_header['student_id'],
+            'address1': '123 Main St',
+            'address2': 'Apt 4B',
+            'country': 'USA',
+            'city': 'Los Angeles',
+            'district': 'LA County',
+            'pincode': '90001',
+            'address_type': 'Permanent'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide State'
+   
+
+def test_add_student_address_missing_city(test_client, auth_header):
+    response = test_client.post(
+        '/student_address/add',
+        json={
+            'student_id': auth_header['student_id'],
+            'address1': '123 Main St',
+            'address2': 'Apt 4B',
+            'country': 'USA',
+            'state': 'California',
+            'district': 'LA County',
+            'pincode': '90001',
+            'address_type': 'Permanent'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide City'
+   
+
+def test_add_student_address_missing_district(test_client, auth_header):
+    response = test_client.post(
+        '/student_address/add',
+        json={
+            'student_id': auth_header['student_id'],
+            'address1': '123 Main St',
+            'address2': 'Apt 4B',
+            'country': 'USA',
+            'state': 'California',
+            'city': 'Los Angeles',
+            'pincode': '90001',
+            'address_type': 'Permanent'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide District'
+  
+
+def test_add_student_address_missing_pincode(test_client, auth_header):
+    response = test_client.post(
+        '/student_address/add',
+        json={
+            'student_id': auth_header['student_id'],
+            'address1': '123 Main St',
+            'address2': 'Apt 4B',
+            'country': 'USA',
+            'state': 'California',
+            'city': 'Los Angeles',
+            'district': 'LA County',
+            'address_type': 'Permanent'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide Pincode'
+    
+
+def test_add_student_address_missing_address_type(test_client, auth_header):
+    response = test_client.post(
+        '/student_address/add',
+        json={
+            'student_id': auth_header['student_id'],
+            'address1': '123 Main St',
+            'address2': 'Apt 4B',
+            'country': 'USA',
+            'state': 'California',
+            'city': 'Los Angeles',
+            'district': 'LA County',
+            'pincode': '90001'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide Address Type'
+  
+
+
+def test_edit_student_address_missing_student_id(test_client, auth_header):
+    response = test_client.put(f'/student_address/edit/{auth_header['student_id']}',  # Replace 1 with a valid address ID
+        json={
+            'address1': '123 Main St',
+            'address2': 'Apt 4B',
+            'country': 'USA',
+            'state': 'California',
+            'city': 'Los Angeles',
+            'district': 'LA County',
+            'pincode': '90001',
+            'address_type': 'Permanent'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide Student Id'
+    
+
+def test_edit_student_address_missing_address1(test_client, auth_header):
+    response = test_client.put(
+        f'/student_address/edit/{auth_header['student_id']}',  # Replace 1 with a valid address ID
+        json={
+            'student_id': auth_header['student_id'],
+            'address2': 'Apt 4B',
+            'country': 'USA',
+            'state': 'California',
+            'city': 'Los Angeles',
+            'district': 'LA County',
+            'pincode': '90001',
+            'address_type': 'Permanent'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide Address 1'
+   
+
+def test_edit_student_address_missing_country(test_client, auth_header):
+    response = test_client.put(
+        f'/student_address/edit/{auth_header['student_id']}',  # Replace 1 with a valid address ID
+        json={
+            'student_id': auth_header['student_id'],
+            'address1': '123 Main St',
+            'address2': 'Apt 4B',
+            'state': 'California',
+            'city': 'Los Angeles',
+            'district': 'LA County',
+            'pincode': '90001',
+            'address_type': 'Permanent'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide Country'
+   
+
+def test_edit_student_address_missing_state(test_client, auth_header):
+    response = test_client.put(
+        f'/student_address/edit/{auth_header['student_id']}',  # Replace 1 with a valid address ID
+        json={
+            'student_id': auth_header['student_id'],
+            'address1': '123 Main St',
+            'address2': 'Apt 4B',
+            'country': 'USA',
+            'city': 'Los Angeles',
+            'district': 'LA County',
+            'pincode': '90001',
+            'address_type': 'Permanent'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide State'
+   
+
+def test_edit_student_address_missing_city(test_client, auth_header):
+    response = test_client.put(
+        f'/student_address/edit/{auth_header['student_id']}',  # Replace 1 with a valid address ID
+        json={
+            'student_id': auth_header['student_id'],
+            'address1': '123 Main St',
+            'address2': 'Apt 4B',
+            'country': 'USA',
+            'state': 'California',
+            'district': 'LA County',
+            'pincode': '90001',
+            'address_type': 'Permanent'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide City'
+   
+
+def test_edit_student_address_missing_district(test_client, auth_header):
+    response = test_client.put(
+        f'/student_address/edit/{auth_header['student_id']}',  # Replace 1 with a valid address ID
+        json={
+            'student_id': auth_header['student_id'],
+            'address1': '123 Main St',
+            'address2': 'Apt 4B',
+            'country': 'USA',
+            'state': 'California',
+            'city': 'Los Angeles',
+            'pincode': '90001',
+            'address_type': 'Permanent'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide District'
+  
+
+def test_edit_student_address_missing_pincode(test_client, auth_header):
+    response = test_client.put(
+        f'/student_address/edit/{auth_header['student_id']}',  # Replace 1 with a valid address ID
+        json={
+            'student_id': auth_header['student_id'],
+            'address1': '123 Main St',
+            'address2': 'Apt 4B',
+            'country': 'USA',
+            'state': 'California',
+            'city': 'Los Angeles',
+            'district': 'LA County',
+            'address_type': 'Permanent'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide Pincode'
+    
+
+def test_edit_student_address_missing_address_type(test_client, auth_header):
+    response = test_client.put(
+        f'/student_address/edit/{auth_header['student_id']}',  # Replace 1 with a valid address ID
+        json={
+            'student_id': auth_header['student_id'],
+            'address1': '123 Main St',
+            'address2': 'Apt 4B',
+            'country': 'USA',
+            'state': 'California',
+            'city': 'Los Angeles',
+            'district': 'LA County',
+            'pincode': '90001'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide Address Type'

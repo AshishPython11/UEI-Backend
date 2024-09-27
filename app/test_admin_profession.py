@@ -5,6 +5,7 @@ from app import app, db
 from app.models.adminuser import AdminLogin,AdminProfession
 from app.models.log import *
 from faker import Faker
+import random
 faker=Faker()
 from app.models.adminuser import AdminContact,CourseMaster,SubjectMaster,EntityType,Institution
 
@@ -28,7 +29,7 @@ def auth_header(test_client):
 #   "password": "admin123",
 #   "user_type": "admin"
 # })
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
@@ -252,3 +253,98 @@ def test_deactivate_admin_profession(test_client, auth_header):
     response = test_client.put(f'/admin_profession/deactivate/{activate_id}', headers=auth_header)   
     assert response.status_code == 200
     assert response.json['message'] == 'Admin Profession deactivated successfully'
+
+
+
+def test_add_admin_profession_missing_admin_id(test_client, auth_header):
+    response = test_client.post('/admin_profession/add', json={
+       
+        'institution_id': seed_ids['institution_id'],
+        'course_id': seed_ids['course_id'],
+        'subject_id': seed_ids['subject_id']
+    }, headers=auth_header)
+    assert response.json['message'] == 'Please Provide Admin Id'
+def test_add_admin_profession_missing_institution_id(test_client, auth_header):
+    response = test_client.post('/admin_profession/add', json={
+        'admin_id': auth_header['admin_id'],
+     
+        'course_id': seed_ids['course_id'],
+        'subject_id': seed_ids['subject_id']
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Institute Id'
+def test_add_admin_profession_missing_course_id(test_client, auth_header):
+    response = test_client.post('/admin_profession/add', json={
+        'admin_id': auth_header['admin_id'],
+        'institution_id': seed_ids['institution_id'],
+      
+        'subject_id': seed_ids['subject_id']
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Course Id'
+def test_add_admin_profession_missing_subject_id(test_client, auth_header):
+    response = test_client.post('/admin_profession/add', json={
+        'admin_id': auth_header['admin_id'],
+      'institution_id': seed_ids['institution_id'],
+        'course_id': seed_ids['course_id'],
+       
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Subject Id'
+
+def test_edit_admin_profession_missing_admin_id(test_client, auth_header):
+    response = test_client.put(f'/admin_profession/edit/{auth_header["admin_id"]}', json={
+       'institution_id': seed_ids['institution_id'],
+        'course_id': seed_ids['course_id'],
+        'subject_id': seed_ids['subject_id']
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Admin Id'
+   
+
+
+def test_edit_admin_profession_missing_institution_id(test_client, auth_header):
+    response = test_client.put(f'/admin_profession/edit/{auth_header["admin_id"]}', json={
+        'admin_id': auth_header['admin_id'],
+
+        'course_id': seed_ids['course_id'],
+        'subject_id': seed_ids['subject_id']
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Institute Id'
+
+
+
+def test_edit_admin_profession_missing_course_id(test_client, auth_header):
+    response = test_client.put(f'/admin_profession/edit/{auth_header["admin_id"]}', json={
+        'admin_id': auth_header['admin_id'],
+        'institution_id': seed_ids['institution_id'],
+    
+        'subject_id': seed_ids['subject_id']
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Course Id'
+   
+
+
+def test_edit_admin_profession_missing_subject_id(test_client, auth_header):
+    response = test_client.put(f'/admin_profession/edit/{auth_header["admin_id"]}', json={
+        'admin_id': auth_header['admin_id'],
+         'institution_id': seed_ids['institution_id'],
+        'course_id': seed_ids['course_id'],
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Subject Id'
+   
+
+
+def test_edit_admin_profession_not_found(test_client, auth_header):
+    response = test_client.put(f'/admin_profession/edit/999474747', json={
+        'admin_id': auth_header['admin_id'],
+        'institution_id': seed_ids['institution_id'],
+        'course_id': seed_ids['course_id'],
+        'subject_id': seed_ids['subject_id']
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Admin Profession not found'
+    

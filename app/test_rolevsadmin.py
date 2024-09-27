@@ -9,7 +9,7 @@ from app.models.student import StudentLogin
 from app.models.log import LoginLog
 from datetime import datetime
 faker = Faker()
-
+import random
 @pytest.fixture(scope='module')
 def test_client():
     app.config['TESTING'] = True
@@ -25,7 +25,7 @@ def test_client():
 
 @pytest.fixture
 def auth_header(test_client):
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
@@ -226,3 +226,22 @@ def test_delete_rolevsadmin(test_client, auth_header):
     assert response.status_code == 200
     data = response.get_json()
     assert 'RolevsUser deleted successfully' in data['message']
+def test_add_role_vs_admin_missing_admin_id(test_client, auth_header):
+    response = test_client.post('/rolevsadmin/add', json={'role_master_id': str(faker.random_int(min=1,max=100)),'admin_id':''}, headers=auth_header)
+    
+    assert response.json['message'] == 'Please Provide Admin Id'
+
+def test_add_role_vs_admin_missing_role_master_id(test_client, auth_header):
+    response = test_client.post('/rolevsadmin/add', json={'admin_id':str(faker.random_int(min=1,max=100)), 'role_master_id': ''}, headers=auth_header)
+    
+    assert response.json['message'] == 'Please Role Master Id'
+
+def test_edit_role_vs_admin_missing_admin_id(test_client, auth_header):
+    response = test_client.put(f'/rolevsadmin/edit/{seed_ids["role_admin_master_id"]}', json={'role_master_id': str(faker.random_int(min=1,max=100)),'admin_id':''}, headers=auth_header)
+    
+    assert response.json['message'] == 'Please Provide Admin Id'
+
+def test_edit_role_vs_admin_missing_role_master_id(test_client, auth_header):
+    response = test_client.put(f'/rolevsadmin/edit/{seed_ids["role_admin_master_id"]}', json={'admin_id':str(faker.random_int(min=1,max=100)), 'role_master_id': ''}, headers=auth_header)
+    
+    assert response.json['message'] == 'Please Role Master Id'

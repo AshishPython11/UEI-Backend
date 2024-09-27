@@ -6,6 +6,7 @@ from faker import Faker
 from app import app, db
 from app.models.student import StudentLogin
 from app.models.log import LoginLog
+import random
 faker = Faker()
 @pytest.fixture(scope='module')
 def test_client():
@@ -22,7 +23,7 @@ def test_client():
 
 @pytest.fixture
 def auth_header(test_client):
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
@@ -202,3 +203,58 @@ def test_delete_rolevsform(test_client, auth_header):
     assert 'Rolevsform deleted successfully' in data['message']
 
       # Cleanup after test
+def test_add_role_vs_form_missing_form_master_id(test_client, auth_header):
+    response = test_client.post(
+        '/rolevsform/add', 
+        json={
+            'role_master_id': str(faker.random_int(min=1, max=100)), 
+            'is_search': True, 
+            'is_save': True, 
+            'is_update': True
+        }, 
+        headers=auth_header
+    )
+    
+    assert response.json['message'] == 'Please Provide RolevsForm Data Id'
+
+def test_add_role_vs_form_missing_role_master_id(test_client, auth_header):
+    response = test_client.post(
+        '/rolevsform/add', 
+        json={
+            'form_master_id': str(faker.random_int(min=1, max=100)), 
+            'is_search': True, 
+            'is_save': True, 
+            'is_update': True
+        }, 
+        headers=auth_header
+    )
+    
+    assert response.json['message'] == 'Please Provide Role Id'
+
+def test_edit_role_vs_form_missing_form_master_id(test_client, auth_header):
+    response = test_client.put(
+        f'/rolevsform/edit/{seed_ids["role_form_master_id"]}', 
+        json={
+            'role_master_id': str(faker.random_int(min=1, max=100)), 
+            'is_search': True, 
+            'is_save': True, 
+            'is_update': True
+        }, 
+        headers=auth_header
+    )
+    
+    assert response.json['message'] == 'Please Provide From Id'
+
+def test_edit_role_vs_form_missing_role_master_id(test_client, auth_header):
+    response = test_client.put(
+        f'/rolevsform/edit/{seed_ids["role_form_master_id"]}', 
+        json={
+            'form_master_id': str(faker.random_int(min=1, max=100)), 
+            'is_search': True, 
+            'is_save': True, 
+            'is_update': True
+        }, 
+        headers=auth_header
+    )
+    
+    assert response.json['message'] == 'Please Provide Role Id'

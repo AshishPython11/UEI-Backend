@@ -6,6 +6,7 @@ from app.models.role import MenuMasterData,SubMenuMasterData
 from flask_jwt_extended import create_access_token
 from datetime import datetime
 from app.models.log import *
+import random
 faker = Faker()
 @pytest.fixture(scope='module')
 def test_client():
@@ -25,7 +26,7 @@ def auth_header(test_client):
 #   "password": "admin123",
 #   "user_type": "admin"
 # })
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
@@ -153,3 +154,69 @@ def test_deactivate_submenu(test_client, auth_header):
     response = test_client.put(f'/submenu/deactivate/{seed_ids["submenu_id"]}', headers=auth_header)
     assert response.status_code == 200
     assert response.json['message'] == 'SubMenu deactivated successfully'
+def test_add_submenu_missing_menu_name(test_client, auth_header):
+    response = test_client.post(
+        '/submenu/add',
+        json={"menu_master_id": seed_ids['menu_id'], "priority": 1},  # No menu_name provided
+        headers=auth_header
+    )
+
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide SubMenu name'
+   
+
+def test_add_submenu_missing_menu_master_id(test_client, auth_header):
+    response = test_client.post(
+        '/submenu/add',
+        json={"menu_name": faker.word(), "priority": 1},  # No menu_master_id provided
+        headers=auth_header
+    )
+
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide Menu Id'
+    
+
+def test_add_submenu_missing_priority(test_client, auth_header):
+    response = test_client.post(
+        '/submenu/add',
+        json={"menu_name": faker.word(), "menu_master_id": seed_ids['menu_id']},  # No priority provided
+        headers=auth_header
+    )
+
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide Priority'
+   
+
+
+
+def test_edit_submenu_missing_menu_name(test_client, auth_header):
+    response = test_client.put(
+        f'/submenu/edit/{seed_ids["submenu_id"]}',
+        json={"menu_master_id": seed_ids['menu_id'], "priority": 1},  # No menu_name provided
+        headers=auth_header
+    )
+
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide SubMenu name'
+   
+
+def test_edit_submenu_missing_menu_master_id(test_client, auth_header):
+    response = test_client.put(
+        f'/submenu/edit/{seed_ids["submenu_id"]}',
+        json={"menu_name": faker.word(), "priority": 1},  # No menu_master_id provided
+        headers=auth_header
+    )
+
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide Menu Id'
+    
+
+def test_edit_submenu_missing_priority(test_client, auth_header):
+    response = test_client.put(
+        f'/submenu/edit/{seed_ids["submenu_id"]}',
+        json={"menu_name": faker.word(), "menu_master_id": seed_ids['menu_id']},  # No priority provided
+        headers=auth_header
+    )
+
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide Priority'

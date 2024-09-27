@@ -5,6 +5,7 @@ from app import app, db
 from app.models.log import *
 from app.models.adminuser import AdminDescription, AdminLogin
 from faker import Faker
+import random
 faker=Faker()
 @pytest.fixture(scope='module')
 def test_client():
@@ -25,7 +26,7 @@ def auth_header(test_client):
 #   "password": "admin123",
 #   "user_type": "admin"
 # })
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
@@ -173,3 +174,34 @@ def test_deactivate_admin_profile_description(test_client, auth_header):
     assert response.status_code == 200
     data = response.json
     assert data['message'] == 'Admin Profile Description deactivated successfully'
+def test_add_admin_profile_description_missing_admin_id(test_client, auth_header):
+    response = test_client.post('/admin_profile_description/add', json={
+        'description': 'This is a profile description.'
+    }, headers=auth_header)
+
+    
+    assert response.json['message'] == 'Please Provide Admin Id'
+def test_add_admin_profile_description_missing_description(test_client, auth_header):
+    response = test_client.post('/admin_profile_description/add', json={
+        'admin_id': auth_header['admin_id']
+    }, headers=auth_header)
+
+    
+    assert response.json['message'] == 'Please Provide Description'
+
+def test_edit_admin_profile_description_missing_admin_id(test_client, auth_header):
+    response = test_client.put(f'/admin_profile_description/edit/{auth_header['admin_id']}', json={
+        'description': 'Updated description'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Admin Id'
+  
+
+
+def test_edit_admin_profile_description_missing_description(test_client, auth_header):
+    response = test_client.put(f'/admin_profile_description/edit/{auth_header['admin_id']}', json={
+        'admin_id': auth_header['admin_id']
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Description'
+   

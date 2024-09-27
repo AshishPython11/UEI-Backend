@@ -123,3 +123,16 @@ def test_department_deactivate(test_client, auth_header):
     response = test_client.put(f'/department/deactivate/{department_id}', headers=auth_header)
     assert response.status_code == 200
     assert 'Department deactivated successfully' in response.json['message']
+def test_add_department_missing_department_name(test_client, auth_header):
+    response = test_client.post('/department/add', json={}, headers=auth_header)
+    
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide Department name'
+
+
+
+def test_edit_department_missing_department_name(test_client, auth_header):
+    response = test_client.put(f'/department/edit/{seed_ids['department_id']}', json={}, headers=auth_header)
+    
+    assert response.is_json
+    assert response.json['message'] == 'Please provide department name'

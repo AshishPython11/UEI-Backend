@@ -207,3 +207,87 @@ def test_feedback_deactivate(test_client, auth_header):
     response = test_client.put(f'/feedback/deactivate/{seed_ids['feedback_id']}', headers=auth_header)
     assert response.status_code == 200
     assert 'Feedback deactivated successfully' in response.json['message']
+
+
+def test_student_feedback_missing_student_id(test_client, auth_header):
+    # Test missing student_id
+    response = test_client.post('/feedback/student_feedback', json={
+  "student_id": 0,
+  "feedbacks": [
+    {
+      "question": faker.word(),
+      "answer": faker.word()
+    }
+  ]
+}
+        
+    , headers=auth_header)
+    
+    # assert response.status_code == 404
+    print(response.data) 
+    assert response.json['message'] == 'Please provide student_id and feedbacks'
+    
+def test_student_feedback_missing_feedbacks(test_client, auth_header):
+    # Test missing feedbacks
+    response = test_client.post('/feedback/student_feedback', json={
+  "student_id": 0,
+  "feedbacks": [
+    
+  ]
+}, headers=auth_header)
+    
+    # assert response.status_code == 404
+    print(response.data) 
+    assert response.json['message'] == 'Please provide student_id and feedbacks'
+
+def test_student_feedback_missing_question(test_client, auth_header):
+    # Test feedback entry missing question
+    response = test_client.post('/feedback/student_feedback', json={
+  "student_id": auth_header['student_id'],
+  "feedbacks": [
+    {
+      "question": "",
+      "answer": "string"
+    }
+  ]
+}, headers=auth_header)
+    
+    print(response.data) 
+    assert response.json['message'] == 'Each feedback entry must include a question'
+
+
+
+def test_student_feedback_empty_answer(test_client, auth_header):
+    # Test feedback entry with empty answer (still should succeed)
+    response = test_client.post('/feedback/student_feedback', json={
+  "student_id": auth_header['student_id'],
+  "feedbacks": [
+    {
+      "question": "string",
+      "answer": ""
+    }
+  ]
+}, headers=auth_header)
+
+    # assert response.status_code == 404
+    print(response.data) 
+    assert response.json['message'] == 'Student feedback submitted successfully'
+
+# Test for adding feedback with missing question and options
+def test_feedback_add_missing_fields(test_client, auth_header):
+    response = test_client.post('/feedback/add', json={}, headers=auth_header)
+    
+    assert response.is_json
+    assert response.json['message'] == 'Please provide question and options'
+
+
+# Test for successfully adding feedback
+ # Verify the creator is the current user
+
+
+# Test for adding feedback with only a question
+def test_feedback_add_only_question(test_client, auth_header):
+    response = test_client.post('/feedback/add', json={'question': 'What do you think?'}, headers=auth_header)
+   
+    assert response.is_json
+    assert response.json['message'] == 'Please provide question and options'

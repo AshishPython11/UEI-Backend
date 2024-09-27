@@ -123,3 +123,19 @@ def test_hobby_deactivate(test_client, auth_header):
     response = test_client.put(f'/hobby/deactivate/{seed_ids["hobby_id"]}', headers=auth_header)
     assert response.status_code == 200
     assert 'Hobby deactivated successfully' in response.json['message']
+
+def test_hobby_add_missing_hobby_name(test_client, auth_header):
+    # Test adding hobby with missing hobby_name
+    response = test_client.post('/hobby/add', json={}, headers=auth_header)
+    
+    assert response.is_json
+    
+    assert response.json['message'] == 'Please Provide Hobby name'
+
+def test_hobby_edit_missing_hobby_name(test_client, auth_header):
+    # Test adding hobby with missing hobby_name
+    response = test_client.put(f'/hobby/edit/{seed_ids["hobby_id"]}', json={}, headers=auth_header)
+    
+    assert response.is_json
+    
+    assert response.json['message'] == 'Please provide hobby name'

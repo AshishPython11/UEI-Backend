@@ -7,7 +7,7 @@ from app import app, db
 from faker import Faker
 faker=Faker()
 from app.models.adminuser import AdminContact,AdminLogin
-
+import random
 @pytest.fixture(scope='module')
 def test_client():
     app.config['TESTING'] = True
@@ -28,7 +28,7 @@ def auth_header(test_client):
 #   "password": "admin123",
 #   "user_type": "admin"
 # })
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
@@ -150,3 +150,119 @@ def test_get_admin_contact_by_id(test_client, auth_header):
     data = response.json
     assert data['message'] == 'Admin Contact found Successfully'
     
+def test_add_admin_contact_missing_mobile_no_call(test_client, auth_header):
+    response = test_client.post('/admin_contact/add', json={
+        'admin_id': auth_header['admin_id'],
+        'mobile_isd_call': '+91',
+        'mobile_isd_watsapp': '+91',
+        'mobile_no_watsapp': '9876543211',
+        'email_id': 'admin_new@example.com'
+    }, headers=auth_header)
+
+    
+    assert response.json['message'] == 'Please Provide Mobile No'
+
+def test_add_admin_contact_missing_email_id(test_client, auth_header):
+    response = test_client.post('/admin_contact/add', json={
+        'admin_id': auth_header['admin_id'],
+        'mobile_isd_call': '+91',
+        'mobile_no_call': '9876543211',
+        'mobile_isd_watsapp': '+91',
+        'mobile_no_watsapp': '9876543211'
+    }, headers=auth_header)
+
+    
+    assert response.json['message'] == 'Please Provide Email Id'
+def test_add_admin_contact_missing_mobile_isd_call(test_client, auth_header):
+    response = test_client.post('/admin_contact/add', json={
+        'admin_id': auth_header['admin_id'],
+        'mobile_no_call': '9876543211',
+        'mobile_isd_watsapp': '+91',
+        'mobile_no_watsapp': '9876543211',
+        'email_id': 'admin_new@example.com'
+    }, headers=auth_header)
+
+    
+    assert response.json['message'] == 'Please Provide Mobile ISD'
+def test_add_admin_contact_missing_mobile_isd_watsapp(test_client, auth_header):
+    response = test_client.post('/admin_contact/add', json={
+        'admin_id': auth_header['admin_id'],
+        'mobile_isd_call': '+91',
+        'mobile_no_call': '9876543211',
+        'mobile_no_watsapp': '9876543211',
+        'email_id': 'admin_new@example.com'
+    }, headers=auth_header)
+
+    
+    assert response.json['message'] == 'Please Provide Whatsapp mobile ISD'
+def test_add_admin_contact_missing_admin_id(test_client, auth_header):
+    response = test_client.post('/admin_contact/add', json={
+        'mobile_isd_call': '+91',
+        'mobile_no_call': '9876543211',
+        'mobile_isd_watsapp': '+91',
+        'mobile_no_watsapp': '9876543211',
+        'email_id': 'admin_new@example.com'
+    }, headers=auth_header)
+
+    
+    assert response.json['message'] == 'Please Provide Admin Id'
+
+def test_edit_admin_contact_missing_mobile_no_call(test_client, auth_header):
+    response = test_client.put(f'/admin_contact/edit/{auth_header['admin_id']}', json={
+        'admin_id': auth_header['admin_id'],
+        'mobile_isd_call': '+91',
+        'mobile_isd_watsapp': '+91',
+        'mobile_no_watsapp': '9876543211',
+        'email_id': 'admin_new@example.com'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Mobile No'
+
+
+def test_edit_admin_contact_missing_email_id(test_client, auth_header):
+    response = test_client.put(f'/admin_contact/edit/{auth_header['admin_id']}', json={
+        'admin_id': auth_header['admin_id'],
+        'mobile_isd_call': '+91',
+        'mobile_no_call': '9876543211',
+        'mobile_isd_watsapp': '+91',
+        'mobile_no_watsapp': '9876543211'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Admin Contact updated successfully'
+
+
+def test_edit_admin_contact_missing_mobile_isd_call(test_client, auth_header):
+    response = test_client.put(f'/admin_contact/edit/{auth_header['admin_id']}', json={
+        'admin_id': auth_header['admin_id'],
+        'mobile_no_call': '9876543211',
+        'mobile_isd_watsapp': '+91',
+        'mobile_no_watsapp': '9876543211',
+        'email_id': 'admin_new@example.com'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Mobile ISD'
+
+
+def test_edit_admin_contact_missing_mobile_isd_watsapp(test_client, auth_header):
+    response = test_client.put(f'/admin_contact/edit/{auth_header['admin_id']}', json={
+        'admin_id': auth_header['admin_id'],
+        'mobile_no_call': '9876543211',
+        'mobile_isd_call': '+91',
+        'mobile_no_watsapp': '9876543211',
+        'email_id': 'admin_new@example.com'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Whatsapp mobile ISD'
+
+
+def test_edit_admin_contact_missing_admin_id(test_client, auth_header):
+    response = test_client.put(f'/admin_contact/edit/{auth_header['admin_id']}', json={
+        'mobile_isd_call': '+91',
+        'mobile_no_call': '9876543211',
+        'mobile_isd_watsapp': '+91',
+        'mobile_no_watsapp': '9876543211',
+        'email_id': 'admin_new@example.com'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Admin Id'
+# Test case for invalid mobile number format

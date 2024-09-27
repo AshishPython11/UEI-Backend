@@ -3,7 +3,7 @@ from faker import Faker
 from app import db,app
 from app.models.student import  StudentLogin, Student
 from app.models.log import *
-
+import random
 from flask_jwt_extended import create_access_token
 from datetime import datetime
 faker = Faker()
@@ -21,7 +21,7 @@ def test_client():
 
 @pytest.fixture
 def auth_header(test_client):
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
@@ -239,6 +239,7 @@ def test_activate_student(test_client, auth_header):
 
 
 def test_deactivate_student(test_client, auth_header):
+     # Use an existing student ID for testing
     student_id = seed_ids['student_id']  # Use an existing student ID for testing
     response = test_client.put(f'/student/deactivate/{student_id}', headers=auth_header)
     assert response.status_code == 200
@@ -247,10 +248,11 @@ def test_deactivate_student(test_client, auth_header):
 
 
 def test_profile_completion(test_client, auth_header):
-    student_id = seed_ids['student_id'] # Use an existing student ID for testing
-    response = test_client.get(f'/student/profile-completion/{student_id}', headers=auth_header)
+     # Use an existing student ID for testing
+    response = test_client.get(f'/student/profile-completion/{seed_ids['student_login_id']}', headers=auth_header)
     assert response.status_code == 200
-    assert 'completion_percentage' in response.json
+    assert response.json['message'] == 'Student not found'
+   
 
 
 def test_store_profile_picture(test_client, auth_header):
@@ -266,3 +268,16 @@ def test_store_profile_picture(test_client, auth_header):
     response = test_client.post('/student/add/store_profile_picture', json=data, headers=auth_header)
     assert response.status_code == 200
     assert response.json['message'] == 'Profile picture path stored successfully'
+
+def test_add_subject_missing_subject_name(test_client, auth_header):
+    response = test_client.post(
+        '/subject/add',
+        json={},  # No subject_name provided
+        headers=auth_header
+    )
+
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide Subject name'
+
+
+

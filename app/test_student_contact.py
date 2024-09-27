@@ -6,7 +6,7 @@ from app.models.student import Contact,StudentLogin
 from faker import Faker
 from app.models.log import LoginLog
 faker = Faker()
-
+import random
 @pytest.fixture(scope='module')
 def test_client():
     app.config['TESTING'] = True
@@ -21,7 +21,7 @@ def test_client():
 
 @pytest.fixture
 def auth_header(test_client):
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
@@ -161,3 +161,159 @@ def test_deactivate_student_contact(test_client, auth_header):
     response = test_client.put(f'/student_contact/deactivate/{contact_id}', headers=auth_header)
     assert response.status_code == 200
     assert response.json['message'] == 'Student Contact deactivated successfully'
+def test_add_student_contact_missing_student_id(test_client, auth_header):
+    response = test_client.post(
+        '/student_contact/add',
+        json={
+            'mobile_isd_call': '91',
+            'mobile_no_call': '9876543210',
+            'mobile_isd_watsapp': '91',
+            'mobile_no_watsapp': '9876543211',
+            'email_id': 'student@example.com'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide Student Id'
+    
+def test_add_student_contact_missing_mobile_isd(test_client, auth_header):
+    response = test_client.post(
+        '/student_contact/add',
+        json={
+            'student_id': auth_header['student_id'],
+            'mobile_no_call': '9876543210',
+            'mobile_isd_watsapp': '91',
+            'mobile_no_watsapp': '9876543211',
+            'email_id': 'student@example.com'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide Mobile ISD'
+
+
+def test_add_student_contact_missing_mobile_no(test_client, auth_header):
+    response = test_client.post(
+        '/student_contact/add',
+        json={
+            'student_id':  auth_header['student_id'],
+            'mobile_isd_call': '91',
+            'mobile_isd_watsapp': '91',
+            'mobile_no_watsapp': '9876543211',
+            'email_id': 'student@example.com'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide Mobile No'
+
+
+def test_add_student_contact_missing_mobile_isd_watsapp(test_client, auth_header):
+    response = test_client.post(
+        '/student_contact/add',
+        json={
+            'student_id':  auth_header['student_id'],
+            'mobile_isd_call': '91',
+            'mobile_no_call': '9876543210',
+            'mobile_no_watsapp': '9876543211',
+            'email_id': 'student@example.com'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide Whatsapp mobile ISD'
+   
+
+def test_add_student_contact_missing_email_id(test_client, auth_header):
+    response = test_client.post(
+        '/student_contact/add',
+        json={
+            'student_id': auth_header['student_id'],
+            'mobile_isd_call': '91',
+            'mobile_no_call': '9876543210',
+            'mobile_isd_watsapp': '91',
+            'mobile_no_watsapp': '9876543211'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide Email Id'
+    
+
+
+
+
+def test_edit_student_contact_missing_student_id(test_client, auth_header):
+    response = test_client.put(
+        f'/student_contact/edit/{auth_header["student_id"]}',
+        json={
+            'mobile_isd_call': '91',
+            'mobile_no_call': '9876543210',
+            'mobile_isd_watsapp': '91',
+            'mobile_no_watsapp': '9876543211',
+            'email_id': 'student@example.com'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide Student Id'
+
+def test_edit_student_contact_missing_mobile_isd(test_client, auth_header):
+    response = test_client.put(
+        f'/student_contact/edit/{auth_header["student_id"]}',
+        json={
+            'student_id': auth_header['student_id'],
+            'mobile_no_call': '9876543210',
+            'mobile_isd_watsapp': '91',
+            'mobile_no_watsapp': '9876543211',
+            'email_id': 'student@example.com'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide Mobile ISD'
+
+def test_edit_student_contact_missing_mobile_no(test_client, auth_header):
+    response = test_client.put(
+        f'/student_contact/edit/{auth_header["student_id"]}',
+        json={
+            'student_id': auth_header['student_id'],
+            'mobile_isd_call': '91',
+            'mobile_isd_watsapp': '91',
+            'mobile_no_watsapp': '9876543211',
+            'email_id': 'student@example.com'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide Mobile No'
+
+def test_edit_student_contact_missing_mobile_isd_watsapp(test_client, auth_header):
+    response = test_client.put(
+        f'/student_contact/edit/{auth_header["student_id"]}',
+        json={
+            'student_id': auth_header['student_id'],
+            'mobile_isd_call': '91',
+            'mobile_no_call': '9876543210',
+            'mobile_no_watsapp': '9876543211',
+            'email_id': 'student@example.com'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Please Provide Whatsapp mobile ISD'
+
+def test_edit_student_contact_missing_email_id(test_client, auth_header):
+    response = test_client.put(
+        f'/student_contact/edit/{auth_header["student_id"]}',
+        json={
+            'student_id': auth_header['student_id'],
+            'mobile_isd_call': '91',
+            'mobile_no_call': '9876543210',
+            'mobile_isd_watsapp': '91',
+            'mobile_no_watsapp': '9876543211'
+        },
+        headers=auth_header
+    )
+
+    assert response.json['message'] == 'Student Contact updated successfully'

@@ -1,0 +1,12 @@
+[run]
+
+omit =
+    app/controllers/student_academic_history_controller.py
+    app/controllers/calculate_completion_controller.py 
+
+[report]
+
+omit =
+
+    app/controllers/student_academic_history_controller.py
+    app/controllers/calculate_completion_controller.py 

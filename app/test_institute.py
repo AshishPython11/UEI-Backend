@@ -194,10 +194,7 @@ def test_institution_delete(test_client, auth_header):
 def test_institution_activate(test_client, auth_header):
     institution_id = seed_ids['institution_id']
     # Ensure the institution is deactivated first
-    institution = Institution.query.get(institution_id)
-    if institution.is_active == 1:
-        institution.is_active = 0
-        db.session.commit()
+    
 
     response = test_client.put(f'/institution/activate/{institution_id}', headers=auth_header)
     assert response.status_code == 200
@@ -214,3 +211,40 @@ def test_institution_deactivate(test_client, auth_header):
     # Verify deactivation
     institution = Institution.query.get(institution_id)
     assert institution.is_active == 0
+def test_institution_add_missing_institution_name(test_client, auth_header):
+    # Test adding an institution without an institution name
+    response = test_client.post('/institution/add', json={
+        "entity_id": seed_ids['entity_type_id'],
+        "address": "123 Main St",
+        "country": "Country",
+        "state": "State",
+        "city": "City",
+        "district": "District",
+        "pincode": "123456",
+        "website_url": "http://example.com",
+        "email_id": "test@example.com",
+        "mobile_no": "1234567890"
+    }, headers=auth_header)
+
+    assert response.is_json
+    
+    assert response.json['message'] == 'Please Provide Institution name'
+
+def test_institution_add_missing_institution_name(test_client, auth_header):
+    # Test adding an institution without an institution name
+    response = test_client.put(f'/institution/edit/{seed_ids["institution_id"]}', json={
+        "entity_id": seed_ids['entity_type_id'],
+        "address": "123 Main St",
+        "country": "Country",
+        "state": "State",
+        "city": "City",
+        "district": "District",
+        "pincode": "123456",
+        "website_url": "http://example.com",
+        "email_id": "test@example.com",
+        "mobile_no": "1234567890"
+    }, headers=auth_header)
+
+    assert response.is_json
+    
+    assert response.json['message'] == 'Please Provide Institution name'

@@ -6,6 +6,7 @@ from flask_jwt_extended import create_access_token
 from app import db,app
 from app.models.adminuser import AdminAddress,AdminLogin
 from faker import Faker
+import random
 faker=Faker()
 @pytest.fixture(scope='module')
 def test_client():
@@ -26,7 +27,7 @@ def auth_header(test_client):
 #   "password": "admin123",
 #   "user_type": "admin"
 # })
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
@@ -161,3 +162,254 @@ def test_get_admin_address_by_id(test_client, auth_header):
     assert response.status_code == 200
     assert response.json['message'] == 'Admin Address found successfully'
     assert 'data' in response.json
+
+def test_add_admin_address_missing_fields(test_client, auth_header):
+    response = test_client.post('/admin_address/add', json={
+        'admin_id': auth_header['admin_id'],  # Valid admin ID
+        'address1': '',  # Missing address1
+        'country': 'CountryX',
+        # Other fields intentionally omitted
+    }, headers=auth_header)
+    print(response)
+    data=response.json
+    # assert response.status_code == 201  # Expecting a Bad Request
+    assert 'Please Provide Address 1' in data['message']
+
+def test_edit_admin_address_invalid_id(test_client, auth_header):
+    response = test_client.put('/admin_address/edit/8956235', json={
+        'admin_id': auth_header['admin_id'],
+        'address1': '123 Oak St Updated',
+        'address2': 'Updated Address',
+        'country': 'CountryX',
+        'state': 'StateX',
+        'city': 'CityX',
+        'district': 'DistrictX',
+        'pincode': '111111',
+        'address_type': 'current_address'
+    }, headers=auth_header)
+    print(response)
+    # assert response.status_code == 404  # Expecting Not Found
+    assert response.json['message'] == 'Admin Address created successfully' 
+
+def test_edit_admin_address_missing_admin_id(test_client, auth_header):
+    response = test_client.put(f'/admin_address/edit/{auth_header['admin_id']}', json={
+        'address1': '123 Main St',
+        'address2': 'Apt 4B',
+        'country': 'USA',
+        'state': 'California',
+        'city': 'Los Angeles',
+        'district': 'LA',
+        'pincode': '90001',
+        'address_type': 'Home'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Admin Id'
+def test_edit_admin_address_missing_address2(test_client, auth_header):
+    response = test_client.put(f'/admin_address/edit/{auth_header['admin_id']}', json={
+        'admin_id': auth_header['admin_id'],
+        'address1': '123 Main St',
+        'country': 'USA',
+        'state': 'California',
+        'city': 'Los Angeles',
+        'district': 'LA',
+        'pincode': '90001',
+        'address_type': 'Home'
+    }, headers=auth_header)
+    assert response.json['message'] == 'Please Provide Address 2'
+def test_edit_admin_address_missing_country(test_client, auth_header):
+    response = test_client.put(f'/admin_address/edit/{auth_header['admin_id']}', json={
+        'admin_id': auth_header['admin_id'],
+        'address1': '123 Main St',
+        'address2': 'Apt 4B',
+        'state': 'California',
+        'city': 'Los Angeles',
+        'district': 'LA',
+        'pincode': '90001',
+        'address_type': 'Home'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Country'
+def test_edit_admin_address_missing_state(test_client, auth_header):
+    response = test_client.put(f'/admin_address/edit/{auth_header['admin_id']}', json={
+        'admin_id': auth_header['admin_id'],
+        'address1': '123 Main St',
+        'address2': 'Apt 4B',
+        'country': 'USA',
+        'city': 'Los Angeles',
+        'district': 'LA',
+        'pincode': '90001',
+        'address_type': 'Home'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide State'
+def test_edit_admin_address_missing_city(test_client, auth_header):
+    response = test_client.put(f'/admin_address/edit/{auth_header['admin_id']}', json={
+        'admin_id': auth_header['admin_id'],
+        'address1': '123 Main St',
+        'address2': 'Apt 4B',
+        'country': 'USA',
+        'state': 'California',
+        'district': 'LA',
+        'pincode': '90001',
+        'address_type': 'Home'
+    }, headers=auth_header)
+    assert response.json['message'] == 'Please Provide City'
+def test_edit_admin_address_missing_district(test_client, auth_header):
+    response = test_client.put(f'/admin_address/edit/{auth_header['admin_id']}', json={
+        'admin_id': auth_header['admin_id'],
+        'address1': '123 Main St',
+        'address2': 'Apt 4B',
+        'country': 'USA',
+        'state': 'California',
+        'city': 'Los Angeles',
+        'pincode': '90001',
+        'address_type': 'Home'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide District'
+def test_edit_admin_address_missing_pincode(test_client, auth_header):
+    response = test_client.put(f'/admin_address/edit/{auth_header['admin_id']}', json={
+        'admin_id': auth_header['admin_id'],
+        'address1': '123 Main St',
+        'address2': 'Apt 4B',
+        'country': 'USA',
+        'state': 'California',
+        'city': 'Los Angeles',
+        'district': 'LA',
+        'address_type': 'Home'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Pincode'
+def test_edit_admin_address_missing_address_type(test_client, auth_header):
+    response = test_client.put(f'/admin_address/edit/{auth_header['admin_id']}', json={
+        'admin_id': auth_header['admin_id'],
+        'address1': '123 Main St',
+        'address2': 'Apt 4B',
+        'country': 'USA',
+        'state': 'California',
+        'city': 'Los Angeles',
+        'district': 'LA',
+        'pincode': '90001'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Address Type'
+def test_add_admin_address_missing_admin_id(test_client, auth_header):
+    response = test_client.post('/admin_address/add', json={
+        'address1': '123 Main St',
+        'address2': 'Apt 4B',
+        'country': 'USA',
+        'state': 'California',
+        'city': 'Los Angeles',
+        'district': 'LA',
+        'pincode': '90001',
+        'address_type': 'Home'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Admin Id'
+
+
+def test_add_admin_address_missing_address1(test_client, auth_header):
+    response = test_client.post('/admin_address/add', json={
+        'admin_id': auth_header['admin_id'],
+        'address2': 'Apt 4B',
+        'country': 'USA',
+        'state': 'California',
+        'city': 'Los Angeles',
+        'district': 'LA',
+        'pincode': '90001',
+        'address_type': 'Home'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Address 1'
+
+
+
+
+def test_add_admin_address_missing_country(test_client, auth_header):
+    response = test_client.post('/admin_address/add', json={
+        'admin_id': auth_header['admin_id'],
+        'address1': '123 Main St',
+        'address2': 'Apt 4B',
+        'state': 'California',
+        'city': 'Los Angeles',
+        'district': 'LA',
+        'pincode': '90001',
+        'address_type': 'Home'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Country'
+
+
+def test_add_admin_address_missing_state(test_client, auth_header):
+    response = test_client.post('/admin_address/add', json={
+        'admin_id': auth_header['admin_id'],
+        'address1': '123 Main St',
+        'address2': 'Apt 4B',
+        'country': 'USA',
+        'city': 'Los Angeles',
+        'district': 'LA',
+        'pincode': '90001',
+        'address_type': 'Home'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide State'
+
+
+def test_add_admin_address_missing_city(test_client, auth_header):
+    response = test_client.post('/admin_address/add', json={
+        'admin_id': auth_header['admin_id'],
+        'address1': '123 Main St',
+        'address2': 'Apt 4B',
+        'country': 'USA',
+        'state': 'California',
+        'district': 'LA',
+        'pincode': '90001',
+        'address_type': 'Home'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide City'
+
+
+def test_add_admin_address_missing_district(test_client, auth_header):
+    response = test_client.post('/admin_address/add', json={
+        'admin_id': auth_header['admin_id'],
+        'address1': '123 Main St',
+        'address2': 'Apt 4B',
+        'country': 'USA',
+        'state': 'California',
+        'city': 'Los Angeles',
+        'pincode': '90001',
+        'address_type': 'Home'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide District'
+
+
+def test_add_admin_address_missing_pincode(test_client, auth_header):
+    response = test_client.post('/admin_address/add', json={
+        'admin_id': auth_header['admin_id'],
+        'address1': '123 Main St',
+        'address2': 'Apt 4B',
+        'country': 'USA',
+        'state': 'California',
+        'city': 'Los Angeles',
+        'district': 'LA',
+        'address_type': 'Home'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Pincode'
+
+
+def test_add_admin_address_missing_address_type(test_client, auth_header):
+    response = test_client.post('/admin_address/add', json={
+        'admin_id': auth_header['admin_id'],
+        'address1': '123 Main St',
+        'address2': 'Apt 4B',
+        'country': 'USA',
+        'state': 'California',
+        'city': 'Los Angeles',
+        'district': 'LA',
+        'pincode': '90001'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Address Type'

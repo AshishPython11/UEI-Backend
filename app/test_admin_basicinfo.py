@@ -8,6 +8,7 @@ from datetime import datetime
 from app.models.adminuser import AdminBasicInformation,DepartmentMaster,AdminLogin
 from app.models.log import *
 from faker import Faker
+import random
 faker=Faker()
 @pytest.fixture(scope='module')
 def test_client():
@@ -28,7 +29,7 @@ def auth_header(test_client):
 #   "password": "admin123",
 #   "user_type": "admin"
 # })
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
@@ -211,3 +212,286 @@ def test_get_profile_success(test_client, auth_header):
     assert 'contact' in data['data']
     assert 'basic_info' in data['data']
     assert 'userid' in data['data']
+def test_add_admin_basic_info_missing_fields(test_client, auth_header):
+    # Missing first_name and gender
+    response = test_client.post('/admin_basicinfo/add', json={
+        'department_id': seed_ids['department_id'],  
+        'last_name': 'Doe',
+        'dob': '1990-01-01',
+        'father_name': 'Father Name',
+        'mother_name': 'Mother Name',
+        'guardian_name': 'Guardian Name',
+        'is_kyc_verified': 1,
+        'pic_path': '/path/to/pic',
+        'admin_login_id': auth_header['admin_id']
+    }, headers=auth_header)
+    
+    
+    assert response.json['message'] == 'Please Provide First Name'
+
+def test_add_admin_basic_info_invalid_data_type(test_client, auth_header):
+    response = test_client.post('/admin_basicinfo/add', json={
+        'department_id': 'invalid_type',  # department_id should be an integer
+        'first_name': 'John',
+        'last_name': 'Doe',
+        'gender': 'Male',
+        'dob': '1990-01-01',
+        'father_name': 'Father Name',
+        'mother_name': 'Mother Name',
+        'guardian_name': 'Guardian Name',
+        'is_kyc_verified': 1,
+        'pic_path': '/path/to/pic',
+        'admin_login_id': auth_header['admin_id']
+    }, headers=auth_header)
+    assert 'invalid input syntax for type integer' in response.json['message']
+    # assert response.status_code == 500
+    # assert 'invalid literal' in response.json['message']
+
+def test_add_admin_basic_info_invalid_date_format(test_client, auth_header):
+    response = test_client.post('/admin_basicinfo/add', json={
+        'department_id': seed_ids['department_id'],
+        'first_name': 'John',
+        'last_name': 'Doe',
+        'gender': 'Male',
+        'dob': 'invalid-date',  # Invalid date format
+        'father_name': 'Father Name',
+        'mother_name': 'Mother Name',
+        'guardian_name': 'Guardian Name',
+        'is_kyc_verified': 1,
+        'pic_path': '/path/to/pic',
+        'admin_login_id': auth_header['admin_id']
+    }, headers=auth_header)
+    
+    # assert response.status_code == 500
+    assert 'invalid input syntax for type date' in response.json['message'] 
+
+def test_add_admin_basic_info_missing_last_name(test_client, auth_header):
+    response = test_client.post('/admin_basicinfo/add', json={
+        'department_id': seed_ids['department_id'],
+        'first_name': 'John',
+        'gender': 'Male',
+        'dob': '1990-01-01',
+        'father_name': 'Father Name',
+        'mother_name': 'Mother Name',
+        'guardian_name': 'Guardian Name',
+        'is_kyc_verified': 1,
+        'pic_path': '/path/to/pic',
+        'admin_login_id': auth_header['admin_id']
+    }, headers=auth_header)
+
+    
+    assert response.json['message'] == 'Please Provide Last Name'
+def test_add_admin_basic_info_missing_gender(test_client, auth_header):
+    response = test_client.post('/admin_basicinfo/add', json={
+        'department_id': seed_ids['department_id'],
+        'first_name': 'John',
+        'last_name': 'Doe',
+        'dob': '1990-01-01',
+        'father_name': 'Father Name',
+        'mother_name': 'Mother Name',
+        'guardian_name': 'Guardian Name',
+        'is_kyc_verified': 1,
+        'pic_path': '/path/to/pic',
+        'admin_login_id': auth_header['admin_id']
+    }, headers=auth_header)
+
+   
+    assert response.json['message'] == 'Please Provide Gender'
+def test_add_admin_basic_info_missing_dob(test_client, auth_header):
+    response = test_client.post('/admin_basicinfo/add', json={
+        'department_id': seed_ids['department_id'],
+        'first_name': 'John',
+        'last_name': 'Doe',
+        'gender': 'Male',
+        'father_name': 'Father Name',
+        'mother_name': 'Mother Name',
+        'guardian_name': 'Guardian Name',
+        'is_kyc_verified': 1,
+        'pic_path': '/path/to/pic',
+        'admin_login_id': auth_header['admin_id']
+    }, headers=auth_header)
+
+    
+    assert response.json['message'] == 'Please Provide Date of Birth'
+def test_add_admin_basic_info_missing_father_name(test_client, auth_header):
+    response = test_client.post('/admin_basicinfo/add', json={
+        'department_id': seed_ids['department_id'],
+        'first_name': 'John',
+        'last_name': 'Doe',
+        'gender': 'Male',
+        'dob': '1990-01-01',
+        'mother_name': 'Mother Name',
+        'guardian_name': 'Guardian Name',
+        'is_kyc_verified': 1,
+        'pic_path': '/path/to/pic',
+        'admin_login_id': auth_header['admin_id']
+    }, headers=auth_header)
+
+   
+    assert response.json['message'] == 'Please Provide Father Name'
+def test_add_admin_basic_info_missing_mother_name(test_client, auth_header):
+    response = test_client.post('/admin_basicinfo/add', json={
+        'department_id': seed_ids['department_id'],
+        'first_name': 'John',
+        'last_name': 'Doe',
+        'gender': 'Male',
+        'dob': '1990-01-01',
+        'father_name': 'Father Name',
+        'guardian_name': 'Guardian Name',
+        'is_kyc_verified': 1,
+        'pic_path': '/path/to/pic',
+        'admin_login_id': auth_header['admin_id']
+    }, headers=auth_header)
+
+    
+    assert response.json['message'] == 'Please Provide Mother Name'
+def test_add_admin_basic_info_missing_admin_login_id(test_client, auth_header):
+    response = test_client.post('/admin_basicinfo/add', json={
+        'department_id': seed_ids['department_id'],
+        'first_name': 'John',
+        'last_name': 'Doe',
+        'gender': 'Male',
+        'dob': '1990-01-01',
+        'father_name': 'Father Name',
+        'mother_name': 'Mother Name',
+        'guardian_name': 'Guardian Name',
+        'is_kyc_verified': 1,
+        'pic_path': '/path/to/pic'
+    }, headers=auth_header)
+
+    
+    assert response.json['message'] == 'Please Provide Logged Admin Id'
+def test_edit_admin_basic_info_missing_department_id(test_client, auth_header):
+    response = test_client.put(f'/admin_basicinfo/edit/{auth_header["admin_id"]}', json={
+        'first_name': 'John',
+        'last_name': 'Doe',
+        'gender': 'Male',
+        'dob': '1990-01-01',
+        'father_name': 'Father Name',
+        'mother_name': 'Mother Name',
+        'guardian_name': 'Guardian Name',
+        'is_kyc_verified': 1,
+        'pic_path': '/path/to/pic',
+        'admin_login_id': auth_header['admin_id']
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Department Id'
+
+
+def test_edit_admin_basic_info_missing_first_name(test_client, auth_header):
+    response = test_client.put(f'/admin_basicinfo/edit/{auth_header["admin_id"]}', json={
+        'department_id': seed_ids['department_id'],
+        'last_name': 'Doe',
+        'gender': 'Male',
+        'dob': '1990-01-01',
+        'father_name': 'Father Name',
+        'mother_name': 'Mother Name',
+        'guardian_name': 'Guardian Name',
+        'is_kyc_verified': 1,
+        'pic_path': '/path/to/pic',
+        'admin_login_id': auth_header['admin_id']
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide First Name'
+
+
+def test_edit_admin_basic_info_missing_last_name(test_client, auth_header):
+    response = test_client.put(f'/admin_basicinfo/edit/{auth_header["admin_id"]}', json={
+        'department_id': seed_ids['department_id'],
+        'first_name': 'John',
+        'gender': 'Male',
+        'dob': '1990-01-01',
+        'father_name': 'Father Name',
+        'mother_name': 'Mother Name',
+        'guardian_name': 'Guardian Name',
+        'is_kyc_verified': 1,
+        'pic_path': '/path/to/pic',
+        'admin_login_id': auth_header['admin_id']
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Last Name'
+
+
+def test_edit_admin_basic_info_missing_gender(test_client, auth_header):
+    response = test_client.put(f'/admin_basicinfo/edit/{auth_header["admin_id"]}', json={
+        'department_id': seed_ids['department_id'],
+        'first_name': 'John',
+        'last_name': 'Doe',
+        'dob': '1990-01-01',
+        'father_name': 'Father Name',
+        'mother_name': 'Mother Name',
+        'guardian_name': 'Guardian Name',
+        'is_kyc_verified': 1,
+        'pic_path': '/path/to/pic',
+        'admin_login_id': auth_header['admin_id']
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Gender'
+
+
+def test_edit_admin_basic_info_missing_dob(test_client, auth_header):
+    response = test_client.put(f'/admin_basicinfo/edit/{auth_header["admin_id"]}', json={
+        'department_id': seed_ids['department_id'],
+        'first_name': 'John',
+        'last_name': 'Doe',
+        'gender': 'Male',
+        'father_name': 'Father Name',
+        'mother_name': 'Mother Name',
+        'guardian_name': 'Guardian Name',
+        'is_kyc_verified': 1,
+        'pic_path': '/path/to/pic',
+        'admin_login_id': auth_header['admin_id']
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Date of Birth'
+
+
+def test_edit_admin_basic_info_missing_father_name(test_client, auth_header):
+    response = test_client.put(f'/admin_basicinfo/edit/{auth_header["admin_id"]}', json={
+        'department_id': seed_ids['department_id'],
+        'first_name': 'John',
+        'last_name': 'Doe',
+        'gender': 'Male',
+        'dob': '1990-01-01',
+        'mother_name': 'Mother Name',
+        'guardian_name': 'Guardian Name',
+        'is_kyc_verified': 1,
+        'pic_path': '/path/to/pic',
+        'admin_login_id': auth_header['admin_id']
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Father Name'
+
+
+def test_edit_admin_basic_info_missing_mother_name(test_client, auth_header):
+    response = test_client.put(f'/admin_basicinfo/edit/{auth_header["admin_id"]}', json={
+        'department_id': seed_ids['department_id'],
+        'first_name': 'John',
+        'last_name': 'Doe',
+        'gender': 'Male',
+        'dob': '1990-01-01',
+        'father_name': 'Father Name',
+        'guardian_name': 'Guardian Name',
+        'is_kyc_verified': 1,
+        'pic_path': '/path/to/pic',
+        'admin_login_id': auth_header['admin_id']
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Mother Name'
+
+
+def test_edit_admin_basic_info_missing_admin_login_id(test_client, auth_header):
+    response = test_client.put(f'/admin_basicinfo/edit/{auth_header["admin_id"]}', json={
+        'department_id': seed_ids['department_id'],
+        'first_name': 'John',
+        'last_name': 'Doe',
+        'gender': 'Male',
+        'dob': '1990-01-01',
+        'father_name': 'Father Name',
+        'mother_name': 'Mother Name',
+        'guardian_name': 'Guardian Name',
+        'is_kyc_verified': 1,
+        'pic_path': '/path/to/pic'
+    }, headers=auth_header)
+
+    assert response.json['message'] == 'Please Provide Logged Admin Id'

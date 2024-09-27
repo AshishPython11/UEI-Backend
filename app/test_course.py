@@ -6,6 +6,7 @@ from app.models.log import *
 from app.models.adminuser import CourseMaster
 from app.models.student import StudentLogin
 import time
+import random
 from faker import Faker
 faker=Faker()
 @pytest.fixture(scope='module')
@@ -25,7 +26,7 @@ def test_client():
 @pytest.fixture
 def auth_header(test_client):
     # You can seed user data here if needed for login
-    unique_email = faker.unique.email()
+    unique_email = f"{faker.unique.email().split('@')[0]}_{random.randint(1000, 9999)}@example.com"
 
     # First, sign up a new user
     signup_response = test_client.post('/auth/signup', json={
@@ -158,3 +159,15 @@ def test_course_deactivate(test_client, auth_header):
     response = test_client.put(f'/course/deactivate/{seed_ids['course_master_id']}', headers=auth_header)
     assert response.status_code == 200
     assert 'Course deactivated successfully' in response.json['message']
+def test_add_course_missing_course_name(test_client, auth_header):
+    response = test_client.post('/course/add', json={}, headers=auth_header)
+    
+    assert response.is_json
+    assert response.json['message'] == 'Please Provide Course name'
+
+def test_edit_course_missing_course_name(test_client, auth_header):
+    response = test_client.put(f'/course/edit/{seed_ids['course_master_id']}', json={}, headers=auth_header)
+    
+    assert response.is_json
+    assert response.json['message'] == 'Please provide course name'
+
