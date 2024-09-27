@@ -243,6 +243,7 @@ class AdminAddressController:
                     address_type = data.get("address_type")
                     current_user_id = get_jwt_identity()
 
+
                     if not admin_id:
                         return jsonify(
                             {"message": "Please Provide Admin Id", "status": 201}
@@ -279,6 +280,7 @@ class AdminAddressController:
                         return jsonify(
                             {"message": "Please Provide Address Type", "status": 201}
                         )
+
                     else:
 
                         admin_address = AdminAddress.query.filter_by(
