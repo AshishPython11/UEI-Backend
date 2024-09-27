@@ -124,7 +124,7 @@ from app.controllers.class_controller import ClassController
 from app.controllers.student_profile_controller import ProfileController
 from app.controllers.feedback_controller import FeedbackController
 from app.controllers.new_student_academic_history_controller import NewStudentAcademicHistoryController
-from app.controllers.google_login import google_bp
+# from app.controllers.google_login import google_bp
 # Instantiate controllers
 auth_controller = AuthController(api)
 subject_controller = SubjectController(api)
@@ -197,7 +197,7 @@ app.register_blueprint(class_controller.class_bp)
 app.register_blueprint(student_profile_controller.profile_bp)
 app.register_blueprint(feedback_controller.feedback_bp)
 app.register_blueprint(new_academic_history.new_student_academic_history_bp)
-app.register_blueprint(google_bp, url_prefix='/google')
+# app.register_blueprint(google_bp, url_prefix='/google')
 # api.init_app(app)
 
 # Route for serving Swagger JSON
