@@ -215,7 +215,7 @@ class StudentHobbyController:
                     
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.student_hobby_ns.route('/edit/<int:id>')
+        @self.student_hobby_ns.route('/edit/<string:id>')
         class StudentHobbyEdit(Resource):
             @self.student_hobby_ns.doc('student_hobby/edit', security='jwt')
             @api.expect(self.student_hobby_model)
@@ -277,7 +277,7 @@ class StudentHobbyController:
                 except Exception as e:
 
                     return jsonify({'message': str(e), 'status': 500})
-        @self.student_hobby_ns.route('/delete/<int:id>')
+        @self.student_hobby_ns.route('/delete/<string:id>')
         class StudentHobbyDelete(Resource):
             @self.student_hobby_ns.doc('student_hobby/delete', security='jwt')
             @jwt_required()
@@ -296,7 +296,7 @@ class StudentHobbyController:
 
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.student_hobby_ns.route('/activate/<int:id>')
+        @self.student_hobby_ns.route('/activate/<string:id>')
         class StudentHobbyActivate(Resource):
             @self.student_hobby_ns.doc('student_hobby/activate', security='jwt')
             @jwt_required()
@@ -316,7 +316,7 @@ class StudentHobbyController:
      
                     return jsonify({'message': str(e), 'status': 500})
         
-        @self.student_hobby_ns.route('/deactivate/<int:id>')
+        @self.student_hobby_ns.route('/deactivate/<string:id>')
         class StudentHobbyDeactivate(Resource):
             @self.student_hobby_ns.doc('student_hobby/deactivate', security='jwt')
             @jwt_required()

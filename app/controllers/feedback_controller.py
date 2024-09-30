@@ -100,7 +100,7 @@ class FeedbackController:
                 except Exception as e:
                     db.session.rollback()
                     return jsonify({'message': str(e), 'status': 500})
-        @self.feedback_ns.route('/edit/<int:id>')
+        @self.feedback_ns.route('/edit/<string:id>')
         class FeedbackEdit(Resource):
             @self.feedback_ns.doc('feedback/edit', security='jwt')
             @self.api.expect(self.feedback_model)
@@ -126,7 +126,7 @@ class FeedbackController:
                 except Exception as e:
                     db.session.rollback()
                     return jsonify({'message': str(e), 'status': 500})
-        @self.feedback_ns.route('/delete/<int:id>')
+        @self.feedback_ns.route('/delete/<string:id>')
         class FeedbackDelete(Resource):
             @self.feedback_ns.doc('feedback/delete', security='jwt')
             @jwt_required()
@@ -177,7 +177,7 @@ class FeedbackController:
                 except Exception as e:
                     db.session.rollback()
                     return jsonify({'message': str(e), 'status': 500})
-        @self.feedback_ns.route('/student_feedback/<int:student_id>')
+        @self.feedback_ns.route('/student_feedback/<string:student_id>')
         class StudentFeedbackGet(Resource):
             @self.feedback_ns.doc('student_feedback/get', security='jwt')
             @jwt_required()
@@ -284,7 +284,7 @@ class FeedbackController:
 
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.feedback_ns.route('/<int:id>')
+        @self.feedback_ns.route('/<string:id>')
         class FeedbackDetail(Resource):
             @self.feedback_ns.doc('feedback/get_by_id', security='jwt')
             @jwt_required()
@@ -332,7 +332,7 @@ class FeedbackController:
                         'updated_by': updated_by,
                     }
                     return jsonify({'message': 'Feedback Details found successfully', 'status': 200, 'data': feedback_data})
-        @self.feedback_ns.route('/activate/<int:id>')
+        @self.feedback_ns.route('/activate/<string:id>')
         class FeedbackActivate(Resource):
             @self.feedback_ns.doc('feedback/activate', security='jwt')
             @jwt_required()
@@ -352,7 +352,7 @@ class FeedbackController:
       
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.feedback_ns.route('/deactivate/<int:id>')
+        @self.feedback_ns.route('/deactivate/<string:id>')
         class FeedbackDeactivate(Resource):
             @self.feedback_ns.doc('feedback/deactivate', security='jwt')
             @jwt_required()
@@ -372,7 +372,7 @@ class FeedbackController:
         
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.feedback_ns.route('/student_activate/<int:id>')
+        @self.feedback_ns.route('/student_activate/<string:id>')
         class StudentFeedbackActivate(Resource):
             @self.feedback_ns.doc('student_feedback/activate', security='jwt')
             @jwt_required()
@@ -392,7 +392,7 @@ class FeedbackController:
        
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.feedback_ns.route('/student_deactivate/<int:id>')
+        @self.feedback_ns.route('/student_deactivate/<string:id>')
         class StudentFeedbackDeactivate(Resource):
             @self.feedback_ns.doc('student_feedback/deactivate', security='jwt')
             @jwt_required()

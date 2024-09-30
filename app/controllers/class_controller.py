@@ -106,7 +106,7 @@ class ClassController:
 
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.class_ns.route('/edit/<int:id>')
+        @self.class_ns.route('/edit/<string:id>')
         class ClassEdit(Resource):
             @self.class_ns.doc('class/edit', security='jwt')
             @self.class_ns.expect(self.class_model)
@@ -141,7 +141,7 @@ class ClassController:
         
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.class_ns.route('/get/<int:id>')
+        @self.class_ns.route('/get/<string:id>')
         class ClassGet(Resource):
             @self.class_ns.doc('class/get', security='jwt')
             @jwt_required()
@@ -166,7 +166,7 @@ class ClassController:
  
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.class_ns.route('/delete/<int:id>')
+        @self.class_ns.route('/delete/<string:id>')
         class ClassDelete(Resource):
             @self.class_ns.doc('class/delete', security='jwt')
             @jwt_required()
@@ -185,7 +185,7 @@ class ClassController:
                     db.session.rollback()
 
                     return jsonify({'message': str(e), 'status': 500})
-        @self.class_ns.route('/activate/<int:id>')
+        @self.class_ns.route('/activate/<string:id>')
         class CourseActivate(Resource):
             @self.class_ns.doc('class/activate', security='jwt')
             @jwt_required()
@@ -206,7 +206,7 @@ class ClassController:
       
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.class_ns.route('/deactivate/<int:id>')
+        @self.class_ns.route('/deactivate/<string:id>')
         class CourseDeactivate(Resource):
             @self.class_ns.doc('class/deactivate', security='jwt')
             @jwt_required()

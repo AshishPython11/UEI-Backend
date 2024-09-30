@@ -133,7 +133,7 @@ class InstituteController:
       
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.institution_ns.route('/edit/<int:id>')
+        @self.institution_ns.route('/edit/<string:id>')
         class InstitutionEdit(Resource):
             @self.institution_ns.doc('institution/edit', security='jwt')
             @api.expect(self.institution_model)
@@ -242,7 +242,7 @@ class InstituteController:
                 except Exception as e:
       
                     return jsonify({'message': str(e), 'status': 500})
-        @self.institution_ns.route('delete/<int:id>')
+        @self.institution_ns.route('delete/<string:id>')
         class InstitutionDelete(Resource):
             @self.institution_ns.doc('institution/delete', security='jwt')
             @jwt_required()
@@ -262,7 +262,7 @@ class InstituteController:
   
                         return jsonify({'message': str(e), 'status': 500})
                     
-        @self.institution_ns.route('/activate/<int:id>')
+        @self.institution_ns.route('/activate/<string:id>')
         class InstitutionActivate(Resource):
             @self.institution_ns.doc('institution/activate', security='jwt')
             @jwt_required()
@@ -282,7 +282,7 @@ class InstituteController:
  
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.institution_ns.route('/deactivate/<int:id>')
+        @self.institution_ns.route('/deactivate/<string:id>')
         class InstitutionDeactivate(Resource):
             @self.institution_ns.doc('institution/deactivate', security='jwt')
             @jwt_required()

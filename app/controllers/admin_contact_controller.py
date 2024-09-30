@@ -120,7 +120,7 @@ class AdminContactController:
                     db.session.rollback()               
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.admin_contact_ns.route('/edit/<int:id>')
+        @self.admin_contact_ns.route('/edit/<string:id>')
         class AdminContactEdit(Resource):
             @self.admin_contact_ns.doc('admin_contact/edit', security='jwt')
             @api.expect(self.admin_contact_model)
@@ -194,7 +194,7 @@ class AdminContactController:
              
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.admin_contact_ns.route('/activate/<int:id>')
+        @self.admin_contact_ns.route('/activate/<string:id>')
         class AdminContactActivate(Resource):
             @self.admin_contact_ns.doc('admin_contact/activate', security='jwt')
             @jwt_required()
@@ -214,7 +214,7 @@ class AdminContactController:
         
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.admin_contact_ns.route('/deactivate/<int:id>')
+        @self.admin_contact_ns.route('/deactivate/<string:id>')
         class AdminContactDeactivate(Resource):
             @self.admin_contact_ns.doc('admin_contact/deactivate', security='jwt')
             @jwt_required()

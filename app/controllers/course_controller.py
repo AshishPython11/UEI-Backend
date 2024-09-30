@@ -98,7 +98,7 @@ class CourseController:
                   
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.course_ns.route('/edit/<int:id>')
+        @self.course_ns.route('/edit/<string:id>')
         class CourseEdit(Resource):
             @self.course_ns.doc('course/edit', security='jwt')
             @self.course_ns.expect(self.course_model)
@@ -154,7 +154,7 @@ class CourseController:
                 except Exception as e:
     
                     return jsonify({'message': str(e), 'status': 500})
-        @self.course_ns.route('delete/<int:id>')
+        @self.course_ns.route('delete/<string:id>')
         class CourseDelete(Resource):
             @self.course_ns.doc('course/delete', security='jwt')
             @jwt_required()
@@ -174,7 +174,7 @@ class CourseController:
 
                         return jsonify({'message': str(e), 'status': 500})
                     
-        @self.course_ns.route('/activate/<int:id>')
+        @self.course_ns.route('/activate/<string:id>')
         class CourseActivate(Resource):
             @self.course_ns.doc('course/activate', security='jwt')
             @jwt_required()
@@ -195,7 +195,7 @@ class CourseController:
            
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.course_ns.route('/deactivate/<int:id>')
+        @self.course_ns.route('/deactivate/<string:id>')
         class CourseDeactivate(Resource):
             @self.course_ns.doc('course/deactivate', security='jwt')
             @jwt_required()

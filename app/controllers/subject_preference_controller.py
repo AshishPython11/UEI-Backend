@@ -280,7 +280,7 @@ class SubjectPreferenceController:
                         return jsonify({'message': str(e), 'status': 500})
 
 
-        @self.subject_preference_ns.route('/edit/<int:id>')
+        @self.subject_preference_ns.route('/edit/<string:id>')
         class SubjectPreferenceEdit(Resource):
             @self.subject_preference_ns.doc('subject_preference/edit', security='jwt')
             @api.expect(self.subject_preference_model)
@@ -360,7 +360,7 @@ class SubjectPreferenceController:
                     return jsonify({'message': str(e), 'status': 500})
 
      
-        @self.subject_preference_ns.route('delete/<int:id>')
+        @self.subject_preference_ns.route('delete/<string:id>')
         class StudentSubjectPreferenceDelete(Resource):
             @self.subject_preference_ns.doc('subject_preference/delete', security='jwt')
             @jwt_required()
@@ -379,7 +379,7 @@ class SubjectPreferenceController:
  
                         return jsonify({'message': str(e), 'status': 500})
                         
-        @self.subject_preference_ns.route('/activate/<int:id>')
+        @self.subject_preference_ns.route('/activate/<string:id>')
         class SubjectPreferenceActivate(Resource):
             @self.subject_preference_ns.doc('subject_preference/activate', security='jwt')
             @jwt_required()
@@ -396,7 +396,7 @@ class SubjectPreferenceController:
                     db.session.rollback()
                     return jsonify({'message': str(e), 'status': 500})
             
-        @self.subject_preference_ns.route('/deactivate/<int:id>')
+        @self.subject_preference_ns.route('/deactivate/<string:id>')
         class SubjectPreferenceDeactivate(Resource):
             @self.subject_preference_ns.doc('subject_preference/deactivate', security='jwt')
             @jwt_required()

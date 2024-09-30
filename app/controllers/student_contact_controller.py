@@ -134,7 +134,7 @@ class StudentContactController:
       
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.student_contact_ns.route('/edit/<int:id>')
+        @self.student_contact_ns.route('/edit/<string:id>')
         class StudentContactEdit(Resource):
             @self.student_contact_ns.doc('student_contact/edit', security='jwt')
             @api.expect(self.student_contact_model)
@@ -214,7 +214,7 @@ class StudentContactController:
                 except Exception as e:
  
                     return jsonify({'message': str(e), 'status': 500})
-        @self.student_contact_ns.route('/activate/<int:id>')
+        @self.student_contact_ns.route('/activate/<string:id>')
         class StudentConatactActivate(Resource):
             @self.student_contact_ns.doc('student/activate', security='jwt')
             @jwt_required()
@@ -234,7 +234,7 @@ class StudentContactController:
 
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.student_contact_ns.route('/deactivate/<int:id>')
+        @self.student_contact_ns.route('/deactivate/<string:id>')
         class StudentConatactDeactivate(Resource):
             @self.student_contact_ns.doc('student/deactivate', security='jwt')
             @jwt_required()

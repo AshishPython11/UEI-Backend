@@ -497,7 +497,7 @@ class ChatController:
                         db.session.rollback()
                         return jsonify({'message': 'Internal Server Error', 'status': 500})
         
-        @self.chat_ns.route('/api/chat-count/<int:student_id>')
+        @self.chat_ns.route('/api/chat-count/<string:student_id>')
         class GetChatCount(Resource):
             def get(self,student_id):
                 try:

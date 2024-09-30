@@ -229,7 +229,7 @@ class AdminLanguageKnownController:
                   
                     return jsonify({'message': str(e), 'status': 500})
                                      
-        @self.admin_language_known_ns.route('/edit/<int:id>')
+        @self.admin_language_known_ns.route('/edit/<string:id>')
         class AdminLanguageKnownEdit(Resource):
             @self.admin_language_known_ns.doc('admin_language_known/edit', security='jwt')
             @api.expect(self.admin_language_known_model)
@@ -295,7 +295,7 @@ class AdminLanguageKnownController:
 
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.admin_language_known_ns.route('/delete/<int:id>')
+        @self.admin_language_known_ns.route('/delete/<string:id>')
         class LanguageKnownDelete(Resource):
             @self.admin_language_known_ns.doc('admin_language_known/delete', security='jwt')
             @jwt_required()
@@ -315,7 +315,7 @@ class AdminLanguageKnownController:
              
                         return jsonify({'message': str(e), 'status': 500})
                         
-        @self.admin_language_known_ns.route('/activate/<int:id>')
+        @self.admin_language_known_ns.route('/activate/<string:id>')
         class LanguageKnownActivate(Resource):
             @self.admin_language_known_ns.doc('admin_language_known/activate', security='jwt')
             @jwt_required()
@@ -335,7 +335,7 @@ class AdminLanguageKnownController:
              
                     return jsonify({'message': str(e), 'status': 500})
         
-        @self.admin_language_known_ns.route('/deactivate/<int:id>')
+        @self.admin_language_known_ns.route('/deactivate/<string:id>')
         class LanguageKnownDeactivate(Resource):
             @self.admin_language_known_ns.doc('admin_language_known/deactivate', security='jwt')
             @jwt_required()

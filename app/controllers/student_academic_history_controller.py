@@ -317,7 +317,7 @@ class StudentAcademicHistoryController:
                 
                     return jsonify({'message': str(e), 'status': 500})
         
-        @self.student_academic_history_ns.route('/edit/<int:id>')
+        @self.student_academic_history_ns.route('/edit/<string:id>')
         class AcademicHistoryEdit(Resource):
             @self.student_academic_history_ns.doc('student_academic_history/edit', security='jwt')
             @api.expect(self.student_academic_history_model)
@@ -410,7 +410,7 @@ class StudentAcademicHistoryController:
                 except Exception as e:
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.student_academic_history_ns.route('delete/<int:id>')
+        @self.student_academic_history_ns.route('delete/<string:id>')
         class StudentAcademicHistoryDelete(Resource):
             @self.student_academic_history_ns.doc('student_academic_history/delete', security='jwt')
             @jwt_required()
@@ -429,7 +429,7 @@ class StudentAcademicHistoryController:
 
                         return jsonify({'message': str(e), 'status': 500})
                     
-        @self.student_academic_history_ns.route('/activate/<int:id>')
+        @self.student_academic_history_ns.route('/activate/<string:id>')
         class StudentAcademicHistoryActivate(Resource):
             @self.student_academic_history_ns.doc('student_academic_history/activate', security='jwt')
             @jwt_required()
@@ -449,7 +449,7 @@ class StudentAcademicHistoryController:
      
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.student_academic_history_ns.route('/deactivate/<int:id>')
+        @self.student_academic_history_ns.route('/deactivate/<string:id>')
         class StudentAcademicHistoryDeactivate(Resource):
             @self.student_academic_history_ns.doc('student_academic_history/deactivate', security='jwt')
             @jwt_required()

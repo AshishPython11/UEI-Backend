@@ -98,7 +98,7 @@ class DepartmentController:
                     
         
                 
-        @self.department_ns.route('/edit/<int:id>')
+        @self.department_ns.route('/edit/<string:id>')
         class DepartmentEdit(Resource):
             @self.department_ns.doc('department/edit', security='jwt')
             @api.expect(self.department_model)
@@ -156,7 +156,7 @@ class DepartmentController:
                 except Exception as e:
                     return jsonify({'message': str(e), 'status': 500})
         
-        @self.department_ns.route('delete/<int:id>')
+        @self.department_ns.route('delete/<string:id>')
         class DepartmentDelete(Resource):
             @self.department_ns.doc('department/delete', security='jwt')
             @jwt_required()
@@ -177,7 +177,7 @@ class DepartmentController:
 
                         return jsonify({'message': str(e), 'status': 500})
                         
-        @self.department_ns.route('/activate/<int:id>')
+        @self.department_ns.route('/activate/<string:id>')
         class DepartmentActivate(Resource):
             @self.department_ns.doc('department/activate', security='jwt')
             @jwt_required()
@@ -198,7 +198,7 @@ class DepartmentController:
 
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.department_ns.route('/deactivate/<int:id>')
+        @self.department_ns.route('/deactivate/<string:id>')
         class DepartmentDeactivate(Resource):
             @self.department_ns.doc('department/deactivate', security='jwt')
             @jwt_required()

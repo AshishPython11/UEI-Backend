@@ -155,7 +155,7 @@ class StudentAddressController:
  
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.student_address_ns.route('/edit/<int:id>')
+        @self.student_address_ns.route('/edit/<string:id>')
         class StudentAddressEdit(Resource):
             @self.student_address_ns.doc('student_address/edit', security='jwt')
             @api.expect(self.student_address_model)
@@ -275,7 +275,7 @@ class StudentAddressController:
                 except Exception as e:
 
                     return jsonify({'message': str(e), 'status': 500})
-        @self.student_address_ns.route('delete/<int:id>')
+        @self.student_address_ns.route('delete/<string:id>')
         class StudentAddressDelete(Resource):
             @self.student_address_ns.doc('student_address/delete', security='jwt')
             @jwt_required()
@@ -293,7 +293,7 @@ class StudentAddressController:
 
                         return jsonify({'message': str(e), 'status': 500})
                         
-        @self.student_address_ns.route('/activate/<int:id>')
+        @self.student_address_ns.route('/activate/<string:id>')
         class StudentAddressActivate(Resource):
             @self.student_address_ns.doc('student_address/activate', security='jwt')
             @jwt_required()
@@ -313,7 +313,7 @@ class StudentAddressController:
 
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.student_address_ns.route('/deactivate/<int:id>')
+        @self.student_address_ns.route('/deactivate/<string:id>')
         class StudentAddressDeactivate(Resource):
             @self.student_address_ns.doc('student_address/deactivate', security='jwt')
             @jwt_required()

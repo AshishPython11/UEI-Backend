@@ -401,7 +401,7 @@ class StudentController:
              
         #             return jsonify({'message': str(e), 'status': 500})
 
-        @self.student_ns.route('/get/<int:id>')
+        @self.student_ns.route('/get/<string:id>')
         class StudentGetByLoginId(Resource):
             @self.student_ns.doc('student/getbyloginId', security='jwt')
             @jwt_required()
@@ -435,7 +435,7 @@ class StudentController:
                     db.session.rollback()
             
                     return jsonify({'message': str(e), 'status': 500})
-            @self.student_ns.route('/getProfile/<int:id>')
+            @self.student_ns.route('/getProfile/<string:id>')
             class StudentGetProfile(Resource):
                 @self.student_ns.doc('student/getProfile', security='jwt')
                 @jwt_required()
@@ -569,7 +569,7 @@ class StudentController:
                     except Exception as e:
 
                             return jsonify({'message': str(e), 'status': 500})        
-        @self.student_ns.route('/edit/<int:id>')
+        @self.student_ns.route('/edit/<string:id>')
         class StudentEdit(Resource):
             @self.student_ns.doc('student/edit', security='jwt')
             @api.expect(self.student_model)
@@ -674,7 +674,7 @@ class StudentController:
                     return jsonify({'message': str(e), 'status': 500})
                     
                 
-        @self.student_ns.route('/editstudent/<int:id>')
+        @self.student_ns.route('/editstudent/<string:id>')
         class StudentEdit(Resource):
             @self.student_ns.doc('student/editeditstudent', security='jwt')
             @api.expect(self.student_model)
@@ -751,7 +751,7 @@ class StudentController:
                         db.session.rollback()
              
                         return jsonify({'message': str(e), 'status': 500})
-        @self.student_ns.route('delete/<int:id>')
+        @self.student_ns.route('delete/<string:id>')
         class StudentDelete(Resource):
             @self.student_ns.doc('student/delete', security='jwt')
             @jwt_required()
@@ -771,7 +771,7 @@ class StudentController:
 
                         return jsonify({'message': str(e), 'status': 500})
                     
-        @self.student_ns.route('/activate/<int:id>')
+        @self.student_ns.route('/activate/<string:id>')
         class StudentActivate(Resource):
             @self.student_ns.doc('student/activate', security='jwt')
             @jwt_required()
@@ -791,7 +791,7 @@ class StudentController:
   
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.student_ns.route('/deactivate/<int:id>')
+        @self.student_ns.route('/deactivate/<string:id>')
         class StudentDeactivate(Resource):
             @self.student_ns.doc('student/deactivate', security='jwt')
             @jwt_required()
@@ -811,7 +811,7 @@ class StudentController:
                   
                     return jsonify({'message': str(e), 'status': 500})
                     
-        @self.student_ns.route('/profile-completion/<int:id>')
+        @self.student_ns.route('/profile-completion/<string:id>')
         class StudentProfileCompletion(Resource):
             @self.student_ns.doc('student/profile-completion', security='jwt')
             @jwt_required()

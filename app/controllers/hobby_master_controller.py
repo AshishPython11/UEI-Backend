@@ -6,6 +6,7 @@ from app import db, api, authorizations
 from flask_restx import Api, Namespace, Resource, fields
 from app.models.student import Hobby
 from sqlalchemy import desc
+from uuid import UUID
 class HobbyController:
     def __init__(self,api):
         self.api = api
@@ -89,7 +90,7 @@ class HobbyController:
 
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.hobby_ns.route('/edit/<int:id>')
+        @self.hobby_ns.route('/edit/<string:id>')
         class HobbyEdit(Resource):
             @self.hobby_ns.doc('hobby/edit', security='jwt')
             @api.expect(self.hobby_model)
@@ -122,6 +123,7 @@ class HobbyController:
             @jwt_required()
             def get(self, id):
                 try:
+                   
                     hobby = Hobby.query.get(id)
                     if not hobby:
             
@@ -143,7 +145,7 @@ class HobbyController:
    
                     return jsonify({'message': str(e), 'status': 500})
                     
-        @self.hobby_ns.route('delete/<int:id>')
+        @self.hobby_ns.route('delete/<string:id>')
         class HobbyDelete(Resource):
             @self.hobby_ns.doc('hobby/delete', security='jwt')
             @jwt_required()
@@ -164,7 +166,7 @@ class HobbyController:
        
                         return jsonify({'message': str(e), 'status': 500})
                         
-        @self.hobby_ns.route('/activate/<int:id>')
+        @self.hobby_ns.route('/activate/<string:id>')
         class HobbyActivate(Resource):
             @self.hobby_ns.doc('hobby/activate', security='jwt')
             @jwt_required()
@@ -184,7 +186,7 @@ class HobbyController:
 
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.hobby_ns.route('/deactivate/<int:id>')
+        @self.hobby_ns.route('/deactivate/<string:id>')
         class HobbyDeactivate(Resource):
             @self.hobby_ns.doc('hobby/deactivate', security='jwt')
             @jwt_required()

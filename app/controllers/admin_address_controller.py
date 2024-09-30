@@ -147,7 +147,7 @@ class AdminAddressController:
                 except Exception as e:
                     return jsonify({'message': str(e), 'status': 500})
                    
-        @self.admin_address_ns.route('/edit/<int:id>')
+        @self.admin_address_ns.route('/edit/<string:id>')
         class AdminAddressEdit(Resource):
             @self.admin_address_ns.doc('admin_address/edit', security='jwt')
             @api.expect(self.admin_address_model)
@@ -261,7 +261,7 @@ class AdminAddressController:
                 except Exception as e:
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.admin_address_ns.route('/activate/<int:id>')
+        @self.admin_address_ns.route('/activate/<string:id>')
         class AdminAddressActivate(Resource):
             @self.admin_address_ns.doc('admin_address/activate', security='jwt')
             @jwt_required()
@@ -280,7 +280,7 @@ class AdminAddressController:
                     db.session.rollback()
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.admin_address_ns.route('/deactivate/<int:id>')
+        @self.admin_address_ns.route('/deactivate/<string:id>')
         class AdminAddressDeactivate(Resource):
             @self.admin_address_ns.doc('admin_address/deactivate', security='jwt')
             @jwt_required()

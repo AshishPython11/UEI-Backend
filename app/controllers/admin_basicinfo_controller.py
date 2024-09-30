@@ -155,7 +155,7 @@ class AdminBasicInformationController:
                     db.session.rollback()
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.admin_basicinfo_ns.route('/edit/<int:id>')
+        @self.admin_basicinfo_ns.route('/edit/<string:id>')
         class AdminBasicInformationEdit(Resource):
             @self.admin_basicinfo_ns.doc('admin_basicinfo/edit', security='jwt')
             @api.expect(self.admin_basicinfo_model)
@@ -247,7 +247,7 @@ class AdminBasicInformationController:
                 except Exception as e:
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.admin_basicinfo_ns.route('/getProfile/<int:id>')
+        @self.admin_basicinfo_ns.route('/getProfile/<string:id>')
         class AdminGetProfile(Resource):
                 @self.admin_basicinfo_ns.doc('admin/getProfile', security='jwt')
                 @jwt_required()
@@ -363,7 +363,7 @@ class AdminBasicInformationController:
                     except Exception as e:
                         return jsonify({'message': str(e), 'status': 500})
                         
-        @self.admin_basicinfo_ns.route('/activate/<int:id>')
+        @self.admin_basicinfo_ns.route('/activate/<string:id>')
         class AdminBasicInformationActivate(Resource):
             @self.admin_basicinfo_ns.doc('admin_basicinfo/activate', security='jwt')
             @jwt_required()
@@ -380,7 +380,7 @@ class AdminBasicInformationController:
                     db.session.rollback()
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.admin_basicinfo_ns.route('/deactivate/<int:id>')
+        @self.admin_basicinfo_ns.route('/deactivate/<string:id>')
         class AdminBasicInformationDeactivate(Resource):
             @self.admin_basicinfo_ns.doc('admin_basicinfo/deactivate', security='jwt')
             @jwt_required()

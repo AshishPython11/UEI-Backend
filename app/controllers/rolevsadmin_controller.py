@@ -124,7 +124,7 @@ class RolevsAdminController:
 
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.rolevsadmin_ns.route('/edit/<int:id>')
+        @self.rolevsadmin_ns.route('/edit/<string:id>')
         class RolevsAdminEdit(Resource):
             @self.rolevsadmin_ns.doc('rolevsadmin/edit', security='jwt')
             @api.expect(self.rolevsadmin_model)
@@ -192,7 +192,7 @@ class RolevsAdminController:
                     return jsonify({'message': str(e), 'status': 500})
                 
             
-        @self.rolevsadmin_ns.route('delete/<int:id>')
+        @self.rolevsadmin_ns.route('delete/<string:id>')
         class RolevsAdminDelete(Resource):
             @self.rolevsadmin_ns.doc('rolevsadmin/delete', security='jwt')
             @jwt_required()
@@ -211,7 +211,7 @@ class RolevsAdminController:
                     except Exception as e:
 
                         return jsonify({'message': str(e), 'status': 500})
-        @self.rolevsadmin_ns.route('/activate/<int:id>')
+        @self.rolevsadmin_ns.route('/activate/<string:id>')
         class RolevsAdminActivate(Resource):
             @self.rolevsadmin_ns.doc('rolevsadmin/activate', security='jwt')
             @jwt_required()
@@ -231,7 +231,7 @@ class RolevsAdminController:
     
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.rolevsadmin_ns.route('/deactivate/<int:id>')
+        @self.rolevsadmin_ns.route('/deactivate/<string:id>')
         class RolevsAdminDeactivate(Resource):
             @self.rolevsadmin_ns.doc('rolevsadmin/deactivate', security='jwt')
             @jwt_required()
