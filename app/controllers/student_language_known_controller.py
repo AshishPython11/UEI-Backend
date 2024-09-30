@@ -232,7 +232,7 @@ class StudentLanguageKnownController:
                     db.session.rollback()
                   
                     return jsonify({'message': str(e), 'status': 500})
-        @self.student_language_known_ns.route('/edit/<int:id>')
+        @self.student_language_known_ns.route('/edit/<string:id>')
         class StudentLanguageKnownEdit(Resource):
             @self.student_language_known_ns.doc('student_language_known/edit', security='jwt')
             @api.expect(self.student_language_known_model)
@@ -297,7 +297,7 @@ class StudentLanguageKnownController:
                 except Exception as e:
 
                     return jsonify({'message': str(e), 'status': 500})
-        @self.student_language_known_ns.route('delete/<int:id>')
+        @self.student_language_known_ns.route('delete/<string:id>')
         class LanguageKnownDelete(Resource):
             @self.student_language_known_ns.doc('student_language_known/delete', security='jwt')
             @jwt_required()
@@ -316,7 +316,7 @@ class StudentLanguageKnownController:
 
                             return jsonify({'message': str(e), 'status': 500})
                     
-        @self.student_language_known_ns.route('/activate/<int:id>')
+        @self.student_language_known_ns.route('/activate/<string:id>')
         class StudentLanguageKnownActivate(Resource):
             @self.student_language_known_ns.doc('student_language_known/activate', security='jwt')
             @jwt_required()
@@ -335,7 +335,7 @@ class StudentLanguageKnownController:
                  
                     return jsonify({'message': str(e), 'status': 500})
         
-        @self.student_language_known_ns.route('/deactivate/<int:id>')
+        @self.student_language_known_ns.route('/deactivate/<string:id>')
         class StudentLanguageKnownDeactivate(Resource):
             @self.student_language_known_ns.doc('student_language_known/deactivate', security='jwt')
             @jwt_required()

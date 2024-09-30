@@ -1,13 +1,14 @@
 from app import db
 from datetime import datetime
 from .adminuser import TimestampMixin
-
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
 
 class Chatbot(db.Model, TimestampMixin):
     __tablename__ = "tbl_chatbot"
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     student_id = db.Column(
-        db.Integer, db.ForeignKey("tbl_student_login.student_id"), nullable=False
+        UUID(as_uuid=True), db.ForeignKey("tbl_student_login.student_id"), nullable=False
     )
     chat_question = db.Column(db.String(255))
     response = db.Column(db.String(255))
@@ -20,9 +21,9 @@ class Chatbot(db.Model, TimestampMixin):
 
 class ChatData(db.Model, TimestampMixin):
     __tablename__ = "tbl_chat_data"
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     student_id = db.Column(
-        db.Integer, db.ForeignKey("tbl_student_login.student_id"), nullable=False
+        UUID(as_uuid=True), db.ForeignKey("tbl_student_login.student_id"), nullable=False
     )
     chat_question = db.Column(db.String(255))
     response = db.Column(db.Text)
@@ -37,7 +38,7 @@ class ChatData(db.Model, TimestampMixin):
 
 class ChatCache(db.Model, TimestampMixin):
     __tablename__ = "tbl_chat_cache"
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     student_stream = db.Column(db.String(255))
     student_course = db.Column(db.String(255))
     chat_question = db.Column(db.String(255))
@@ -51,7 +52,7 @@ class ChatCache(db.Model, TimestampMixin):
 class CustomChatData(db.Model):
     __tablename__ = 'custom_chat_data' 
 
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
     student_id = db.Column(db.Integer, nullable=False)
     chat_title = db.Column(db.Text, nullable=False)
     chat_conversation = db.Column(db.Text, nullable=False)
@@ -70,8 +71,8 @@ from sqlalchemy import Index
 
 class ChatConversionData(db.Model):
     __tablename__ = 'chat_conversation_data' 
-    id = db.Column(db.Integer, primary_key=True)
-    student_id = db.Column(db.Integer, db.ForeignKey('tbl_student_login.student_id'), nullable=False) 
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False)
+    student_id = db.Column(UUID(as_uuid=True), db.ForeignKey('tbl_student_login.student_id'), nullable=False)
     chat_question = db.Column(db.Text, nullable=False)
     response = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now, nullable=False)

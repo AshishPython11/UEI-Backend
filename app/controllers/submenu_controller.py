@@ -107,7 +107,7 @@ class SubMenuController:
 
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.submenu_ns.route('/edit/<int:id>')
+        @self.submenu_ns.route('/edit/<string:id>')
         class SubMenuEdit(Resource):
             @self.submenu_ns.doc('submenu/edit', security='jwt')
             @api.expect(self.submenu_model)
@@ -165,7 +165,7 @@ class SubMenuController:
                         return jsonify({'message': 'SubMenu found Successfully', 'status': 200,'data':submenu_data})
                 except Exception as e:
                     return jsonify({'message': str(e), 'status': 500})
-        @self.submenu_ns.route('delete/<int:id>')
+        @self.submenu_ns.route('delete/<string:id>')
         class SubMenuDelete(Resource):
             @self.submenu_ns.doc('submenu/delete', security='jwt')
             @jwt_required()
@@ -182,7 +182,7 @@ class SubMenuController:
                     except Exception as e:
                         return jsonify({'message': str(e), 'status': 500})
                     
-        @self.submenu_ns.route('/activate/<int:id>')
+        @self.submenu_ns.route('/activate/<string:id>')
         class SubMenuActivate(Resource):
             @self.submenu_ns.doc('submenu/activate', security='jwt')
             @jwt_required()
@@ -199,7 +199,7 @@ class SubMenuController:
                         db.session.rollback()
                         return jsonify({'message': str(e), 'status': 500})
 
-        @self.submenu_ns.route('/deactivate/<int:id>')
+        @self.submenu_ns.route('/deactivate/<string:id>')
         class SubMenuDeactivate(Resource):
             @self.submenu_ns.doc('submenu/deactivate', security='jwt')
             @jwt_required()

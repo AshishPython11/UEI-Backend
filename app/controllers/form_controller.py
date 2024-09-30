@@ -123,7 +123,7 @@ class FormController:
   
                     return jsonify({'message': str(e), 'status': 500})
                     
-        @self.form_ns.route('/edit/<int:id>')
+        @self.form_ns.route('/edit/<string:id>')
         class FormEdit(Resource):
             @self.form_ns.doc('form/edit', security='jwt')
             @api.expect(self.form_model)
@@ -199,7 +199,7 @@ class FormController:
                 except Exception as e:
 
                     return jsonify({'message': str(e), 'status': 500})
-        @self.form_ns.route('delete/<int:id>')
+        @self.form_ns.route('delete/<string:id>')
         class FormDelete(Resource):
             @self.form_ns.doc('form/delete', security='jwt')
             @jwt_required()
@@ -227,7 +227,7 @@ class FormController:
 
                         return jsonify({'message': str(e), 'status': 500})
                     
-        @self.form_ns.route('/activate/<int:id>')
+        @self.form_ns.route('/activate/<string:id>')
         class FormActivate(Resource):
             @self.form_ns.doc('form/activate', security='jwt')
             @jwt_required()
@@ -248,7 +248,7 @@ class FormController:
     
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.form_ns.route('/deactivate/<int:id>')
+        @self.form_ns.route('/deactivate/<string:id>')
         class FormDeactivate(Resource):
             @self.form_ns.doc('form/deactivate', security='jwt')
             @jwt_required()

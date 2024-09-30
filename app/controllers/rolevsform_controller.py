@@ -112,7 +112,7 @@ class RolevsFormController:
 
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.rolevsform_ns.route('/edit/<int:id>')
+        @self.rolevsform_ns.route('/edit/<string:id>')
         class RolevsFormEdit(Resource):
             @self.rolevsform_ns.doc('rolevsform/edit', security='jwt')
             @api.expect(self.rolevsform_model)
@@ -188,7 +188,7 @@ class RolevsFormController:
                 except Exception as e:
 
                     return jsonify({'message': str(e), 'status': 500})
-        @self.rolevsform_ns.route('delete/<int:id>')
+        @self.rolevsform_ns.route('delete/<string:id>')
         class RolevsFormDelete(Resource):
             @self.rolevsform_ns.doc('rolevsform/delete', security='jwt')
             @jwt_required()
@@ -207,7 +207,7 @@ class RolevsFormController:
                     except Exception as e:
   
                         return jsonify({'message': str(e), 'status': 500})
-        @self.rolevsform_ns.route('/activate/<int:id>')
+        @self.rolevsform_ns.route('/activate/<string:id>')
         class RolevsformActivate(Resource):
             @self.rolevsform_ns.doc('student_academic_history/activate', security='jwt')
             @jwt_required()
@@ -227,7 +227,7 @@ class RolevsFormController:
 
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.rolevsform_ns.route('/deactivate/<int:id>')
+        @self.rolevsform_ns.route('/deactivate/<string:id>')
         class RolevsformDeactivate(Resource):
             @self.rolevsform_ns.doc('student_academic_history/deactivate', security='jwt')
             @jwt_required()

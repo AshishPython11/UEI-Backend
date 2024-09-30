@@ -249,7 +249,7 @@ class MenuController:
           
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.menu_ns.route('/edit/<int:id>')
+        @self.menu_ns.route('/edit/<string:id>')
         class MenuEdit(Resource):
             @self.menu_ns.doc('menu/edit', security='jwt')
             @api.expect(self.menu_model)
@@ -306,7 +306,7 @@ class MenuController:
                 except Exception as e:
   
                     return jsonify({'message': str(e), 'status': 500})
-        @self.menu_ns.route('delete/<int:id>')
+        @self.menu_ns.route('delete/<string:id>')
         class MenuDelete(Resource):
             @self.menu_ns.doc('menu/delete', security='jwt')
             @jwt_required()
@@ -327,7 +327,7 @@ class MenuController:
 
                         return jsonify({'message': str(e), 'status': 500})
                     
-        @self.menu_ns.route('/activate/<int:id>')
+        @self.menu_ns.route('/activate/<string:id>')
         class MenuActivate(Resource):
             @self.menu_ns.doc('menu/activate', security='jwt')
             @jwt_required()
@@ -347,7 +347,7 @@ class MenuController:
 
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.menu_ns.route('/deactivate/<int:id>')
+        @self.menu_ns.route('/deactivate/<string:id>')
         class MenuDeactivate(Resource):
             @self.menu_ns.doc('menu/deactivate', security='jwt')
             @jwt_required()
@@ -366,7 +366,7 @@ class MenuController:
                     db.session.rollback()
               
                     return jsonify({'message': str(e), 'status': 500})
-        @self.menu_ns.route('/menu/list_by_admin/<admin_id>')
+        @self.menu_ns.route('/menu/list_by_admin/<string:admin_id>')
         class MenuListByAdmin(Resource):
             @self.menu_ns.doc('menu/list_by_admin', security='jwt')
             @jwt_required()

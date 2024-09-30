@@ -26,7 +26,7 @@ class ChatbotController:
     
         
     def register_routes(self):
-        @self.chatbot_ns.route('/list_based_on_id/<int:student_id>')
+        @self.chatbot_ns.route('/list_based_on_id/<string:student_id>')
         class ChatbotList(Resource):
             @self.chatbot_ns.doc('Chatbot/list_based_on_id', security='jwt')
             @jwt_required()
@@ -122,7 +122,7 @@ class ChatbotController:
                         db.session.rollback()
                 
                         return jsonify({'message': str(e), 'status': 500})
-        @self.chatbot_ns.route('/delete/<int:id>')
+        @self.chatbot_ns.route('/delete/<string:id>')
         class ChatbotDelete(Resource):
             @self.chatbot_ns.doc('Chatbot/delete', security='jwt')
             @jwt_required()
@@ -144,7 +144,7 @@ class ChatbotController:
          
                         return jsonify({'message': str(e), 'status': 500})
                     
-        @self.chatbot_ns.route('/activate/<int:id>')
+        @self.chatbot_ns.route('/activate/<string:id>')
         class ChatbotActivate(Resource):
             @self.chatbot_ns.doc('Chatbot/activate', security='jwt')
             @jwt_required()
@@ -164,7 +164,7 @@ class ChatbotController:
                   
                         return jsonify({'message': str(e), 'status': 500})
 
-        @self.chatbot_ns.route('/deactivate/<int:id>')
+        @self.chatbot_ns.route('/deactivate/<string:id>')
         class ChatbotDeactivate(Resource):
             @self.chatbot_ns.doc('Chatbot/deactivate', security='jwt')
             @jwt_required()

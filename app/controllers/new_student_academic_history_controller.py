@@ -261,7 +261,7 @@ class NewStudentAcademicHistoryController:
                   
                         return jsonify({'message': str(e), 'status': 500})
 
-        @self.new_student_academic_history_ns.route('/edit/<int:id>')
+        @self.new_student_academic_history_ns.route('/edit/<string:id>')
         class AcademicHistoryEdit(Resource):
             @self.new_student_academic_history_ns.doc('edit_academic_history', security='jwt')
             @self.new_student_academic_history_ns.expect(self.student_academic_history_model, validate=True)
@@ -292,7 +292,7 @@ class NewStudentAcademicHistoryController:
                     db.session.rollback()
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.new_student_academic_history_ns.route('/get/<int:id>')
+        @self.new_student_academic_history_ns.route('/get/<string:id>')
         class AcademicHistoryGet(Resource):
             @self.new_student_academic_history_ns.doc('get_academic_history', security='jwt')
             @jwt_required()
@@ -334,7 +334,7 @@ class NewStudentAcademicHistoryController:
                 except Exception as e:
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.new_student_academic_history_ns.route('/delete/<int:id>')
+        @self.new_student_academic_history_ns.route('/delete/<string:id>')
         class AcademicHistoryDelete(Resource):
             @self.new_student_academic_history_ns.doc('delete_academic_history', security='jwt')
             @jwt_required()
@@ -355,7 +355,7 @@ class NewStudentAcademicHistoryController:
                     db.session.rollback()
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.new_student_academic_history_ns.route('/activate/<int:id>')
+        @self.new_student_academic_history_ns.route('/activate/<string:id>')
         class AcademicHistoryActivate(Resource):
             @self.new_student_academic_history_ns.doc('activate_academic_history', security='jwt')
             @jwt_required()
@@ -376,7 +376,7 @@ class NewStudentAcademicHistoryController:
                     db.session.rollback()
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.new_student_academic_history_ns.route('/deactivate/<int:id>')
+        @self.new_student_academic_history_ns.route('/deactivate/<string:id>')
         class AcademicHistoryDeactivate(Resource):
             @self.new_student_academic_history_ns.doc('deactivate_academic_history', security='jwt')
             @jwt_required()

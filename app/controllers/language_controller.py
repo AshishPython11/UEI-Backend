@@ -95,7 +95,7 @@ class LanguageController:
      
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.language_ns.route('/edit/<int:id>')
+        @self.language_ns.route('/edit/<string:id>')
         class LanguageEdit(Resource):
             @self.language_ns.doc('language/edit', security='jwt')
             @api.expect(self.language_model)
@@ -153,7 +153,7 @@ class LanguageController:
            
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.language_ns.route('delete/<int:id>')
+        @self.language_ns.route('delete/<string:id>')
         class LanguageDelete(Resource):
             @self.language_ns.doc('language/delete', security='jwt')
             @jwt_required()
@@ -173,7 +173,7 @@ class LanguageController:
     
                         return jsonify({'message': str(e), 'status': 500})
                     
-        @self.language_ns.route('/activate/<int:id>')
+        @self.language_ns.route('/activate/<string:id>')
         class LanguageActivate(Resource):
             @self.language_ns.doc('language/activate', security='jwt')
             @jwt_required()
@@ -193,7 +193,7 @@ class LanguageController:
        
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.language_ns.route('/deactivate/<int:id>')
+        @self.language_ns.route('/deactivate/<string:id>')
         class LanguageDeactivate(Resource):
             @self.language_ns.doc('language/deactivate', security='jwt')
             @jwt_required()

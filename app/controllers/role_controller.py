@@ -97,7 +97,7 @@ class RoleController:
  
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.role_ns.route('/edit/<int:id>')
+        @self.role_ns.route('/edit/<string:id>')
         class RoleEdit(Resource):
             @self.role_ns.doc('role/edit', security='jwt')
             @api.expect(self.role_model)
@@ -154,7 +154,7 @@ class RoleController:
                 except Exception as e:
 
                     return jsonify({'message': str(e), 'status': 500})
-        @self.role_ns.route('delete/<int:id>')
+        @self.role_ns.route('delete/<string:id>')
         class RoleDelete(Resource):
             @self.role_ns.doc('role/delete', security='jwt')
             @jwt_required()
@@ -183,7 +183,7 @@ class RoleController:
 
                         return jsonify({'message': str(e), 'status': 500})
                         
-        @self.role_ns.route('/activate/<int:id>')
+        @self.role_ns.route('/activate/<string:id>')
         class RoleActivate(Resource):
             @self.role_ns.doc('role/activate', security='jwt')
             @jwt_required()
@@ -204,7 +204,7 @@ class RoleController:
  
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.role_ns.route('/deactivate/<int:id>')
+        @self.role_ns.route('/deactivate/<string:id>')
         class RoleDeactivate(Resource):
             @self.role_ns.doc('role/deactivate', security='jwt')
             @jwt_required()

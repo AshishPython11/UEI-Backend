@@ -105,7 +105,7 @@ class AdminProfileDescriptionController:
 
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.admin_profile_description_ns.route('/edit/<int:id>')
+        @self.admin_profile_description_ns.route('/edit/<string:id>')
         class AdminProfileDescriptionEdit(Resource):
             @self.admin_profile_description_ns.doc('admin_profile_description/edit', security='jwt')
             @api.expect(self.admin_profile_description_model)
@@ -165,7 +165,7 @@ class AdminProfileDescriptionController:
              
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.admin_profile_description_ns.route('/activate/<int:id>')
+        @self.admin_profile_description_ns.route('/activate/<string:id>')
         class ActivateAdminProfileDescription(Resource):
             @self.admin_profile_description_ns.doc('admin_profile_description/activate', security='jwt')
             @jwt_required()
@@ -185,7 +185,7 @@ class AdminProfileDescriptionController:
  
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.admin_profile_description_ns.route('/deactivate/<int:id>')
+        @self.admin_profile_description_ns.route('/deactivate/<string:id>')
         class DeactivateAdminProfileDescription(Resource):
             @self.admin_profile_description_ns.doc('admin_profile_description/deactivate', security='jwt')
             @jwt_required()

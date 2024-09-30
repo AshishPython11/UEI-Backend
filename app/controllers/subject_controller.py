@@ -97,7 +97,7 @@ class SubjectController:
         
                     return jsonify({'message': str(e), 'status': 500})
                     
-        @self.subject_ns.route('/edit/<int:id>')
+        @self.subject_ns.route('/edit/<string:id>')
         class SubjectEdit(Resource):
             @self.subject_ns.doc('subject/edit', security='jwt')
             @self.subject_ns.expect(self.subject_model)
@@ -154,7 +154,7 @@ class SubjectController:
 
                     return jsonify({'message': str(e), 'status': 500})
             
-        @self.subject_ns.route('delete/<int:id>')
+        @self.subject_ns.route('delete/<string:id>')
         class SubMenuDelete(Resource):
             @self.subject_ns.doc('subject/delete', security='jwt')
             @jwt_required()
@@ -174,7 +174,7 @@ class SubjectController:
   
                         return jsonify({'message': str(e), 'status': 500})
                     
-        @self.subject_ns.route('/activate/<int:id>')
+        @self.subject_ns.route('/activate/<string:id>')
         class SubjectActivate(Resource):
             @self.subject_ns.doc('subject/activate', security='jwt')
             @jwt_required()
@@ -193,7 +193,7 @@ class SubjectController:
                     db.session.rollback()
      
                     return jsonify({'message': str(e), 'status': 500})
-        @self.subject_ns.route('/deactivate/<int:id>')
+        @self.subject_ns.route('/deactivate/<string:id>')
         class SubjectDeactivate(Resource):
             @self.subject_ns.doc('subject/deactivate', security='jwt')
             @jwt_required()

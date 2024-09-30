@@ -94,7 +94,7 @@ class EntityController:
                     db.session.rollback()
   
                     return jsonify({'message': str(e), 'status': 500})
-        @self.entity_ns.route('/edit/<int:id>')
+        @self.entity_ns.route('/edit/<string:id>')
         class EntityEdit(Resource):
             @self.entity_ns.doc('entity/edit', security='jwt')
             @self.entity_ns.expect(self.entity_model)
@@ -147,7 +147,7 @@ class EntityController:
                 except Exception as e:
 
                     return jsonify({'message': str(e), 'status': 500})
-        @self.entity_ns.route('delete/<int:id>')
+        @self.entity_ns.route('delete/<string:id>')
         class EntityDelete(Resource):
             @self.entity_ns.doc('entity/delete', security='jwt')
             @jwt_required()
@@ -166,7 +166,7 @@ class EntityController:
                     except Exception as e:
                         return jsonify({'message': str(e), 'status': 500})
                     
-        @self.entity_ns.route('/activate/<int:id>')
+        @self.entity_ns.route('/activate/<string:id>')
         class EntityActivate(Resource):
             @self.entity_ns.doc('entity/activate', security='jwt')
             @jwt_required()
@@ -187,7 +187,7 @@ class EntityController:
 
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.entity_ns.route('/deactivate/<int:id>')
+        @self.entity_ns.route('/deactivate/<string:id>')
         class EntityDeactivate(Resource):
             @self.entity_ns.doc('entity/deactivate', security='jwt')
             @jwt_required()

@@ -118,7 +118,7 @@ class AdminProfessionController:
        
                     return jsonify({'message': str(e), 'status': 500})
                 
-        @self.admin_profession_ns.route('/edit/<int:id>')
+        @self.admin_profession_ns.route('/edit/<string:id>')
         class AdminProfessionEdit(Resource):
             @self.admin_profession_ns.doc('admin_profession/edit', security='jwt')
             @api.expect(self.admin_profession_model)
@@ -189,7 +189,7 @@ class AdminProfessionController:
 
                     return jsonify({'message': str(e), 'status': 500})
                     
-        @self.admin_profession_ns.route('/activate/<int:id>')
+        @self.admin_profession_ns.route('/activate/<string:id>')
         class ActivateAdminProfession(Resource):
             @self.admin_profession_ns.doc('admin_profession/activate', security='jwt')
             @jwt_required()
@@ -208,7 +208,7 @@ class AdminProfessionController:
  
                     return jsonify({'message': str(e), 'status': 500})
 
-        @self.admin_profession_ns.route('/deactivate/<int:id>')
+        @self.admin_profession_ns.route('/deactivate/<string:id>')
         class DeactivateAdminProfession(Resource):
             @self.admin_profession_ns.doc('admin_profession/deactivate', security='jwt')
             @jwt_required()
