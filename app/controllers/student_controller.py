@@ -293,18 +293,15 @@ class StudentController:
                         student_login = StudentLogin.query.get(id)
                         student = Student.query.filter_by(student_login_id=id).first()
                         if not student:
-                           
                             prompt = "**question** in Educational term"
                             return jsonify({'message': 'Student not found', 'status': 404, 'data': {'prompt': prompt, 'user_id': student_login.userid}})
                         
                         student_academic_history = NewStudentAcademicHistory.query.filter_by(student_id=id, is_active=True).order_by(NewStudentAcademicHistory.id.desc()).first()
                         student_address = StudentAddress.query.filter_by(student_id=id, is_active=1).order_by(StudentAddress.address_id.desc()).first()
-                        student_subject_preference = SubjectPreference.query.filter_by(student_id=id, is_active=1).order_by(SubjectPreference.subject_preference_id.desc()).first()
                         student_hobby = StudentHobby.query.filter_by(student_id=id, is_active=1).order_by(StudentHobby.id.desc()).first()
                         student_language_known = LanguageKnown.query.filter_by(student_id=id, is_active=1).order_by(LanguageKnown.language_known_id.desc()).first()
                         student_contact = Contact.query.filter_by(student_id=id).order_by(Contact.contact_id.desc()).first()
 
-                      
                         institution_name = entity_name = course_name = subject_name = class_name = None
                         class_id = None
 
@@ -318,11 +315,26 @@ class StudentController:
                             class_data = ClassMaster.query.filter_by(class_id=class_id, is_deleted=False).first()
                             class_name = class_data.class_name if class_data else None
 
-                        if student_subject_preference:
-                            course = CourseMaster.query.filter_by(course_id=student_subject_preference.course_id, is_deleted=False).first()
+                   
+                        student_subject_preferences = SubjectPreference.query.filter_by(student_id=id, is_active=1).order_by(SubjectPreference.subject_preference_id.desc()).all()
+                        
+                      
+                        subject_preference_list = []
+                        for subject_preference in student_subject_preferences:
+                            course = CourseMaster.query.filter_by(course_id=subject_preference.course_id, is_deleted=False).first()
                             course_name = course.course_name if course else None
-                            subject = SubjectMaster.query.filter_by(subject_id=student_subject_preference.subject_id, is_deleted=False).first()
+                            subject = SubjectMaster.query.filter_by(subject_id=subject_preference.subject_id, is_deleted=False).first()
                             subject_name = subject.subject_name if subject else None
+                            
+                           
+                            subject_preference_list.append({
+                                'id': subject_preference.subject_preference_id,
+                                'course_name': course_name,
+                                'subject_name': subject_name,
+                                'preference': subject_preference.preference,
+                                'score_in_percentage': subject_preference.score_in_percentage,
+                                'is_active': subject_preference.is_active
+                            })
 
                         student_data = {
                             'basic_info': {
@@ -367,14 +379,7 @@ class StudentController:
                                 'address_type': student_address.address_type if student_address else None,
                                 'is_active': student_address.is_active if student_address else None,
                             },
-                            'subject_preference': {
-                                'id': student_subject_preference.subject_preference_id if student_subject_preference else None,
-                                'course_name': course_name,
-                                'subject_name': subject_name,
-                                'preference': student_subject_preference.preference if student_subject_preference else None,
-                                'score_in_percentage': student_subject_preference.score_in_percentage if student_subject_preference else None,
-                                'is_active': student_subject_preference.is_active if student_subject_preference else None
-                            },
+                            'subject_preferences': subject_preference_list,  
                             'hobby': {
                                 'id': student_hobby.id if student_hobby else None,
                                 'hobby_id': student_hobby.hobby_id if student_hobby else None,
@@ -413,11 +418,11 @@ class StudentController:
                                 prompt = prompt.replace(f'**{key}**', str(data))
 
                         student_data['prompt'] = prompt
-                     
+                        
                         return jsonify({'message': 'Student found Successfully', 'status': 200, 'data': student_data}) 
                     except Exception as e:
-
-                            return jsonify({'message': str(e), 'status': 500})        
+                        return jsonify({'message': str(e), 'status': 500})
+                     
         @self.student_ns.route('/edit/<int:id>')
         class StudentEdit(Resource):
             @self.student_ns.doc('student/edit', security='jwt')
