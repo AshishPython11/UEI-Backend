@@ -66,7 +66,7 @@ class ChatController:
         @self.chat_ns.route("/chat")
         class ChatAdd(Resource):
             client = OpenAI(
-                api_key=os.environ.get('API_KEY'),
+                api_key=API_KEY
             )
 
             def get_gpt3_prompt(self, prompt):
@@ -146,7 +146,7 @@ class ChatController:
         @self.chat_ns.route("/chatadd")
         class ChatbotAdd(Resource):
             client = OpenAI(
-                api_key=os.environ.get('API_KEY'),
+                api_key=API_KEY,
             )
 
             def get_similar_question(self, question, stream, course):
@@ -394,7 +394,7 @@ class ChatController:
         
         class ChatAdd(Resource):
             client = OpenAI(
-                api_key=os.environ.get('API_KEY'),)
+                api_key=API_KEY)
 
             def get_gpt3_prompt(self, prompt):
                 gpt3_system_prompt = f"'{prompt}'\n\n"
@@ -415,6 +415,8 @@ class ChatController:
             
             def contains_exclusion(self, text):
                 exclusion_statements = ["I'm sorry", "I apologize","However,I don't have real time access","As an AI created by gyan setu, my responses are based on the 'BE' course and 'Python' subject only.","I'm unable to provide a detailed answer for this topic."]
+                if isinstance(text, list):
+                     text = ' '.join(text)
                 normalized_text = text.lower()
                 for statement in exclusion_statements:
                     if statement.lower() in normalized_text:
@@ -896,7 +898,7 @@ class ChatController:
         @self.chat_ns.route("/generate-from-api", methods=["POST"])
         class GenerateChat(Resource):
             client = OpenAI(
-                api_key=os.environ.get('API_KEY'),
+                api_key=API_KEY
             )
 
             def get_gpt3_prompt(self, prompt):
