@@ -315,7 +315,7 @@ class MenuController:
                         menu_entity = MenuMasterData.query.get(id)
                         if not menu_entity:
           
-                            return jsonify({'message': 'menu not found', 'status': 404})
+                            return jsonify({'message': 'Menu not found', 'status': 404})
                         else:
                           
                             menu_entity.is_deleted=True

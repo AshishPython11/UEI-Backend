@@ -134,6 +134,7 @@ class AuthController:
             @self.auth_ns.doc('login')
             @self.api.expect(self.login_model)
             def post(self):
+                
                 try:
                     data = request.json
                     userid = data.get('userid')
@@ -151,10 +152,10 @@ class AuthController:
                         user = AdminLogin.query.filter_by(userid=userid, is_active=1).first()
 
                     if user is None:
-                        return jsonify({'message': 'User does not exist', 'status': 404})
+                        return jsonify({'message': 'User does not exist', 'status': 401})
 
                     if not check_password_hash(user.password, password):
-                        return jsonify({'message': 'Invalid userid or password', 'status': 404})
+                        return jsonify({'message': 'Invalid userid or password', 'status': 401})
 
                     if user_type == 'student':
                         id = user.student_id
@@ -189,10 +190,12 @@ class AuthController:
             @jwt_required()
             def post(self):
                 try:
-                    unset_jwt_cookies()
-                    return  jsonify({'message': 'User logged out successfully','status':200})
+                    response = jsonify({'message': 'User logged out successfully', 'status': 200})
+                    unset_jwt_cookies(response)
+                    return response
                 except Exception as e:
                     db.session.rollback()
+                    
                  
                     return jsonify({'message': str(e), 'status': 500})
             
@@ -200,6 +203,7 @@ class AuthController:
         
         @self.auth_ns.route('/forgotpassword')
         class ForgotPassword(Resource):
+            
             def send_reset_email(self,email,user_type):
                 user = email
                 print(user)
@@ -209,7 +213,6 @@ class AuthController:
                 msg.html = html_content
                 
                 mail.send(msg)
-
 
             @self.auth_ns.doc('forgotpassword', security='jwt')
             @self.api.expect(self.forgotpassword_model)
@@ -233,6 +236,7 @@ class AuthController:
                
                     try:
                         self.send_reset_email(email,user_type)
+     
                     except Exception as e:
                         print(e)
                         return jsonify({'message': 'Failed to send reset password email', 'status': 500})

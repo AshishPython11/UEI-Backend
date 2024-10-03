@@ -44,8 +44,40 @@ class AdminLanguageKnownController:
             @self.admin_language_known_ns.doc('admin_language_known/list', security='jwt')
             @jwt_required()
             def get(self):
+                   
+                    try:
+                        admin_language_knownes = AdminLanguageKnown.query.filter_by(is_active=1).all()
+                        # admin_language_knownes = AdminLanguageKnown.query.all()
+                        admin_language_knownes_data = []
+                        
+                        for admin_language_known in admin_language_knownes:
+                            admin_language_known_data = {
+                                'id': admin_language_known.id,
+                                'admin_id': admin_language_known.admin_id,
+                                'language_id': admin_language_known.language_id,
+                                'proficiency': admin_language_known.proficiency,
+                                'is_active': admin_language_known.is_active
+                            }
+                            admin_language_knownes_data.append(admin_language_known_data)
+                        
+                        if not admin_language_knownes_data:
+                    
+                            return jsonify({'message': 'No Admin Language Known found', 'status': 404})
+                        else:
+                    
+                            return jsonify({'message': 'Admin Language Known found Successfully', 'status': 200, 'data': admin_language_knownes_data})
+                    except Exception as e:
+                        
+                        return jsonify({'message': str(e), 'status': 500})
+        @self.admin_language_known_ns.route('/alldata')
+        class AdminLanguageKnownList(Resource):
+            @self.admin_language_known_ns.doc('admin_language_known/alldata', security='jwt')
+            @jwt_required()
+            def get(self):
                 try:
+
                     admin_language_knownes = AdminLanguageKnown.query.filter_by(is_active=1).all()
+                    # admin_language_knownes = AdminLanguageKnown.query.all()
                     admin_language_knownes_data = []
                     
                     for admin_language_known in admin_language_knownes:
@@ -59,37 +91,11 @@ class AdminLanguageKnownController:
                         admin_language_knownes_data.append(admin_language_known_data)
                     
                     if not admin_language_knownes_data:
-           
-                        return jsonify({'message': 'No Admin Language Known found', 'status': 404})
-                    else:
-               
-                        return jsonify({'message': 'Admin Language Known found Successfully', 'status': 200, 'data': admin_language_knownes_data})
-                except Exception as e:
-                   
-
-                    return jsonify({'message': str(e), 'status': 500})
-        @self.admin_language_known_ns.route('/alldata')
-        class AdminLanguageKnownList(Resource):
-            @self.admin_language_known_ns.doc('admin_language_known/alldata', security='jwt')
-            @jwt_required()
-            def get(self):
-                try:
-                    # Fetch the first AdminLanguageKnown entry (single object)
-                    admin_language_known = AdminLanguageKnown.query.filter_by(is_active=1).first()
-
-                    if not admin_language_known:
                         return jsonify({'message': 'No Admin Language Known found', 'status': 404})
                     
-                    # Prepare the data from the single object
-                    admin_language_known_data = {
-                        'id': admin_language_known.id,
-                        'admin_id': admin_language_known.admin_id,
-                        'language_id': admin_language_known.language_id,
-                        'proficiency': admin_language_known.proficiency,
-                        'is_active': admin_language_known.is_active
-                    }
-
-                    return jsonify({'message': 'Admin Language Known found Successfully', 'status': 200, 'data': admin_language_known_data})
+                    else:
+                   
+                        return jsonify({'message': 'Admin Language Known found Successfully', 'status': 200, 'data': admin_language_knownes_data})
                 except Exception as e:
                     return jsonify({'message': str(e), 'status': 500})
         @self.admin_language_known_ns.route('/add')
@@ -304,7 +310,7 @@ class AdminLanguageKnownController:
                         admin_language_known = AdminLanguageKnown.query.get(id)
                         if not admin_language_known:
                         
-                            return jsonify({'message': 'Admin language Known  not found', 'status': 404})
+                            return jsonify({'message': 'Admin language Known not found', 'status': 404})
                         else:
                             admin_language_known.is_active = 0
                             db.session.commit()

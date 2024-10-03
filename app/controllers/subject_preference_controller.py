@@ -369,7 +369,7 @@ class SubjectPreferenceController:
                         subject_preference = SubjectPreference.query.get(id)
                         if not subject_preference:
                     
-                            return jsonify({'message': 'Student Preference  not found', 'status': 404})
+                            return jsonify({'message': 'Student Preference not found', 'status': 404})
                         else:
                             subject_preference.is_active = 0
                             db.session.commit()

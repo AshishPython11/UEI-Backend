@@ -94,7 +94,7 @@ class RolevsFormController:
                     current_user_id = get_jwt_identity()
                     if not form_master_id :
 
-                        return jsonify({'message': 'Please Provide RolevsForm Data  Id', 'status': 201})
+                        return jsonify({'message': 'Please Provide RolevsForm Data Id', 'status': 201})
                     if not role_master_id :
     
                         return jsonify({'message': 'Please Provide Role Id', 'status': 201})
@@ -106,7 +106,7 @@ class RolevsFormController:
                         db.session.add(form)
                         db.session.commit()
 
-                        return jsonify({'message': 'RolevsForm Data  created successfully', 'status': 200})
+                        return jsonify({'message': 'RolevsForm Data created successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
 
@@ -137,7 +137,7 @@ class RolevsFormController:
                         form = RoleVsFormMasterData.query.get(id)
                         if not form:
                   
-                            return jsonify({'message': 'RolevsForm Data  not found', 'status': 404})
+                            return jsonify({'message': 'RolevsForm Data not found', 'status': 404})
                         else:
                             form.form_master_id = form_master_id
                             form.role_master_id = role_master_id
@@ -154,7 +154,7 @@ class RolevsFormController:
                                     manage_role.is_save = is_save
                                     manage_role.is_update = is_update
                
-                            return jsonify({'message': 'RolevsForm Data  updated successfully', 'status': 200})
+                            return jsonify({'message': 'RolevsForm Data updated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
              
@@ -167,7 +167,7 @@ class RolevsFormController:
                     form = RoleVsFormMasterData.query.get(id)
                     if not form:
       
-                        return jsonify({'message': 'RolevsForm Data  not found', 'status': 404})
+                        return jsonify({'message': 'RolevsForm Data not found', 'status': 404})
                     else:
                         form_data = {
                             'id': form.role_form_master_id,
@@ -197,7 +197,7 @@ class RolevsFormController:
                         form_entity = RoleVsFormMasterData.query.get(id)
                         if not form_entity:
           
-                            return jsonify({'message': 'form not found', 'status': 404})
+                            return jsonify({'message': 'Rolevsform not found', 'status': 404})
                         else:
                           
                             form_entity.is_deleted = True

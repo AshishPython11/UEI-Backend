@@ -59,7 +59,7 @@ class StudentLanguageKnownController:
                         return jsonify({'message': 'No Student Language Known found', 'status': 404})
                     else:
 
-                        return jsonify({'message': 'Student Language Known  found Successfully', 'status': 200, 'data': student_language_knowns_data})
+                        return jsonify({'message': 'Student Language Known found Successfully', 'status': 200, 'data': student_language_knowns_data})
                 except Exception as e:
     
                     return jsonify({'message': str(e), 'status': 500})
@@ -88,7 +88,7 @@ class StudentLanguageKnownController:
                         return jsonify({'message': 'No Student Language Known found', 'status': 404})
                     else:
                
-                        return jsonify({'message': 'Student Language Known  found Successfully', 'status': 200, 'data': student_language_knowns_data})
+                        return jsonify({'message': 'Student Language Known found Successfully', 'status': 200, 'data': student_language_knowns_data})
                 except Exception as e:
 
                     return jsonify({'message': str(e), 'status': 500})
@@ -306,7 +306,7 @@ class StudentLanguageKnownController:
                         student_language_known = LanguageKnown.query.get(id)
                         if not student_language_known:
                    
-                            return jsonify({'message': 'Student language Known  not found', 'status': 404})
+                            return jsonify({'message': 'Student language Known not found', 'status': 404})
                         else:
                             student_language_known.is_active = 0
                             db.session.commit()
