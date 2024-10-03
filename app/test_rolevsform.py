@@ -258,3 +258,62 @@ def test_edit_role_vs_form_missing_role_master_id(test_client, auth_header):
     )
     
     assert response.json['message'] == 'Please Provide Role Id'
+
+def test_edit_rolevsform_invalid(test_client, auth_header):
+
+    payload = {
+        "role_master_id": str(seed_ids['role_master_id']),
+        "form_master_id": str(seed_ids['form_master_id']),
+        "is_search": False,
+        "is_save": False,
+        "is_update": False
+    }
+    
+    response = test_client.put('/rolevsform/edit/8885695', json=payload, headers=auth_header)
+
+    data = response.get_json()
+    assert 'RolevsForm Data not found' in data['message']
+
+      # Cleanup after test
+
+# Test: Get RoleVsForm by ID
+def test_get_rolevsform_invalid(test_client, auth_header):
+     # Seed initial data
+
+    response = test_client.get('/rolevsform/edit/8885695', headers=auth_header)
+   
+    data = response.get_json()
+    assert 'RolevsForm Data not found' in data['message']
+
+     # Cleanup after test
+
+# Test: Activate RoleVsForm
+def test_activate_rolevsform_invalid(test_client, auth_header):
+      # Seed initial data
+
+    response = test_client.put('/rolevsform/activate/8885695', headers=auth_header)
+ 
+    data = response.get_json()
+    assert 'Rolevsform not found' in data['message']
+
+      # Cleanup after test
+
+# Test: Deactivate RoleVsForm
+def test_deactivate_rolevsform_invalid(test_client, auth_header):
+      # Seed initial data
+
+    response = test_client.put('/rolevsform/deactivate/8859659', headers=auth_header)
+    
+    data = response.get_json()
+    assert 'Rolevsform not found' in data['message']
+
+     # Cleanup after test
+
+# Test: Delete RoleVsForm
+def test_delete_rolevsform_invalid(test_client, auth_header):
+    # Seed initial data
+
+    response = test_client.delete('/rolevsformdelete/8856959', headers=auth_header)
+  
+    data = response.get_json()
+    assert 'Rolevsform not found' in data['message']

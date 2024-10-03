@@ -223,7 +223,7 @@ class StudentContactController:
                     student = Contact.query.get(id)
                     if not student:
      
-                        return jsonify({'message': 'Student contact not found', 'status': 404})
+                        return jsonify({'message': 'Student Contact not found', 'status': 404})
                     else:
                         student.is_active = 1
                         db.session.commit()
@@ -243,7 +243,7 @@ class StudentContactController:
                     student = Contact.query.get(id)
                     if not student:
             
-                        return jsonify({'message': 'Student contact not found', 'status': 404})
+                        return jsonify({'message': 'Student Contact not found', 'status': 404})
                     else:
                         student.is_active = 0
                         db.session.commit()

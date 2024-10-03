@@ -145,7 +145,7 @@ class RolevsAdminController:
                         form = RoleVsAdminMaster.query.get(id)
                         if not form:
                        
-                            return jsonify({'message': 'RolevsUser Data  not found', 'status': 404})
+                            return jsonify({'message': 'RolevsUser Data not found', 'status': 404})
                         else:
                             form.admin_id = admin_id
                             form.role_master_id = role_master_id
@@ -173,7 +173,7 @@ class RolevsAdminController:
                     form = RoleVsAdminMaster.query.get(id)
                     if not form:
                  
-                        return jsonify({'message': 'RolevsUser Data  not found', 'status': 404})
+                        return jsonify({'message': 'RolevsUser Data not found', 'status': 404})
                     else:
                         form_data = {
                             'id': form.role_admin_master_id,

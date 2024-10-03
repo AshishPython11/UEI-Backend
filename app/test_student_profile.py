@@ -186,6 +186,12 @@ def test_check_profile_complete(test_client, auth_header):
     assert response.status_code == 200
     
 
+def test_check_profile_complete_without_auth(test_client):
+    response = test_client.get('/profile/check_profile')
+    data = response.get_json()
+    assert 'Missing Authorization Header' in data['msg']
+
+
 # def test_check_profile_incomplete(test_client, auth_header):
 #     # Modify data to make the profile incomplete
 #     student = Student.query.first()

@@ -203,6 +203,7 @@ class AuthController:
         
         @self.auth_ns.route('/forgotpassword')
         class ForgotPassword(Resource):
+            
             def send_reset_email(self,email,user_type):
                 user = email
                 print(user)
@@ -212,7 +213,6 @@ class AuthController:
                 msg.html = html_content
                 
                 mail.send(msg)
-
 
             @self.auth_ns.doc('forgotpassword', security='jwt')
             @self.api.expect(self.forgotpassword_model)
@@ -236,6 +236,7 @@ class AuthController:
                
                     try:
                         self.send_reset_email(email,user_type)
+     
                     except Exception as e:
                         print(e)
                         return jsonify({'message': 'Failed to send reset password email', 'status': 500})

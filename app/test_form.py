@@ -297,4 +297,44 @@ def test_edit_form_missing_form_url(test_client, auth_header):
     assert response.json['message'] == 'Please Provide Form Url'
     
 
+def test_form_edit_invalid(test_client, auth_header):
+    """Test editing a form"""
+    new_form_name = faker.word()
+    data = {
+        'form_name': new_form_name,
+        'menu_master_id': seed_ids['menu_master_id'],
+        'sub_menu_master_id': seed_ids['submenu_master_id'],
+        'form_url': faker.url(),
+        'form_description': faker.sentence(),
+        'is_menu_visible': True
+    }
 
+    response = test_client.put('/form/edit/8889659', headers=auth_header, json=data)
+   
+    assert 'Form not found' in response.json['message']
+
+
+
+def test_form_delete_invalid(test_client, auth_header):
+    """Test deleting a form"""
+    response = test_client.delete('/formdelete/8889659', headers=auth_header)
+
+    assert 'form not found' in response.json['message']
+
+
+def test_entity_activate_invalid(test_client, auth_header):
+    
+    response = test_client.put('/form/activate/774589', headers=auth_header)
+    
+    assert 'Form not found' in response.json['message']
+
+def test_entity_deactivate_invalid(test_client, auth_header):
+   
+    
+
+    
+    response = test_client.put('/form/deactivate/888596', headers=auth_header)
+    
+    
+   
+    assert response.json['message'].strip() == 'Form not found'

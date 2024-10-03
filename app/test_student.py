@@ -191,14 +191,6 @@ def test_get_profile_success(test_client, auth_header):
     
 
 def test_edit_student(test_client, auth_header):
-    # student_id = auth_header['student_id']  # This should correspond to an existing student
-    # print(f"Using student ID: {student_id}")  # Debug print
-
-    # # Ensure the student_id is valid
-    # existing_student = Student.query.filter_by(student_id=student_id).first()
-    # if not existing_student:
-    #     print(f"No student found with ID: {student_id}")  # Debug print
-    #     pytest.fail(f"No student found with ID: {student_id}")
 
     data = {
         'first_name': 'John',
@@ -281,3 +273,43 @@ def test_add_subject_missing_subject_name(test_client, auth_header):
 
 
 
+
+
+def test_edit_student_invalid(test_client, auth_header):
+
+    data = {
+        'first_name': 'John',
+        'last_name': 'Doe',
+        'gender': 'Male',
+        'dob': '2000-01-01',
+        'father_name': 'Father Name',
+        'mother_name': 'Mother Name',
+        'guardian_name': 'Guardian Name',
+        'is_kyc_verified': True,
+        'student_login_id': seed_ids['student_login_id'],
+        'pic_path': 'path/to/pic.jpg',
+        'aim': 'Engineer',
+        'mobile_no_call': '1234567890',
+        'email_id': "john@gmail.com",  
+    }
+
+    response = test_client.put('/student/editstudent/8885695', json=data, headers=auth_header)
+    assert response.json['message'] == 'Student not found'
+    
+
+def test_delete_student_invalid(test_client, auth_header):
+    response = test_client.delete('/studentdelete/8885695', headers=auth_header)
+    assert response.json['message'] == 'Student not found'
+
+def test_activate_student_invalid(test_client, auth_header):
+     # Use an existing student ID for testing
+    response = test_client.put('/student/activate/8885695', headers=auth_header)
+  
+    assert response.json['message'] == 'Student not found'
+
+
+def test_deactivate_student_invalid(test_client, auth_header):
+
+    response = test_client.put('/student/deactivate/8856958', headers=auth_header)
+
+    assert response.json['message'] == 'Student not found'

@@ -248,3 +248,60 @@ def test_institution_add_missing_institution_name(test_client, auth_header):
     assert response.is_json
     
     assert response.json['message'] == 'Please Provide Institution name'
+
+
+
+
+
+
+
+def test_institution_edit_invalid(test_client, auth_header):
+    new_institution_name = faker.company()
+    response = test_client.put('/institution/edit/8888956', headers=auth_header, json={
+        'institution_name': new_institution_name,
+        'entity_id': seed_ids['entity_type_id'],
+        'address': faker.address(),
+        'country': faker.country(),
+        'state': faker.state(),
+        'city': faker.city(),
+        'district': faker.city_suffix(),
+        'pincode': faker.postcode(),
+        'website_url': faker.url(),
+        'email_id': faker.email(),
+        'mobile_no': faker.phone_number()
+    })
+    
+    assert 'Institution not found' in response.json['message']
+
+def test_institution_get_invalid(test_client, auth_header):
+    response = test_client.get('/institution/edit/8889659', headers=auth_header)
+    
+    assert 'Institution not found' in response.json['message']
+    
+
+def test_institution_delete_invalid(test_client, auth_header):
+
+    response = test_client.delete('/institutiondelete/8889659', headers=auth_header)
+   
+    assert 'Institution not found' in response.json['message']
+
+    # Verify that the institution is marked as deleted
+    
+
+def test_institution_activate_invalid(test_client, auth_header):
+    
+    # Ensure the institution is deactivated first
+    
+
+    response = test_client.put('/institution/activate/8885968', headers=auth_header)
+  
+    assert 'Institution not found' in response.json['message']
+    # Verify activation
+   
+
+def test_institution_deactivate_invalid(test_client, auth_header):
+ 
+    response = test_client.put('/institution/deactivate/8885968', headers=auth_header)
+
+    assert 'Institution not found' in response.json['message']
+   

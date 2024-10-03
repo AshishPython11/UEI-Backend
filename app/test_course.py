@@ -171,3 +171,41 @@ def test_edit_course_missing_course_name(test_client, auth_header):
     assert response.is_json
     assert response.json['message'] == 'Please provide course name'
 
+
+
+
+
+
+def test_course_edit_invalid(test_client, auth_header):
+      # Using seeded course_id
+    new_class_name = 'Unique Class Name'
+    unique_suffix = str(int(time.time())) 
+    new_course_name = f"{new_class_name}_{unique_suffix}"
+    response = test_client.put('/course/edit/888856', headers=auth_header, json={
+        "course_name": new_course_name
+    })
+   
+    assert 'Course not found' in response.json['message']
+
+def test_course_get_invalid(test_client, auth_header):
+      # Using seeded course_id
+    response = test_client.get('/course/edit/8888569', headers=auth_header)
+    
+    assert 'Course not found' in response.json['message']
+
+def test_course_delete_invalid(test_client, auth_header):
+    
+    response = test_client.delete('/coursedelete/88856', headers=auth_header)
+    assert 'course not found' in response.json['message']
+
+def test_course_activate_invalid(test_client, auth_header):
+     # Using seeded course_id
+    response = test_client.put('/course/activate/888856', headers=auth_header)
+    
+    assert 'Course not found' in response.json['message']
+
+def test_course_deactivate_invalid(test_client, auth_header):
+  
+    response = test_client.put('/course/deactivate/888856', headers=auth_header)
+    
+    assert 'Course not found' in response.json['message']

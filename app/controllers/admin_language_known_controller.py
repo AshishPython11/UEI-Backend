@@ -310,7 +310,7 @@ class AdminLanguageKnownController:
                         admin_language_known = AdminLanguageKnown.query.get(id)
                         if not admin_language_known:
                         
-                            return jsonify({'message': 'Admin language Known  not found', 'status': 404})
+                            return jsonify({'message': 'Admin language Known not found', 'status': 404})
                         else:
                             admin_language_known.is_active = 0
                             db.session.commit()

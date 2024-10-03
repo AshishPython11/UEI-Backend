@@ -251,7 +251,7 @@ class InstituteController:
                         institution_entity = Institution.query.get(id)
                         if not institution_entity:
                           
-                            return jsonify({'message': 'institution not found', 'status': 404})
+                            return jsonify({'message': 'Institution not found', 'status': 404})
                         else:
                             
                             institution_entity.is_deleted=True

@@ -449,3 +449,37 @@ def test_add_admin_multiple_language_known_invalid_payload(test_client, auth_hea
     assert response.is_json
     # assert response.status_code == 400
     assert response.json['message'] == 'Input payload validation failed' 
+
+def test_get_admin_language_known_by_invalid(test_client, auth_header):
+    response = test_client.get('/admin_language_known/edit/88856', headers=auth_header)
+    
+    
+    data = response.json
+    assert data['message'] == 'Admin language Known not found'
+def test_activate_admin_language_known_invalid(test_client, auth_header):
+    # Seed data or manually add an entry for `admin_language_known`
+    response = test_client.put('/admin_language_known/activate/88856', headers=auth_header)
+    
+  
+    data = response.json
+    assert data['message'] == 'Admin language Known not found'
+def test_deactivate_admin_language_known_invalid(test_client, auth_header):
+    # Seed data or manually add an entry for `admin_language_known`
+    response = test_client.put('/admin_language_known/deactivate/88856', headers=auth_header)
+    
+    data = response.json
+    assert data['message'] == 'Admin language Known not found'
+
+
+def test_admin_lang_delete_success(test_client, auth_header):
+    # Assuming an existing class with ID 1
+    response = test_client.delete(f'admin_language_known/delete/{seed_ids['admin_language_known_id']}', headers=auth_header)
+    assert response.status_code == 200
+    response_json = response.get_json()
+    assert response_json['message'] == 'Admin Language Known deleted successfully'
+
+def test_admin_lang_delete_success_invalid(test_client, auth_header):
+    # Assuming an existing class with ID 1
+    response = test_client.delete('admin_language_known/delete/88856', headers=auth_header)
+    
+    assert response.json['message'] == 'Admin language Known not found'

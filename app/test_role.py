@@ -152,3 +152,44 @@ def test_edit_role_missing_name(test_client, auth_header):
     # assert response.status_code == 201
     assert response.is_json
     assert response.json['message'] == 'Please Provide Role name'
+
+
+
+
+
+def test_edit_role_invalid(test_client, auth_header):
+    payload = {
+        "role_name": faker.unique.word()  # Faker for new role name
+    }
+    response = test_client.put('/role/edit/8885965', json=payload, headers=auth_header)
+    
+    data = response.get_json()
+    assert 'Role not found' in data['message']
+
+# Test: Get Role by ID
+def test_get_role_invalid(test_client, auth_header):
+    response = test_client.get('/role/edit/8885695', headers=auth_header)
+
+    data = response.get_json()
+    assert 'Role not found' in data['message']
+
+# Test: Activate Role
+def test_activate_role_invalid(test_client, auth_header):
+    response = test_client.put('/role/activate/8859659', headers=auth_header)
+   
+    data = response.get_json()
+    assert 'Role not found' in data['message']
+
+# Test: Deactivate Role
+def test_deactivate_role_invalid(test_client, auth_header):
+    response = test_client.put('/role/deactivate/8856959', headers=auth_header)
+  
+    data = response.get_json()
+    assert 'Role not found' in data['message']
+
+# Test: Delete Role
+def test_delete_role_invalid(test_client, auth_header):
+    response = test_client.delete('/roledelete/8885695', headers=auth_header)
+   
+    data = response.get_json()
+    assert 'Role not found' in data['message']

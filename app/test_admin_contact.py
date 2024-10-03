@@ -266,3 +266,36 @@ def test_edit_admin_contact_missing_admin_id(test_client, auth_header):
 
     assert response.json['message'] == 'Please Provide Admin Id'
 # Test case for invalid mobile number format
+
+def test_edit_admin_contact_invalid(test_client, auth_header):
+    response = test_client.put('/admin_contact/edit/88856', json={
+        'admin_id': auth_header['admin_id'],  # Use admin_id from seed data
+        'mobile_isd_call': '+91',
+        'mobile_no_call': '9999999999',  # Updated mobile number
+        'mobile_isd_watsapp': '+91',
+        'mobile_no_watsapp': '9876543210',
+        'email_id': 'admin_seeder@example.com'
+    }, headers=auth_header)
+    
+   
+    assert response.json['message'] == 'Admin Contact not found'
+
+
+def test_get_admin_contact_invalid(test_client, auth_header):
+    response = test_client.get('/admin_contact/edit/88856', headers=auth_header)
+    
+   
+    assert response.json['message'] == 'Admin Contact not found'
+# Test case for activating an admin contact
+def test_activate_admin_contact_invalid(test_client, auth_header):
+    response = test_client.put('/admin_contact/activate/88568', headers=auth_header)
+    
+   
+    assert response.json['message'] == 'Admin Contact not found'
+
+# Test case for deactivating an admin contact
+def test_deactivate_admin_contact_invalid(test_client, auth_header):
+    response = test_client.put('/admin_contact/deactivate/88856', headers=auth_header)
+    
+   
+    assert response.json['message'] == 'Admin Contact not found'

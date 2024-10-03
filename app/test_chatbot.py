@@ -155,7 +155,7 @@ def test_chatbot_delete_success(test_client, auth_header):
     assert response.status_code == 200
     response_json = response.get_json()
     assert response_json['status'] == 200
-    assert response_json['message'] == 'Chatbot activated successfully'
+    assert response_json['message'] == 'Chatbot deleted successfully'
 
 def test_chatbot_activate_success(test_client, auth_header):
     # First, create a chat entry that will be used for activation
@@ -208,7 +208,20 @@ def test_chatbot_add_missing_student_id(test_client, auth_header):
         'chat_question': 'What is the weather today?',
         'response': 'It is sunny today.'
     }, headers=auth_header)
-
-    
-    
+  
     assert response.status_code == 404
+
+def test_chatbot_activate_success_invalid(test_client, auth_header):
+    # First, create a chat entry that will be used for activation
+    
+    response = test_client.put('/Chatbot/activate/888569', headers=auth_header)
+    assert response.json['message'] == "Chatbot not found"
+
+
+def test_chatbot_deactivate_success_invalid(test_client, auth_header):
+    # Assuming `seed_data` returns a chat_data_id
+    
+
+    response = test_client.put('/Chatbot/deactivate/888856', headers=auth_header)
+    assert response.json['message'] == "Chatbot not found"
+    

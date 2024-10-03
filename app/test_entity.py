@@ -134,3 +134,41 @@ def test_edit_entity_missing_entity_type(test_client, auth_header):
     
     assert response.is_json
     assert response.json['message'] == 'Please provide entity type'
+
+
+
+
+def test_entity_edit_invalid(test_client, auth_header):
+    base_class_name = 'Unique Class Name'
+    unique_suffix = str(int(time.time())) 
+    updated_entity_name = f"{base_class_name}_{unique_suffix}"
+    
+    response = test_client.put('/entity/edit/888859', headers=auth_header, json={
+        "entity_type": updated_entity_name
+    })
+ 
+    assert 'Entity not found' in response.json['message']
+
+def test_entity_get_invalid(test_client, auth_header):
+   
+    response = test_client.get('/entity/edit/888569', headers=auth_header)
+    
+    assert 'Entity not found' in response.json['message']
+
+def test_entity_delete_invalid(test_client, auth_header):
+  
+    response = test_client.delete('/entitydelete/8888569', headers=auth_header)
+
+    assert 'entity not found' in response.json['message']
+
+def test_entity_activate_invalid(test_client, auth_header):
+  
+    response = test_client.put(f'/entity/activate/888785', headers=auth_header)
+  
+    assert 'Entity not found' in response.json['message']
+
+def test_entity_deactivate_invalid(test_client, auth_header):
+   
+    response = test_client.put('/entity/deactivate/888965', headers=auth_header)
+    
+    assert 'Entity not found' in response.json['message']

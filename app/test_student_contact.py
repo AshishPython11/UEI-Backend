@@ -317,3 +317,34 @@ def test_edit_student_contact_missing_email_id(test_client, auth_header):
     )
 
     assert response.json['message'] == 'Student Contact updated successfully'
+
+
+def test_get_student_contact_invalid(test_client, auth_header):
+
+    response = test_client.get('/student_contact/edit/8885695', headers=auth_header)
+    assert response.json['message'] == 'Student Contact not found'
+
+def test_edit_student_contact_invalid(test_client, auth_header):
+      # replace with actual generated contact ID
+    response = test_client.put('/student_contact/edit/888599', json={
+        'student_id':auth_header['student_id'],
+        'mobile_isd_call': faker.country_calling_code(),
+        'mobile_no_call': faker.phone_number(),
+        'mobile_isd_watsapp': faker.country_calling_code(),
+        'mobile_no_watsapp': faker.phone_number(),
+        'email_id': faker.email()
+    }, headers=auth_header)
+    
+    assert response.json['message'] == 'Student Contact not found'
+
+def test_activate_student_contact_invalid(test_client, auth_header):
+   # replace with actual generated contact ID
+    response = test_client.put('/student_contact/activate/8885695', headers=auth_header)
+    
+    assert response.json['message'] == 'Student Contact not found'
+
+def test_deactivate_student_contact_invalid(test_client, auth_header):
+     # replace with actual generated contact ID
+    response = test_client.put('/student_contact/deactivate/8886595', headers=auth_header)
+  
+    assert response.json['message'] == 'Student Contact not found'

@@ -441,3 +441,37 @@ def test_add_student_multiple_language_known_invalid_payload(test_client, auth_h
 
     assert response.is_json
     assert response.json['message'] == 'Input payload validation failed'
+
+def test_language_known_edit_invalid(test_client, auth_header):
+     # Use the first seeded ID
+    response = test_client.put('/student_language_known/edit/8885695', headers=auth_header, json={
+        "student_id": auth_header['student_id'],  # Fix key here
+        "language_id": seed_ids['language_known_id'],  # Use first seeded ID
+        "proficiency": faker.word()
+    })
+    assert response.status_code == 200
+    assert 'Student language Known not found' in response.json['message']
+
+def test_language_known_get_invalid(test_client, auth_header):
+    # Use the first seeded ID
+    response = test_client.get('/student_language_known/edit/8885695', headers=auth_header)
+  
+    assert 'Student language Known not found' in response.json['message']
+
+def test_language_known_delete_invalid(test_client, auth_header):
+     # Use the first seeded ID
+    response = test_client.delete('/student_language_knowndelete/8889659', headers=auth_header)
+    
+    assert 'Student language Known not found' in response.json['message']
+
+def test_language_known_activate_invalid(test_client, auth_header):
+ # Use the first seeded ID
+    response = test_client.put('/student_language_known/activate/8889659', headers=auth_header)
+
+    assert 'Student language Known not found' in response.json['message']
+
+def test_language_known_deactivate_invalid(test_client, auth_header):
+     # Use the first seeded ID
+    response = test_client.put('/student_language_known/deactivate/8896598', headers=auth_header)
+    
+    assert 'Student language Known not found' in response.json['message']

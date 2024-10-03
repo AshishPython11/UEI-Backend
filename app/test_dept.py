@@ -136,3 +136,42 @@ def test_edit_department_missing_department_name(test_client, auth_header):
     
     assert response.is_json
     assert response.json['message'] == 'Please provide department name'
+
+
+
+
+
+def test_department_edit_invalid(test_client, auth_header):
+    updated_name = 'Unique Class Name'
+    unique_suffix = str(int(time.time())) 
+    updated_edit_name = f"{updated_name}_{unique_suffix}"
+   
+    response = test_client.put('/department/edit/888856', headers=auth_header, json={
+        "department_name": updated_edit_name
+    })
+  
+    assert 'Department not found' in response.json['message']
+
+def test_department_get_invalid(test_client, auth_header):
+    
+    response = test_client.get('/department/edit/888856', headers=auth_header)
+   
+    assert 'Department not found' in response.json['message']
+
+def test_department_delete_invalid(test_client, auth_header):
+    
+    response = test_client.delete('/departmentdelete/88856', headers=auth_header)
+    
+    assert 'Department not found' in response.json['message']
+
+def test_department_activate_invalid(test_client, auth_header):
+   
+    response = test_client.put('/department/activate/888655', headers=auth_header)
+    
+    assert 'Department not found' in response.json['message']
+
+def test_department_deactivate_invalid(test_client, auth_header):
+    
+    response = test_client.put('/department/deactivate/8856956', headers=auth_header)
+   
+    assert 'Department not found' in response.json['message']

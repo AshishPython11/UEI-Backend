@@ -205,3 +205,36 @@ def test_edit_admin_profile_description_missing_description(test_client, auth_he
 
     assert response.json['message'] == 'Please Provide Description'
    
+def test_edit_admin_profile_description_invalid(test_client, auth_header):
+    
+
+    response = test_client.put('/admin_profile_description/edit/888896', json={
+        'admin_id': auth_header['admin_id'],
+        'description': 'Updated Description'
+    }, headers=auth_header)
+    
+   
+    data = response.json
+    assert data['message'] == 'Admin Profile Description not found'
+
+def test_get_admin_profile_description_by_idinvalid(test_client, auth_header):
+    response = test_client.get('/admin_profile_description/edit/88856', headers=auth_header)
+    
+   
+    data = response.json
+    assert data['message'] == 'Admin Profile Description not found'
+    
+
+def test_activate_admin_profile_description_invalid(test_client, auth_header):
+    response = test_client.put('/admin_profile_description/activate/88856', headers=auth_header)
+    
+    
+    data = response.json
+    assert data['message'] == 'Admin Profile Description not found'
+
+def test_deactivate_admin_profile_description_invalid(test_client, auth_header):
+    response = test_client.put('/admin_profile_description/deactivate/888856', headers=auth_header)
+    
+    
+    data = response.json
+    assert data['message'] == 'Admin Profile Description not found'

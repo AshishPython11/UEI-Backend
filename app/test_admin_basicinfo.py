@@ -495,3 +495,49 @@ def test_edit_admin_basic_info_missing_admin_login_id(test_client, auth_header):
     }, headers=auth_header)
 
     assert response.json['message'] == 'Please Provide Logged Admin Id'
+
+
+def test_get_admin_basic_info_invalid(test_client, auth_header):
+    response = test_client.get('/admin_basicinfo/edit/88856', headers=auth_header)
+    
+    
+    assert response.json['message'] == 'Admin Basic Information not found'
+
+def test_edit_admin_basic_info_invalid(test_client, auth_header):
+    response = test_client.put('/admin_basicinfo/edit/88856', json={
+        'department_id': 2,  # Ensure this ID exists in your seed data
+        'first_name': 'Jane',
+        'last_name': 'Doe',
+        'gender': 'Female',
+        'dob': '1992-05-15',
+        'father_name': 'Updated Father Name',
+        'mother_name': 'Updated Mother Name',
+        'guardian_name': 'Updated Guardian Name',
+        'is_kyc_verified': 0,
+        'pic_path': '/updated/path/to/pic',
+        'admin_login_id': auth_header['admin_id']  # Use admin_id from seed data
+    }, headers=auth_header)
+    
+    
+    assert response.json['message'] == 'Admin Basic Information not found'
+
+def test_activate_admin_basic_info_invalid(test_client, auth_header):
+    response = test_client.put('/admin_basicinfo/activate/88856', headers=auth_header)
+    
+    
+    assert response.json['message'] == 'Admin Basic Information not found'
+def test_deactivate_admin_basic_info_invalid(test_client, auth_header):
+    response = test_client.put('/admin_basicinfo/deactivate/88856', headers=auth_header)
+    
+    
+    assert response.json['message'] == 'Admin Basic Information not found'
+def test_get_profile_success_invalid(test_client, auth_header):
+    # Assume seed_data provides a valid admin ID
+    
+    
+    response = test_client.get('/admin_basicinfo/getProfile/88856', headers=auth_header)
+    
+   
+    
+    assert response.json['message']== 'Admin not found'
+    

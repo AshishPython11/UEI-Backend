@@ -306,7 +306,7 @@ class StudentLanguageKnownController:
                         student_language_known = LanguageKnown.query.get(id)
                         if not student_language_known:
                    
-                            return jsonify({'message': 'Student language Known  not found', 'status': 404})
+                            return jsonify({'message': 'Student language Known not found', 'status': 404})
                         else:
                             student_language_known.is_active = 0
                             db.session.commit()

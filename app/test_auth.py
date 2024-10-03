@@ -156,3 +156,16 @@ def test_reset_password(test_client, auth_header):
 #         assert response.status_code == 200
 #         assert response.json['message'] == 'Reset password instructions sent to email'
 
+def test_activate_student_invalid(test_client, auth_header):
+      # Use an existing student ID for testing
+    response = test_client.put('/auth/activate/8596963', headers=auth_header)
+    
+    assert response.json['message'] == 'User not found'
+
+
+
+def test_deactivate_student_invalid(test_client, auth_header):
+     # Use an existing student ID for testing
+    response = test_client.put('/auth/deactivate/88856965', headers=auth_header)
+   
+    assert response.json['message'] == 'User not found'

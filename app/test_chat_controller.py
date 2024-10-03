@@ -231,6 +231,7 @@ def test_chat_conversation_missing_question(test_client, auth_header):
     
     assert response.status_code == 404
 
+
 def test_chat_conversation_missing_prompt(test_client, auth_header):
     response = test_client.post('/chatconversation', json={
         'prompt':'',
@@ -240,4 +241,34 @@ def test_chat_conversation_missing_prompt(test_client, auth_header):
     assert response.status_code == 404
     
   
+def test_generate_from_api_unauthorized(test_client):
+    data = {
+        "question": "What is Artificial Intelligence?",
+        "prompt": "Provide a detailed explanation.",
+        "course": "AI",
+        "stream": "Computer Science",
+        "chat_history": []
+    }
+
+    response = test_client.post('/chat/generate-from-api', json=data)  # No auth header
+    
+    
+    response_json = response.get_json()
+    assert 'msg' in response_json
+    assert response_json['msg'] == 'Missing Authorization Header'
     # Restore the original method
+
+def test_fetch_from_db_success_invalid(test_client, auth_header):
+    # Assuming the database has relevant cached data
+    data = {
+        "question": "hfhdbfub bdhj?"
+    }
+
+    response = test_client.post('/chat/fetch-from-db', json=data, headers=auth_header)
+
+    assert response.status_code == 200
+    response_json = response.get_json()
+    assert 'message' in response_json
+    assert 'status' in response_json
+
+    assert response_json['message'] == 'No similar question found in cache'

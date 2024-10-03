@@ -176,3 +176,34 @@ def test_edit_subject_missing_subject_name(test_client, auth_headers):
 
     assert response.is_json
     assert response.json['message'] == 'Please provide subject name'
+
+def test_edit_subject_invalid(test_client, auth_headers):
+    updated_subject_name = faker.unique.word()# Seed data and get the subject ID
+    subject_data = {'subject_name':updated_subject_name}
+    response = test_client.put('subject/edit/88856959', json=subject_data, headers=auth_headers)
+   
+    assert response.json['message'] == 'Subject not found'
+
+def test_get_subject_invalid(test_client, auth_headers):
+     # Seed data and get the subject ID
+    response = test_client.get('subject/edit/888569596', headers=auth_headers)
+    assert response.json['message'] == 'Subject not found'
+     # Adjust based on actual seeded name
+
+def test_delete_subject_invalid(test_client, auth_headers):
+     # Seed data and get the subject ID
+    response = test_client.delete('subjectdelete/88856959', headers=auth_headers)
+    
+    assert response.json['message'] == 'Subject not found'
+
+def test_activate_subject_invalid(test_client, auth_headers):
+     # Seed data and get the subject ID
+    response = test_client.put('subject/activate/88856959', headers=auth_headers)
+    
+    assert response.json['message'] == 'Subject not found'
+
+def test_deactivate_subject_invalid(test_client, auth_headers):
+      # Seed data and get the subject ID
+    response = test_client.put('subject/deactivate/88547595', headers=auth_headers)
+    
+    assert response.json['message'] == 'Subject not found'

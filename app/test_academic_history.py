@@ -358,4 +358,52 @@ def test_add_academic_history_invalid_class_id(test_client, auth_header):
     }, headers=auth_header)
     print(response.data)
     assert response.json['message'] == 'Input payload validation failed'
+ 
+def test_edit_academic_history_invalid(test_client, auth_header):
     
+    updated_data = {
+        'student_id': str(auth_header['student_id']),
+        'institution_type': 'School',
+        'board': 'CBSE',
+        'state_for_stateboard': 'Updated State',
+        'institute_id': str(seed_ids['institution_id']), 
+        'course_id': str(seed_ids['course_id']),  
+        'learning_style': 'Visual',
+        'class_id': str(seed_ids['class_id']),
+        'year': '2023'
+    }
+    response = test_client.put('/new_student_academic_history/edit/8856598', headers=auth_header, json=updated_data)
+ 
+    
+    data = response.get_json()
+   
+    assert data['message'] == 'Academic History not found'
+
+def test_get_academic_history_invalid(test_client, auth_header):
+   
+    response = test_client.get('/new_student_academic_history/get/8856959', headers=auth_header)
+    
+    data = response.get_json()
+    assert data['message'] == 'Academic History not found'
+  
+
+def test_delete_academic_history_invalid(test_client, auth_header):
+ 
+    response = test_client.delete('/new_student_academic_history/delete/88565965', headers=auth_header)
+   
+    data = response.get_json()
+    assert data['message'] == 'Academic History not found'
+
+def test_activate_academic_history_invalid(test_client, auth_header):
+    
+    response = test_client.put('/new_student_academic_history/activate/8896598', headers=auth_header)
+  
+    data = response.get_json()
+    assert data['message'] == 'Academic History not found'
+
+def test_deactivate_academic_history_invalid(test_client, auth_header):
+    
+    response = test_client.put('/new_student_academic_history/deactivate/5585968', headers=auth_header)
+    
+    data = response.get_json()
+    assert data['message'] == 'Academic History not found'

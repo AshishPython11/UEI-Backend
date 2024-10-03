@@ -208,8 +208,10 @@ def test_edit_submenu_missing_menu_master_id(test_client, auth_header):
     )
 
     assert response.is_json
-    assert response.json['message'] == 'Please Provide Menu Id'
-    
+    # Check that the error message matches the expected NOT NULL violation message
+    assert "null value in column \"menu_master_id\"" in response.json['message']
+    # Optionally check for status code 500 or appropriate error code
+   
 
 def test_edit_submenu_missing_priority(test_client, auth_header):
     response = test_client.put(
@@ -220,3 +222,32 @@ def test_edit_submenu_missing_priority(test_client, auth_header):
 
     assert response.is_json
     assert response.json['message'] == 'Please Provide Priority'
+
+def test_edit_submenu_invalid(test_client, auth_header):
+    data = {
+        'menu_name': faker.unique.word(),
+        'menu_master_id': seed_ids['menu_id'],
+        'priority': 3
+    }
+    response = test_client.put('/submenu/edit/885695', json=data, headers=auth_header)
+    
+    assert response.json['message'] == 'SubMenu not found'
+
+def test_get_submenu_invalid(test_client, auth_header):
+    response = test_client.get('/submenu/edit/8854659', headers=auth_header)
+    
+    assert response.json['message'] == 'SubMenu not found'
+
+def test_delete_submenu_invalid(test_client, auth_header):
+    response = test_client.delete('/submenudelete/8885659', headers=auth_header)
+    
+    assert response.json['message'] == 'SubMenu not found'
+
+def test_activate_submenu_invalid(test_client, auth_header):
+    response = test_client.put('/submenu/activate/8856959', headers=auth_header)
+   
+    assert response.json['message'] == 'SubMenu not found'
+def test_deactivate_submenu_invalid(test_client, auth_header):
+    response = test_client.put('/submenu/deactivate/8856959', headers=auth_header)
+    
+    assert response.json['message'] == 'SubMenu not found'

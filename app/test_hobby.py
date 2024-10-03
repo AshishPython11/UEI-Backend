@@ -139,3 +139,37 @@ def test_hobby_edit_missing_hobby_name(test_client, auth_header):
     assert response.is_json
     
     assert response.json['message'] == 'Please provide hobby name'
+
+
+
+
+
+
+def test_hobby_edit_invalid(test_client, auth_header):
+    new_hobby_name = f"Updated Hobby {int(time.time())}"
+    response = test_client.put('/hobby/edit/885695', headers=auth_header, json={
+        "hobby_name": new_hobby_name
+    })
+   
+    assert 'Hobby not found' in response.json['message']
+
+def test_hobby_get_invalid(test_client, auth_header):
+    response = test_client.get('/hobby/edit/888569', headers=auth_header)
+  
+    assert 'Hobby not found' in response.json['message']
+
+def test_hobby_delete_invalid(test_client, auth_header):
+    
+    response = test_client.delete('/hobbydelete/888956', headers=auth_header)
+   
+    assert 'hobby not found' in response.json['message']
+
+def test_hobby_activate_invalid(test_client, auth_header):
+    response = test_client.put('/hobby/activate/8875965', headers=auth_header)
+
+    assert 'Hobby not found' in response.json['message']
+
+def test_hobby_deactivate_invalid(test_client, auth_header):
+    response = test_client.put('/hobby/deactivate/8899965', headers=auth_header)
+   
+    assert 'Hobby not found' in response.json['message']

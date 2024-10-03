@@ -137,7 +137,7 @@ class RolevsFormController:
                         form = RoleVsFormMasterData.query.get(id)
                         if not form:
                   
-                            return jsonify({'message': 'RolevsForm Data  not found', 'status': 404})
+                            return jsonify({'message': 'RolevsForm Data not found', 'status': 404})
                         else:
                             form.form_master_id = form_master_id
                             form.role_master_id = role_master_id
@@ -167,7 +167,7 @@ class RolevsFormController:
                     form = RoleVsFormMasterData.query.get(id)
                     if not form:
       
-                        return jsonify({'message': 'RolevsForm Data  not found', 'status': 404})
+                        return jsonify({'message': 'RolevsForm Data not found', 'status': 404})
                     else:
                         form_data = {
                             'id': form.role_form_master_id,
@@ -197,7 +197,7 @@ class RolevsFormController:
                         form_entity = RoleVsFormMasterData.query.get(id)
                         if not form_entity:
           
-                            return jsonify({'message': 'form not found', 'status': 404})
+                            return jsonify({'message': 'Rolevsform not found', 'status': 404})
                         else:
                           
                             form_entity.is_deleted = True

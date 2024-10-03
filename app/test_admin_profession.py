@@ -347,4 +347,41 @@ def test_edit_admin_profession_not_found(test_client, auth_header):
     }, headers=auth_header)
 
     assert response.json['message'] == 'Admin Profession not found'
+
+def test_edit_admin_profession_invalid(test_client, auth_header):
     
+    response = test_client.put('/admin_profession/edit/88885', json={
+        'admin_id': auth_header['admin_id'],
+        'institution_id': seed_ids['institution_id'],  # Use the seeded institution_id
+        'course_id': seed_ids['course_id'],             # Use the seeded course_id
+        'subject_id': seed_ids['subject_id']
+    }, headers=auth_header)   
+   
+    data = response.json
+   
+    assert data['message'] == 'Admin Profession not found'
+    
+
+def test_get_admin_profession_by_id_invalid(test_client, auth_header):
+    
+    response = test_client.get('/admin_profession/edit/88885', headers=auth_header)   
+      
+    data = response.json
+    
+    assert data['message'] == 'Admin Profession not found'
+
+
+def test_activate_admin_profession_invalid(test_client, auth_header):
+    
+    
+
+    response = test_client.put(f'/admin_profession/activate/88856', headers=auth_header)    
+  
+    assert response.json['message'] == 'Admin Profession not found'
+
+
+def test_deactivate_admin_profession_invalid(test_client, auth_header):
+      
+    response = test_client.put(f'/admin_profession/deactivate/88856', headers=auth_header)   
+    
+    assert response.json['message'] == 'Admin Profession not found'

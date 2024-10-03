@@ -189,3 +189,50 @@ def test_language_edit_missing_language_name(test_client, auth_header):
     assert response.is_json
    
     assert response.json['message'] == 'Please provide language name'
+
+
+
+
+
+def test_edit_language_invalid(test_client, auth_header):
+    
+    payload = {
+        "language_name": faker.unique.language_name(),  # Faker for new language name
+        "description": faker.sentence(),  # New random sentence for description
+        "icon": faker.image_url()  # New random image URL
+    }
+    response = test_client.put('/language/edit/8885695', json=payload, headers=auth_header)
+
+    data = response.get_json()
+    assert 'Language not found' in data['message']
+
+# Test: Get Language by ID
+def test_get_language_invalid(test_client, auth_header):
+   
+    response = test_client.get('/language/edit/885695', headers=auth_header)
+    assert 'Language not found' in response.json['message']
+    
+
+# Test: Activate Language
+def test_activate_language_invalid(test_client, auth_header):
+    
+    response = test_client.put('/language/activate/7758965', headers=auth_header)
+  
+    data = response.get_json()
+    assert 'Language not found' in data['message']
+
+# Test: Deactivate Language
+def test_deactivate_language_invalid(test_client, auth_header):
+    
+    response = test_client.put('/language/deactivate/85569568', headers=auth_header)
+   
+    data = response.get_json()
+    assert 'Language not found' in data['message']
+
+# Test: Delete Language
+def test_delete_language_invalid(test_client, auth_header):
+    
+    response = test_client.delete('/languagedelete/885968', headers=auth_header)
+    
+    data = response.get_json()
+    assert 'Language not found' in data['message']

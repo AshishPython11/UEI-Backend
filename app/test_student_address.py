@@ -495,3 +495,53 @@ def test_edit_student_address_missing_address_type(test_client, auth_header):
     )
 
     assert response.json['message'] == 'Please Provide Address Type'
+
+
+def test_get_student_address_invalid(test_client, auth_header):
+    
+     # replace with actual generated student ID
+    response = test_client.get('/student_address/edit/8885995',headers=auth_header)
+
+    assert response.json['message']=="Student Address not found"
+
+def test_edit_student_address_invalid(test_client, auth_header):
+    student_id = auth_header['student_id']  # Replace with actual generated student ID
+
+    # Send the request to create or update student address
+    response = test_client.put('/student_address/edit/8885695', json={
+        'student_id': student_id,
+        'address1': faker.address(),
+        'address2': faker.address(),
+        'country': faker.country(),
+        'state': faker.state(),
+        'city': faker.city(),
+        'district': faker.city(),
+        'pincode': faker.zipcode(),
+        'address_type': faker.random_element(['home', 'work'])
+    }, headers=auth_header)
+
+     # Allow both success codes
+
+    # Allow both messages (either creation or update)
+    
+    assert response.json['message'] =="Student Address created successfully"
+
+
+def test_delete_student_address_invalid(test_client, auth_header):
+  
+      # replace with actual generated student ID
+    response = test_client.delete('/student_addressdelete/8859659',headers=auth_header)
+    
+    assert response.json['message'] == 'Student Address not found'
+
+def test_activate_student_address_invalid(test_client, auth_header):
+    
+    response = test_client.put('/student_address/activate/8885695',headers=auth_header)
+   
+    assert response.json['message'] == 'Student Address not found'
+
+def test_deactivate_student_address_invalid(test_client, auth_header):
+   # replace with actual generated student ID
+    response = test_client.put('/student_address/deactivate/8885995',headers=auth_header)
+
+    assert response.json['message'] == 'Student Address not found'

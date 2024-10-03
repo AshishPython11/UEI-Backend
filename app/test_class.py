@@ -219,3 +219,29 @@ def test_edit_class_not_found(test_client, auth_header):
 
     assert response.json['message'] == 'Class Not Found'
     
+def test_class_get_success_invalid(test_client, auth_header):
+    # Assuming an existing class with ID 1
+    response = test_client.get('/class/get/888856', headers=auth_header)
+    
+    
+    assert response.json['message'] == 'Class Not Found'
+    
+
+def test_class_delete_success_invalid(test_client, auth_header):
+    # Assuming an existing class with ID 1
+    response = test_client.delete('/class/delete/888856', headers=auth_header)
+    
+    assert response.json['message'] == 'Class Not Found'
+
+def test_class_activate_success_invalid(test_client, auth_header):
+    # Assuming an existing class with ID 1
+    response = test_client.put('/class/activate/888569', headers=auth_header)
+  
+    assert response.json['message'] == 'Class Not Found'
+
+def test_class_deactivate_success_invalid(test_client, auth_header):
+    # Assuming an existing class with ID 1
+    response = test_client.put('/class/deactivate/88856', headers=auth_header)
+    
+    response_json = response.get_json()
+    assert response_json['message'] == 'Class not found'

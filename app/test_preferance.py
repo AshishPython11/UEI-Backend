@@ -483,3 +483,56 @@ def test_subject_preference_edit_missing_score_in_percentage(test_client, auth_h
     assert response.is_json
     assert response.json['message'] == 'Please Provide Score in percentage'
 
+def test_subject_preference_edit_invalid(test_client,auth_headers):
+
+    payload = {
+       'student_id': str(auth_headers['student_id']),
+        'course_id': str(seed_ids['course_id']),
+        'subject_id': str(seed_ids['subject_id']),
+        'preference': 'Advanced Math',
+        'score_in_percentage': 95
+    }
+    response = test_client.put('/subject_preference/edit/888569',
+                          headers=auth_headers,
+                          data=json.dumps(payload),
+                          content_type='application/json')
+
+  
+    data = response.get_json()
+    assert data['message'] == 'Subject Preference not found'
+
+
+def test_subject_preference_get_by_id_invalid(test_client,auth_headers):
+
+    
+    response = test_client.get('/subject_preference/edit/8885695',
+                          headers=auth_headers)
+
+    
+    data = response.get_json()
+    assert data['message'] == 'Subject Preference not found'
+
+def test_subject_preference_delete_invalid(test_client,auth_headers):
+
+    response = test_client.delete('/subject_preferencedelete/888569',
+                             headers=auth_headers)
+
+  
+    data = response.get_json()
+    assert data['message'] == 'Student Preference not found'
+
+def test_subject_preference_activate_invalid(test_client,auth_headers):
+
+    response = test_client.put('/subject_preference/activate/8885965',
+                          headers=auth_headers)
+
+    data = response.get_json()
+    assert data['message'] == 'Subject Preference not found'
+
+def test_subject_preference_deactivate_invalid(test_client,auth_headers):
+
+    response = test_client.put('/subject_preference/deactivate/8885659',
+                          headers=auth_headers)
+
+    data = response.get_json()
+    assert data['message'] == 'Subject Preference not found'

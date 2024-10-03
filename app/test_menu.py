@@ -290,3 +290,67 @@ def test_edit_menu_missing_priority(test_client, auth_header):
     assert response.is_json
     assert response.json['message'] == 'Please Provide Priority'
     
+def test_edit_menu_invalid(test_client, auth_header):
+    payload = {
+        "menu_name": faker.unique.word(),  # Faker for new menu name
+        "priority": faker.random_int(min=1, max=10)  # New random priority
+    }
+    response = test_client.put('/menu/edit/888568', json=payload, headers=auth_header)
+   
+    data = response.get_json()
+    assert 'Menu not found' in data['message']
+
+# Test: Get Menu by ID
+def test_get_menu_invalid(test_client, auth_header):
+    response = test_client.get('/menu/edit/8885695', headers=auth_header)
+    
+    data = response.get_json()
+    assert 'Menu not found' in data['message']
+
+# Test: Activate Menu
+def test_activate_menu_invalid(test_client, auth_header):
+    response = test_client.put('/menu/activate/8885695', headers=auth_header)
+  
+    data = response.get_json()
+    assert 'Menu not found' in data['message']
+
+# Test: Deactivate Menu
+def test_deactivate_menu_invalid(test_client, auth_header):
+    response = test_client.put('/menu/deactivate/8885695', headers=auth_header)
+
+    data = response.get_json()
+    assert 'Menu not found' in data['message']
+
+# Test: Delete Menu
+def test_delete_menu_invalid(test_client, auth_header):
+    response = test_client.delete('/menudelete/888569', headers=auth_header)
+    
+    data = response.get_json()
+    assert 'Menu not found' in data['message']
+
+
+def test_menu_list_without_auth(test_client):
+    response = test_client.get('/menu/list')
+    # assert response.status_code == 401
+    data = response.get_json()
+    assert 'Missing Authorization Header' in data['msg']
+def test_menu_list_without_auth(test_client):
+    payload = {
+        "menu_name": 123,  # Invalid type, should be a string
+        "priority": "high"  # Invalid type, should be an integer
+    }
+    response = test_client.post('/menu/add', json=payload)
+    # assert response.status_code == 401
+    data = response.get_json()
+    assert 'Missing Authorization Header' in data['msg']
+
+
+def test_add_menu_invalid_data_type(test_client, auth_header):
+    payload = {
+        "menu_name": 123,  # Invalid type, should be a string
+        "priority": "high"  # Invalid type, should be an integer
+    }
+    response = test_client.post('/menu/add', json=payload, headers=auth_header)
+    # assert response.status_code == 400
+    data = response.get_json()
+    assert 'invalid input syntax for type integer' in data['message']

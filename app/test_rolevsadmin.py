@@ -245,3 +245,42 @@ def test_edit_role_vs_admin_missing_role_master_id(test_client, auth_header):
     response = test_client.put(f'/rolevsadmin/edit/{seed_ids["role_admin_master_id"]}', json={'admin_id':str(faker.random_int(min=1,max=100)), 'role_master_id': ''}, headers=auth_header)
     
     assert response.json['message'] == 'Please Role Master Id'
+
+
+def test_edit_rolevsadmin_invalid(test_client, auth_header):
+    payload = {
+        "admin_id": auth_header['admin_id'],
+        "role_master_id": seed_ids['role_master_id']
+    }
+    response = test_client.put('/rolevsadmin/edit/8885695', json=payload, headers=auth_header)
+ 
+    data = response.get_json()
+    assert 'RolevsUser Data not found' in data['message']
+
+# Test: Get RolevsAdmin by ID
+def test_get_rolevsadmin_invalid(test_client, auth_header):
+    response = test_client.get('/rolevsadmin/edit/8885695', headers=auth_header)
+ 
+    data = response.get_json()
+    assert 'RolevsUser Data not found' in data['message']
+
+# Test: Activate RolevsAdmin
+def test_activate_rolevsadmin_invalid(test_client, auth_header):
+    response = test_client.put('/rolevsadmin/activate/8856958', headers=auth_header)
+    
+    data = response.get_json()
+    assert 'RolevsUser Data not found' in data['message']
+
+# Test: Deactivate RolevsAdmin
+def test_deactivate_rolevsadmin_invalid(test_client, auth_header):
+    response = test_client.put('/rolevsadmin/deactivate/8856959', headers=auth_header)
+
+    data = response.get_json()
+    assert 'RolevsUser Data not found' in data['message']
+
+# Test: Delete RolevsAdmin
+def test_delete_rolevsadmin_invalid(test_client, auth_header):
+    response = test_client.delete('/rolevsadmindelete/8859659', headers=auth_header)
+
+    data = response.get_json()
+    assert 'RolevsUser not found' in data['message']

@@ -244,3 +244,33 @@ def test_edit_student_hobby_missing_hobby_id(test_client, auth_header):
 
     assert response.is_json
     assert response.json['message'] == 'Please Provide Hobby Id'
+
+
+
+
+
+
+
+def test_student_hobby_get_invalid(test_client, auth_header):
+    
+    response = test_client.get('/student_hobby/edit/8885695', headers=auth_header)
+   
+    assert 'Student Hobby not found' in response.json['message']
+    
+
+def test_student_hobby_delete_invalid(test_client, auth_header):
+   
+    response = test_client.delete('/student_hobby/delete/8885695', headers=auth_header)
+    
+    assert 'Student Hobby not found' in response.json['message']
+
+def test_student_hobby_activate_invalid(test_client, auth_header):
+    response = test_client.put('/student_hobby/activate/8856959', headers=auth_header)
+    
+    assert 'Student Hobby not found' in response.json['message']
+
+def test_student_hobby_deactivate_invalid(test_client, auth_header):
+   
+    response = test_client.put('/student_hobby/deactivate/88569586', headers=auth_header)
+    
+    assert 'Student Hobby not found' in response.json['message']

@@ -291,3 +291,56 @@ def test_feedback_add_only_question(test_client, auth_header):
    
     assert response.is_json
     assert response.json['message'] == 'Please provide question and options'
+
+def test_feedback_edit_invalid(test_client, auth_header):
+  
+    response = test_client.put('/feedback/edit/888958', headers=auth_header, json={
+        "question": "How would you rate the course content?",
+        "options": ["Poor", "Fair", "Good", "Excellent"]
+    })
+    
+    assert 'Feedback not found' in response.json['message']
+
+def test_feedback_get_invalid(test_client, auth_header):
+    
+    response = test_client.get('/feedback/888569', headers=auth_header)
+   
+    assert 'Feedback not found' in response.json['message']
+
+def test_feedback_delete_invalid(test_client, auth_header):
+   
+    response = test_client.delete('/feedback/delete/888546', headers=auth_header)
+   
+    assert 'Feedback not found' in response.json['message']
+
+
+
+def test_student_feedback_get_invalid(test_client, auth_header):
+
+    response = test_client.get('/feedback/student_feedback/4454844', headers=auth_header)
+   
+    assert 'Student not found' in response.json['message']
+
+def test_student_feedback_activate_invalid(test_client, auth_header):
+    
+    response = test_client.put('/feedback/student_activate/8885695', headers=auth_header)
+    
+    assert 'Student Feedback not found' in response.json['message']
+
+def test_student_feedback_deactivate_invalid(test_client, auth_header):
+   
+    response = test_client.put('/feedback/student_deactivate/888569', headers=auth_header)
+   
+    assert 'Student Feedback not found' in response.json['message']
+
+def test_feedback_activate_invalid(test_client, auth_header):
+    
+    response = test_client.put('/feedback/activate/888569', headers=auth_header)
+    
+    assert 'Feedback not found' in response.json['message']
+
+def test_feedback_deactivate_invalid(test_client, auth_header):
+    
+    response = test_client.put('/feedback/deactivate/888856', headers=auth_header)
+    
+    assert 'Feedback not found' in response.json['message']

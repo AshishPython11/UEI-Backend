@@ -413,3 +413,22 @@ def test_add_admin_address_missing_address_type(test_client, auth_header):
     }, headers=auth_header)
 
     assert response.json['message'] == 'Please Provide Address Type'
+
+
+
+def test_activate_admin_address_invalid(test_client, auth_header):
+    response = test_client.put('/admin_address/activate/88569', headers=auth_header)
+    
+    assert response.json['message'] == 'Admin Address not found'
+
+def test_deactivate_admin_address_invalid(test_client, auth_header):
+    response = test_client.put('/admin_address/deactivate/88569', headers=auth_header)
+    print(response.data)
+    assert response.json['message'] == 'Admin Address not found'
+
+
+def test_get_admin_address_invalid(test_client, auth_header):
+    response = test_client.get('/admin_address/edit/88569', headers=auth_header)
+    
+    assert response.json['message'] == 'Admin Address not found'
+    
