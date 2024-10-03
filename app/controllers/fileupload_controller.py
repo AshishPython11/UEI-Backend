@@ -57,7 +57,10 @@ class UploadFileController:
                  
                     if 'file' not in request.files:
             
-                        return jsonify({'error': 'No file part'})
+                        return jsonify({'error': 'No file part','status':400})
+                    file = request.files['file']
+                    if file.filename == '':
+                        return jsonify({"error": "No selected file",'status':400})
                     else:
                         file_url = self.save_file_and_return_url(file)
                         data ={

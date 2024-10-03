@@ -66,7 +66,7 @@ class ChatController:
         @self.chat_ns.route("/chat")
         class ChatAdd(Resource):
             client = OpenAI(
-                api_key=os.environ.get('API_KEY'),
+                api_key=API_KEY
             )
 
             def get_gpt3_prompt(self, prompt):
@@ -146,7 +146,7 @@ class ChatController:
         @self.chat_ns.route("/chatadd")
         class ChatbotAdd(Resource):
             client = OpenAI(
-                api_key=os.environ.get('API_KEY'),
+                api_key=API_KEY,
             )
 
             def get_similar_question(self, question, stream, course):
@@ -394,7 +394,7 @@ class ChatController:
         
         class ChatAdd(Resource):
             client = OpenAI(
-                api_key=os.environ.get('API_KEY'),)
+                api_key=API_KEY)
 
             def get_gpt3_prompt(self, prompt):
                 gpt3_system_prompt = f"'{prompt}'\n\n"
@@ -415,6 +415,8 @@ class ChatController:
             
             def contains_exclusion(self, text):
                 exclusion_statements = ["I'm sorry", "I apologize","However,I don't have real time access","As an AI created by gyan setu, my responses are based on the 'BE' course and 'Python' subject only.","I'm unable to provide a detailed answer for this topic."]
+                if isinstance(text, list):
+                     text = ' '.join(text)
                 normalized_text = text.lower()
                 for statement in exclusion_statements:
                     if statement.lower() in normalized_text:
@@ -428,6 +430,7 @@ class ChatController:
                     question = data.get('question')
                     prompt = data.get('prompt')
                     current_user_id = get_jwt_identity()
+
                     if not question:
                         return jsonify({'message': 'Please provide a question', 'status': 400})
 
@@ -436,8 +439,8 @@ class ChatController:
 
                     gpt3_system_prompt = self.get_gpt3_prompt(prompt)
                     conversation = [{'role': 'system', 'content': gpt3_system_prompt}]
-
                     model_name = 'gpt-3.5-turbo'
+
                     try:
                         response = self.client.chat.completions.create(
                             model=model_name,
@@ -454,31 +457,36 @@ class ChatController:
                             if chunk.choices[0].delta.content is not None:
                                 content = chunk.choices[0].delta.content.strip()
                                 if not self.contains_greeting(content):
-                                # if 'greeting' not in content.lower() and 'hello' not in content.lower():
                                     filtered_responses.append(content)
-                        
+
                         if not filtered_responses:
                             return jsonify({'message': 'No relevant answer found', 'status': 404})
-                        
-                        # Store only the first relevant response, assuming it's the most relevant
-                        # answer = filtered_responses[0]
-                        if self.should_store_response(question, filtered_responses) and self.contains_exclusion(filtered_responses):
+
+                        # Iterate over filtered_responses to apply exclusion and store relevant answers
+                        valid_responses = [
+                            response for response in filtered_responses 
+                            if self.should_store_response(question, response) 
+                            and self.contains_exclusion(response)
+                        ]
+
+                        if valid_responses:
+                            # Store only the first valid response, assuming it's the most relevant
                             new_chat_entry = ChatConversionData(
                                 chat_question=question,
                                 student_id=current_user_id,
-                                response=filtered_responses,  # Store the single relevant response
+                                response=valid_responses[0],  # Store the single relevant response
                                 created_at=datetime.now(),
                                 updated_at=datetime.now(),
                                 is_deleted=False
                             )
                             db.session.add(new_chat_entry)
                             db.session.commit()
+
                         return jsonify({
                             'message': 'Answer stored successfully',
                             'data': {
                                 'question': question,
-                                # 'answer': '\n'.join(filtered_responses),
-                                'answer': filtered_responses,
+                                'answer': valid_responses,
                                 'prompt': prompt,
                             },
                             'status': 200,
@@ -492,8 +500,80 @@ class ChatController:
                             'status': 500,
                         })
                 except Exception as e:
-                        db.session.rollback()
-                        return jsonify({'message': 'Internal Server Error', 'status': 500})
+                    db.session.rollback()
+                    return jsonify({'message': 'Internal Server Error', 'status': 500})
+            # def post(self):
+            #     try:
+            #         data = request.json
+            #         question = data.get('question')
+            #         prompt = data.get('prompt')
+            #         current_user_id = get_jwt_identity()
+            #         if not question:
+            #             return jsonify({'message': 'Please provide a question', 'status': 400})
+
+            #         if not prompt:
+            #             return jsonify({'message': 'Please provide a prompt', 'status': 400})
+
+            #         gpt3_system_prompt = self.get_gpt3_prompt(prompt)
+            #         conversation = [{'role': 'system', 'content': gpt3_system_prompt}]
+
+            #         model_name = 'gpt-3.5-turbo'
+            #         try:
+            #             response = self.client.chat.completions.create(
+            #                 model=model_name,
+            #                 messages=conversation,
+            #                 stream=True,
+            #                 max_tokens=2048,  # Set the desired response length here
+            #                 temperature=0.7,
+            #                 n=1,
+            #                 stop=None,
+            #             )
+
+            #             filtered_responses = []
+            #             for chunk in response:
+            #                 if chunk.choices[0].delta.content is not None:
+            #                     content = chunk.choices[0].delta.content.strip()
+            #                     if not self.contains_greeting(content):
+            #                     # if 'greeting' not in content.lower() and 'hello' not in content.lower():
+            #                         filtered_responses.append(content)
+                        
+            #             if not filtered_responses:
+            #                 return jsonify({'message': 'No relevant answer found', 'status': 404})
+                        
+            #             # Store only the first relevant response, assuming it's the most relevant
+            #             # answer = filtered_responses[0]
+            #             if self.should_store_response(question, filtered_responses) and self.contains_exclusion(filtered_responses):
+            #                 new_chat_entry = ChatConversionData(
+            #                     chat_question=question,
+            #                     student_id=current_user_id,
+            #                     response=filtered_responses,  # Store the single relevant response
+            #                     created_at=datetime.now(),
+            #                     updated_at=datetime.now(),
+            #                     is_deleted=False
+            #                 )
+            #                 db.session.add(new_chat_entry)
+            #                 db.session.commit()
+            #             return jsonify({
+            #                 'message': 'Answer stored successfully',
+            #                 'data': {
+            #                     'question': question,
+            #                     # 'answer': '\n'.join(filtered_responses),
+            #                     'answer': filtered_responses,
+            #                     'prompt': prompt,
+            #                 },
+            #                 'status': 200,
+            #             })
+
+            #         except Exception as e:
+            #             error_message = str(e)
+            #             return jsonify({
+            #                 'message': 'Error while calling GPT-3 API',
+            #                 'error': error_message,
+            #                 'status': 500,
+            #             })
+            #     except Exception as e:
+            #             db.session.rollback()
+            #             return jsonify({'message': 'Internal Server Error', 'status': 500})
         
         @self.chat_ns.route('/api/chat-count/<int:student_id>')
         class GetChatCount(Resource):
@@ -896,7 +976,7 @@ class ChatController:
         @self.chat_ns.route("/generate-from-api", methods=["POST"])
         class GenerateChat(Resource):
             client = OpenAI(
-                api_key=os.environ.get('API_KEY'),
+                api_key=API_KEY
             )
 
             def get_gpt3_prompt(self, prompt):

@@ -177,8 +177,9 @@ class StudentAddressController:
 
                         return jsonify({'message': 'Please Provide Student Id', 'status': 201})
                     if not address1 :
-
+         
                         return jsonify({'message': 'Please Provide Address 1', 'status': 201})
+
                     if not address2 :
         
                         return jsonify({'message': 'Please Provide Address 2', 'status': 201})
@@ -284,7 +285,7 @@ class StudentAddressController:
                         student_address = StudentAddress.query.get(id)
                         if not student_address:
                   
-                            return jsonify({'message': 'Student Address  not found', 'status': 404})
+                            return jsonify({'message': 'Student Address not found', 'status': 404})
                         else:
                             student_address.is_active = 0
                     

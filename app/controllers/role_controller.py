@@ -164,7 +164,7 @@ class RoleController:
                         if not role_entity:
    
 
-                            return jsonify({'message': 'role not found', 'status': 404})
+                            return jsonify({'message': 'Role not found', 'status': 404})
                         else:
                             #
                             manage_roles = ManageRole.query.filter_by(role_master_id=str(id)).all()

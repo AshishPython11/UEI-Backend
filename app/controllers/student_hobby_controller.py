@@ -270,7 +270,7 @@ class StudentHobbyController:
                     
                     if not student_hobbies_data:
         
-                        return jsonify({'message': 'No Student Hobby found', 'status': 404})
+                        return jsonify({'message': 'Student Hobby not found', 'status': 404})
                     else:
       
                         return jsonify({'message': 'Student Hobbies found Successfully', 'status': 200, 'data': student_hobbies_data})

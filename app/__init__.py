@@ -7,6 +7,7 @@ from flask_jwt_extended import JWTManager,get_unverified_jwt_headers
 from flask import Flask, jsonify
 from flask_swagger_ui import get_swaggerui_blueprint
 from flask_migrate import Migrate
+from authlib.integrations.flask_client import OAuth
 import os
 import json  # Import the json module
 from flask_cors import CORS
@@ -38,7 +39,7 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=2)
 # app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes=5)
 # Initialize SQLAlchemy
 db = SQLAlchemy(app)
-
+oauth = OAuth(app)
 # Initialize Flask-Migrate
 migrate = Migrate(app, db)
 
@@ -86,6 +87,7 @@ swagger_blueprint = get_swaggerui_blueprint(
     }
 )
 app.register_blueprint(swagger_blueprint, url_prefix=SWAGGER_URL)
+
 # Import controllers
 from app.controllers.admin_contact_controller import AdminContactController
 from app.controllers.auth_controller import AuthController
@@ -122,6 +124,7 @@ from app.controllers.class_controller import ClassController
 from app.controllers.student_profile_controller import ProfileController
 from app.controllers.feedback_controller import FeedbackController
 from app.controllers.new_student_academic_history_controller import NewStudentAcademicHistoryController
+# from app.controllers.google_login import google_bp
 # Instantiate controllers
 auth_controller = AuthController(api)
 subject_controller = SubjectController(api)
@@ -194,6 +197,7 @@ app.register_blueprint(class_controller.class_bp)
 app.register_blueprint(student_profile_controller.profile_bp)
 app.register_blueprint(feedback_controller.feedback_bp)
 app.register_blueprint(new_academic_history.new_student_academic_history_bp)
+# app.register_blueprint(google_bp, url_prefix='/google')
 # api.init_app(app)
 
 # Route for serving Swagger JSON
@@ -201,3 +205,6 @@ app.register_blueprint(new_academic_history.new_student_academic_history_bp)
 def swagger():
     with open('swagger.json', 'r') as f:
         return jsonify(json.load(f))
+ 
+if __name__ == "__main__":
+    app.run(debug=True)
