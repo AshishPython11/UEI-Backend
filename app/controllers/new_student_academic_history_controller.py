@@ -96,41 +96,86 @@ class NewStudentAcademicHistoryController:
             @jwt_required()
             def get(self):
                 try:
+            # Fetch all student academic histories as a list
                     student_academic_histories = NewStudentAcademicHistory.query.all()
                     student_academic_histories_data = []
-                    institution_name = None
-                    if student_academic_histories.institute_id:
-                        institution = Institution.query.get(student_academic_histories.institute_id)
-                        if institution:
-                            institution_name = institution.institution_name
-                    
+
+                    # Loop through each student academic history record
                     for history in student_academic_histories:
+                        # Initialize institution_name as None for each record
+                        institution_name = None
+
+                        # Check if institute_id exists, then fetch institution details
+                        if history.institute_id:
+                            institution = Institution.query.get(history.institute_id)
+                            if institution:
+                                institution_name = institution.institution_name
+                        
+                        # Create the history data dictionary for each record
                         history_data = {
                             'student_id': history.student_id,
-                            'institution_type': history.institution_type,  
+                            'institution_type': history.institution_type,
                             'board': history.board,
                             'state_for_stateboard': history.state_for_stateboard,
-                            'institute_id': history.institute_id,  
+                            'institute_id': history.institute_id,
                             'institute_name': institution_name,
-                            'course_id': history.course_id,  
+                            'course_id': history.course_id,
                             'learning_style': history.learning_style,
-                            'class_id': history.class_id,  
-                            'year': history.year_or_semester,  
+                            'class_id': history.class_id,
+                            'year': history.year_or_semester,
                             'created_at': history.created_at,
                             'updated_at': history.updated_at,
                             'is_active': history.is_active
                         }
+
+                        # Append the processed history record to the list
                         student_academic_histories_data.append(history_data)
-                    
+
+                    # Check if any data was found
                     if not student_academic_histories_data:
-             
                         return jsonify({'message': 'No student academic histories found', 'status': 404})
                     else:
-               
                         return jsonify({'message': 'Student Academic Histories retrieved successfully', 'status': 200, 'data': student_academic_histories_data})
+
                 except Exception as e:
-          
+                    # Handle exceptions and return error message
                     return jsonify({'message': str(e), 'status': 500})
+                # try:
+                #     student_academic_histories = NewStudentAcademicHistory.query.all()
+                #     student_academic_histories_data = []
+                #     institution_name = None
+                #     if student_academic_histories.institute_id:
+                #         institution = Institution.query.get(student_academic_histories.institute_id)
+                #         if institution:
+                #             institution_name = institution.institution_name
+                    
+                #     for history in student_academic_histories:
+                #         history_data = {
+                #             'student_id': history.student_id,
+                #             'institution_type': history.institution_type,  
+                #             'board': history.board,
+                #             'state_for_stateboard': history.state_for_stateboard,
+                #             'institute_id': history.institute_id,  
+                #             'institute_name': institution_name,
+                #             'course_id': history.course_id,  
+                #             'learning_style': history.learning_style,
+                #             'class_id': history.class_id,  
+                #             'year': history.year_or_semester,  
+                #             'created_at': history.created_at,
+                #             'updated_at': history.updated_at,
+                #             'is_active': history.is_active
+                #         }
+                #         student_academic_histories_data.append(history_data)
+                    
+                #     if not student_academic_histories_data:
+             
+                #         return jsonify({'message': 'No student academic histories found', 'status': 404})
+                #     else:
+               
+                #         return jsonify({'message': 'Student Academic Histories retrieved successfully', 'status': 200, 'data': student_academic_histories_data})
+                # except Exception as e:
+          
+                #     return jsonify({'message': str(e), 'status': 500})
 
        
         @self.new_student_academic_history_ns.route('/add')
@@ -250,7 +295,7 @@ class NewStudentAcademicHistoryController:
 
                                 responses.append({'id': record.id, 'message': 'Academic History updated successfully'})
                             else:
-                                
+                           
                                 responses.append({'id': record_id, 'message': 'Record not found'})
 
                         db.session.commit()
