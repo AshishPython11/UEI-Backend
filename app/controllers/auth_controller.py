@@ -1,5 +1,6 @@
 from datetime import datetime,timedelta
 import random
+import os
 from flask import Blueprint, render_template, request, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_jwt_extended import create_access_token
@@ -12,8 +13,10 @@ import jwt
 from flask_jwt_extended import JWTManager,jwt_required, unset_jwt_cookies
 from flask_mail import Mail, Message
 import string
+import json
 import secrets
 mail = Mail(app)
+
 class AuthController:
     def __init__(self,api):
         self.api = api
