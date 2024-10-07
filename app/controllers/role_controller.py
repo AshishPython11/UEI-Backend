@@ -218,7 +218,7 @@ class RoleController:
 
                     role.is_active = 0
                     db.session.commit()
-                 
+                    
                     return jsonify({'message': 'Role deactivated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
