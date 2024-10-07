@@ -191,6 +191,7 @@ class NewStudentAcademicHistory(db.Model):
     created_by = db.Column(db.String(255), nullable=True)
     updated_by = db.Column(db.String(255), nullable=True)
     learning_style = db.Column(db.String(255), nullable=True)  
+    stream= db.Column(db.String(255), nullable=True)
     institute_id = db.Column(db.Integer, db.ForeignKey('tbl_institutions.institution_id'), nullable=False)
     course_id = db.Column(db.Integer, db.ForeignKey(CourseMaster.course_id), nullable=False)
     class_id = db.Column(db.Integer, db.ForeignKey('tbl_class_master.class_id'), nullable=False)
