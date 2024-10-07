@@ -18,7 +18,8 @@ class NewStudentAcademicHistoryController:
             'course_id': fields.String(required=True, description='ID of the course'),
             'learning_style': fields.String(required=False, description='Learning style'),
             'class_id': fields.String(required=True, description='ID of the class'),
-            'year': fields.String(required=False, description='Academic year or semester')
+            'year': fields.String(required=False, description='Academic year or semester'),
+            'stream': fields.String(required=False, description='Stream')
         })
 
         self.student_multiple_academic_history_model = self.api.model('AcademicHistories', {
@@ -77,7 +78,8 @@ class NewStudentAcademicHistoryController:
                             'year': history.year_or_semester,
                             'created_at': history.created_at,
                             'updated_at': history.updated_at,
-                            'is_active': history.is_active
+                            'is_active': history.is_active,
+                            'stream':history.stream,
                         }
                         data.append(history_data)
 
@@ -125,7 +127,8 @@ class NewStudentAcademicHistoryController:
                             'year': history.year_or_semester,
                             'created_at': history.created_at,
                             'updated_at': history.updated_at,
-                            'is_active': history.is_active
+                            'is_active': history.is_active,
+                            'stream':history.stream,
                         }
 
                         # Append the processed history record to the list
@@ -201,6 +204,7 @@ class NewStudentAcademicHistoryController:
                         course_id=course_id,
                         learning_style=data['learning_style'],
                         class_id=class_id,
+                        stream=data.get('stream'),
                         year_or_semester=data['year'],
                         created_by=current_user_id,  
                         updated_by=current_user_id
@@ -240,6 +244,7 @@ class NewStudentAcademicHistoryController:
                             board=item.get('board'),
                             state_for_stateboard=item.get('state_for_stateboard'),
                             class_id=item.get('class_id'),
+                            stream=item.get('stream'),
                             year_or_semester=item.get('year'),
                             university_name=item.get('university_name', None),  
                             learning_style=item.get('learning_style'),
@@ -284,6 +289,7 @@ class NewStudentAcademicHistoryController:
                                 record.student_id = item.get('student_id', record.student_id)
                                 record.institution_type = item.get('institution_type', record.institution_type)
                                 record.board = item.get('board', record.board)
+                                record.stream = item.get('stream', record.stream)
                                 record.state_for_stateboard = item.get('state_for_stateboard', record.state_for_stateboard)
                                 record.institute_id = item.get('institute_id', record.institute_id)
                                 record.course_id = item.get('course_id', record.course_id)
@@ -322,6 +328,7 @@ class NewStudentAcademicHistoryController:
                     academic_history.student_id = data.get('student_id', academic_history.student_id)
                     academic_history.institution_type = data.get('institution_type', academic_history.institution_type)  
                     academic_history.board = data.get('board', academic_history.board)
+                    academic_history.stream = data.get('stream', academic_history.stream)
                     academic_history.state_for_stateboard = data.get('state_for_stateboard', academic_history.state_for_stateboard)
                     academic_history.institute_id = data.get('institution_id', academic_history.institute_id)  
                     academic_history.course_id = data.get('course_id', academic_history.course_id)  
@@ -362,6 +369,7 @@ class NewStudentAcademicHistoryController:
                                 "institution_type": student_academic_history.institution_type,
                                 "board": student_academic_history.board,
                                 "state_for_stateboard": student_academic_history.state_for_stateboard,
+                                "stream": student_academic_history.stream,
                                 'institute_name': institution_name,
                                 'institute_id': student_academic_history.institute_id,
                                 "course_id": student_academic_history.course_id,
