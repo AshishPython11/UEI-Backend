@@ -35,7 +35,8 @@ class NewStudentAcademicHistoryController:
             'course_id': fields.String(required=True, description='ID of the course'),
             'learning_style': fields.String(required=False, description='Learning style'),
             'class_id': fields.String(required=True, description='ID of the class'),
-            'year': fields.String(required=False, description='Academic year or semester')
+            'year': fields.String(required=False, description='Academic year or semester'),
+            'stream': fields.String(required=False, description='Stream')
         })
 
         self.student_multiple_academic_history_edit_model = self.api.model('AcademicHistoriesEdit', {
