@@ -255,7 +255,7 @@ class StudentHobbyController:
             @jwt_required()
             def get(self, id):
                 try:
-               
+                
                     student_hobbies = StudentHobby.query.filter_by(student_id=id,is_active=1).all() 
                     student_hobbies_data = []
                     
