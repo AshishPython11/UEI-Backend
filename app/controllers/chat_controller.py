@@ -3,6 +3,7 @@ import json
 import nltk
 from datetime import datetime
 import time
+import openai
 from concurrent.futures import ThreadPoolExecutor
 from sqlalchemy import func
 from flask import Blueprint, jsonify, request,current_app
@@ -17,8 +18,7 @@ from pinecone import Pinecone, ServerlessSpec
 import os
 from sentence_transformers import SentenceTransformer
 
-# Initialize embedding model (e.g., Sentence-BERT or OpenAI)
-model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -32,22 +32,29 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 from pymongo import MongoClient
-client = MongoClient('mongodb://localhost:27017/')  # Update with your MongoDB URI
-db_mongo = client['mongo_db_store']  # Use your MongoDB database name
+client = MongoClient('mongodb://localhost:27017/')
+db_mongo = client['mongo_db_store']  
 collection = db_mongo['mongo_collection']  
+# import pinecone
+
+# pinecone.init(api_key="a4636f48-583c-429e-82e0-c970614508bd", environment="your-environment")
+# index_name = "hybridsearch"
 pc = Pinecone(api_key=os.getenv('PINECONE_API_KEY'))
-index_name="hybrid-search"
+index_name="new-hybrid-search"
+if index_name in pc.list_indexes():
+    pc.delete_index(index_name)
+    print(f"Deleted existing index '{index_name}'")
 if index_name not in pc.list_indexes().names():
     pc.create_index(
     name=index_name,
-    dimension=8, # Replace with your model dimensions
+    dimension=1536,
     metric="cosine",
      spec=ServerlessSpec(
         cloud="aws",
         region="us-east-1"
-    )  # Replace with your model metric
+    )  
     )
-# index = pc.Index('my_index')
+# index = pc.Index('hybridsearch')
 
 # List all available indexes
 
@@ -290,6 +297,48 @@ class ChatController:
             @self.api.expect(self.chat_model)
             @jwt_required()
             def post(self):
+                # try:
+                #     data = request.json
+                #     question = data.get("question")
+                #     prompt = data.get("prompt")
+                #     course = data.get("course")
+                #     stud_stream = data.get("stream")
+                #     chat_history = data.get("chat_history", [])
+                #     current_user_id = get_jwt_identity()
+
+                #     # GPT system prompt and conversation setup as before
+
+                #     # First, search in vector database
+                #     embedded_question = client.embeddings.create(input=question, model="text-embedding-ada-002")["data"][0]["embedding"]
+
+                #     search_results = pinecone.query(index_name=index_name, queries=[embedded_question], top_k=5)
+
+                #     for result in search_results['matches']:
+                #         match_score = result['score']
+                #         if match_score > similarity_threshold:
+                #             cached_question_id = result['id']
+                #             cached_response = ChatConversionData.query.filter_by(id=cached_question_id).first()
+                #             if cached_response:
+                #                 return jsonify({
+                #                     "message": "Answer retrieved from vector cache",
+                #                     "data": {
+                #                         "question": cached_response.chat_question,
+                #                         "answer": cached_response.response,
+                #                         "prompt": prompt,
+                #                     },
+                #                     "status": 200,
+                #                 })
+
+                #     # If no similar question is found, call GPT and store response
+                #     # Process GPT-3 response and store in PostgreSQL and MongoDB as usual
+
+                #     # After storing in PostgreSQL, upsert the question into Pinecone
+                #     embedded_question = client.embeddings.create(input=question, model="text-embedding-ada-002")["data"][0]["embedding"]
+                #     pinecone.upsert(vectors=[(str(new_chat_entry.id), embedded_question)], index_name=index_name)
+
+                # except Exception as e:
+                #     logger.error(f"Error in post method: {str(e)}")
+                #     return jsonify({"message": "Internal Server Error", "status": 500})
                 try:
                     data = request.json
                     question = data.get("question")
@@ -420,7 +469,11 @@ class ChatController:
                             "created_at": datetime.now(),
                         }
                             collection.insert_one(mongo_data)
-                            embedded_question = client.embeddings.create(input=question, model="text-embedding-ada-002")["data"][0]["embedding"]
+                            embedding_response = openai.embeddings.create(input=question, model="text-embedding-ada-002")
+
+                                # Access the embedding data from the response
+                            embedded_question = embedding_response.data[0].embedding
+                            # embedded_question = openai.embeddings.create(input=question, model="text-embedding-ada-002")["data"][0]["embedding"]
                             pc.Index(index_name).upsert(vectors=[(str(new_chat_entry.id), embedded_question)])
                         return jsonify({
                             'message': 'Answer stored successfully',
@@ -876,13 +929,29 @@ class ChatController:
 
         @self.chat_ns.route("/fetch-from-db", methods=["POST"])
         class FetchChat(Resource):
+            
+
             stop_words = set(stopwords.words('english'))
             lemmatizer = WordNetLemmatizer()
+            general_keywords = {"python", "java", "programming", "language"}
             unwanted_phrases = [
-                "what can you tell me about", "can you tell me about", 
-                "brief explanation", "explain", "define", "tell me about", 
-                "something about", "what is"
+                "what can you tell me about",
+                "can you tell me about",
+                "brief explanation",
+                "explain",
+                "define",
+                "tell me about",
+                "something about",
+                "what is"
             ]
+            def parse_response_string(self, response_string):
+        
+                cleaned_string = response_string.strip('{}"')
+                
+                cleaned_string = cleaned_string.replace('\"', ',')
+                
+                words = [word.strip() for word in cleaned_string.split(',') if word.strip()]
+                return words
 
             def preprocess_text(self, text):
                 for phrase in self.unwanted_phrases:
@@ -891,208 +960,160 @@ class ChatController:
                 tokens = [self.lemmatizer.lemmatize(token) for token in tokens if token.isalnum() and token not in self.stop_words]
                 return tokens
 
-            def embed_text(self, text):
-                # Generate embedding for the text using sentence-transformers or any embedding model
-                return model.encode(text, convert_to_tensor=True).tolist()
+            def extract_keywords(self, text):
+                return self.preprocess_text(text)
 
-            def store_in_vector_db(self, question, answer, user_id):
-                # Create embedding and store in vector DB
-                embedding = self.embed_text(question)
-                data_to_store = {'answer': answer, 'user_id': user_id, 'question': question}
-                # index.upsert([(str(user_id), embedding, data_to_store)])  # user_id as key, embedding as vector
+            def get_similar_question(self, question):
+                question_keywords = self.extract_keywords(question)
+                if not question_keywords:
+                    return "No relevant data available."
 
-            def fetch_from_vector_db(self, question_embedding):
-                # Perform similarity search with question embedding
-                result = index.query([question_embedding], top_k=1, include_metadata=True)
-                if result['matches']:
-                    return result['matches'][0]['metadata']  # Return the closest match's metadata (answer)
-                return None
+                cached_responses = ChatConversionData.query.filter(
+                    ChatConversionData.is_deleted == False
+                ).all()
 
+                best_response = None
+                best_score = 0
+                minimum_score_threshold = 1  # Allow for at least one specific keyword match
+
+                for response in cached_responses:
+                    stored_question_keywords = self.extract_keywords(response.chat_question)
+                    match_count = 0
+                    general_keyword_present = False
+
+                  
+                    for keyword in question_keywords:
+                        if keyword in stored_question_keywords:
+                            match_count += 1
+                            if keyword in self.general_keywords:
+                                general_keyword_present = True
+
+                   
+                    if match_count == len(question_keywords):
+                        score = match_count
+
+                        if score > best_score or (score == best_score and not general_keyword_present):
+                            best_score = score
+                            best_response = response
+
+              
+                if best_score >= minimum_score_threshold:
+                    return best_response
+                else:
+                    return None
+            def fetch_from_pinecone(self, question_embedding):
+                index = pc.Index("new-hybrid-search")  # Replace with your actual index name
+
+                # Query Pinecone for similar vectors (questions)
+                query_result = index.query(
+                    top_k=5,  # Number of top matches you want to retrieve
+                    vector=question_embedding,
+                    include_values=True,
+                )
+
+                # Print the entire query result for debugging
+                print("Query Result:", query_result)
+
+                # Process the results
+                similar_questions = []
+                for match in query_result['matches']:
+                    question_data = {
+                        'id': match['id'],
+                        'score': match['score'],
+                    }
+
+                    # Check if 'metadata' exists in the match
+                    if 'metadata' in match:
+                        question_data['metadata'] = match['metadata']
+                    else:
+                        question_data['metadata'] = None  # or handle accordingly
+
+                    similar_questions.append(question_data)
+
+                print("Similar Questions:", similar_questions)
+                return similar_questions
+                # question_keywords = self.extract_keywords(question)
+                # cached_responses = ChatConversionData.query.filter(
+                #     ChatConversionData.is_deleted == False
+                # ).all()
+
+                # for response in cached_responses:
+                #     stored_question_keywords = self.extract_keywords(response.chat_question)
+                #     if any(keyword in stored_question_keywords for keyword in question_keywords):
+                #         return response
+                # return None
+
+            @self.api.expect(self.chat_model)
             @jwt_required()
             def post(self):
                 try:
                     data = request.json
-                    question = data.get('question')
-                    user_id = get_jwt_identity()
+                    question = data.get("question")
+                    
+                  
+                    postgres_start_time = time.time()
+                    
+                  
+                    cached_response = self.get_similar_question(question)
+                    embedding_response = openai.embeddings.create(input=question, model="text-embedding-ada-002")
+                    question_embedding = embedding_response.data[0].embedding
 
-                    if not question:
-                        return jsonify({'message': 'Please provide a question', 'status': 400})
+                
+                    cached_response = self.get_similar_question(question)
+                    pinecone_start_time = time.time()  # Start tracking time for Pinecone retrieval
+                    pinecone_results = self.fetch_from_pinecone(question_embedding)
+                    pinecone_retrieval_time = time.time() - pinecone_start_time 
+                  
+                    pinecone_results = self.fetch_from_pinecone(question_embedding)
+                    print(pinecone_results)
+                    # If you find any matches in Pinecone
+                    # if pinecone_results:
+                    #     best_match = pinecone_results[0] 
+                    #     print("hello") # You can customize this logic
+                    #     return jsonify({
+                    #         'message': 'Answer retrieved from Pinecone cache',
+                    #         'status': 200,
+                    #         'data': {
+                    #             'question': question,
+                    #             'answer': best_match['metadata']['response'],  # Assuming you store the response here
+                    #         },
+                    #     })
+                    # Calculate PostgreSQL retrieval time
+                    postgres_retrieval_time = time.time() - postgres_start_time
+                    
+                    if cached_response:
+                        response_string = cached_response.response  # Access the response attribute
+                        if response_string.startswith('{\"') and response_string.endswith('}'):
+                                response_array = self.parse_response_string(response_string)
+                        else:
+                            response_array = cached_response.response.split(' ')
+  
+                        mongo_start_time = time.time()
 
-                    # Create an embedding for the incoming question
-                    question_embedding = self.embed_text(question)
+                        mongo_cached_response = collection.find_one({"question": question})
 
-                    # Start time tracking for vector DB retrieval
-                    vector_db_start_time = time.time()
-
-                    # Retrieve a similar question from the vector DB
-                    similar_response = self.fetch_from_vector_db(question_embedding)
-
-                    vector_db_retrieval_time = time.time() - vector_db_start_time
-
-                    if similar_response:
+                        mongo_retrieval_time = time.time() - mongo_start_time
+                        
                         return jsonify({
-                            'message': 'Answer retrieved from vector database',
+                            'message': 'Answer retrieved from similar question in cache',
                             'status': 200,
-                            'data': similar_response['answer'],
-                            'vector_db_retrieval_time': vector_db_retrieval_time
+                            'data': {
+                                'question': question,
+                                'answer': response_array,
+                            },
+                            'postgres_retrieval_time': postgres_retrieval_time, 
+                            'mongo_retrieval_time': mongo_retrieval_time, 
+                            'pinecone_retrieval_time': pinecone_retrieval_time, 
                         })
                     else:
-                        # Use GPT-3 or other models to generate the response
-                        # Replace with your own logic for generating the answer using GPT-3 or OpenAI API
-
-                        generated_answer = "Generated answer based on the model response."
-                        
-                        # Store the new question and answer in the vector database
-                        self.store_in_vector_db(question, generated_answer, user_id)
-
                         return jsonify({
-                            'message': 'Answer generated and stored in vector database',
-                            'status': 200,
-                            'data': generated_answer,
-                            'vector_db_retrieval_time': vector_db_retrieval_time
+                            'message': 'No similar question found in cache',
+                            'status': 404
                         })
                 except Exception as e:
-                    logger.error(f"Error in chat logic: {str(e)}")
-                    return jsonify({'message': 'Internal Server Error', 'status': 500})
-
-            # stop_words = set(stopwords.words('english'))
-            # lemmatizer = WordNetLemmatizer()
-            # general_keywords = {"python", "java", "programming", "language"}
-            # unwanted_phrases = [
-            #     "what can you tell me about",
-            #     "can you tell me about",
-            #     "brief explanation",
-            #     "explain",
-            #     "define",
-            #     "tell me about",
-            #     "something about",
-            #     "what is"
-            # ]
-            # def parse_response_string(self, response_string):
-        
-            #     cleaned_string = response_string.strip('{}"')
-                
-            #     cleaned_string = cleaned_string.replace('\"', ',')
-                
-            #     words = [word.strip() for word in cleaned_string.split(',') if word.strip()]
-            #     return words
-
-            # def preprocess_text(self, text):
-            #     for phrase in self.unwanted_phrases:
-            #         text = text.replace(phrase, "")
-            #     tokens = word_tokenize(text.lower())
-            #     tokens = [self.lemmatizer.lemmatize(token) for token in tokens if token.isalnum() and token not in self.stop_words]
-            #     return tokens
-
-            # def extract_keywords(self, text):
-            #     return self.preprocess_text(text)
-
-            # def get_similar_question(self, question):
-            #     question_keywords = self.extract_keywords(question)
-            #     if not question_keywords:
-            #         return "No relevant data available."
-
-            #     cached_responses = ChatConversionData.query.filter(
-            #         ChatConversionData.is_deleted == False
-            #     ).all()
-
-            #     best_response = None
-            #     best_score = 0
-            #     minimum_score_threshold = 1  # Allow for at least one specific keyword match
-
-            #     for response in cached_responses:
-            #         stored_question_keywords = self.extract_keywords(response.chat_question)
-            #         match_count = 0
-            #         general_keyword_present = False
-
-                  
-            #         for keyword in question_keywords:
-            #             if keyword in stored_question_keywords:
-            #                 match_count += 1
-            #                 if keyword in self.general_keywords:
-            #                     general_keyword_present = True
-
-                   
-            #         if match_count == len(question_keywords):
-            #             score = match_count
-
-            #             if score > best_score or (score == best_score and not general_keyword_present):
-            #                 best_score = score
-            #                 best_response = response
-
-              
-            #     if best_score >= minimum_score_threshold:
-            #         return best_response
-            #     else:
-            #         return None
-            #     # question_keywords = self.extract_keywords(question)
-            #     # cached_responses = ChatConversionData.query.filter(
-            #     #     ChatConversionData.is_deleted == False
-            #     # ).all()
-
-            #     # for response in cached_responses:
-            #     #     stored_question_keywords = self.extract_keywords(response.chat_question)
-            #     #     if any(keyword in stored_question_keywords for keyword in question_keywords):
-            #     #         return response
-            #     # return None
-
-            # @self.api.expect(self.chat_model)
-            # @jwt_required()
-            # def post(self):
-            #     try:
-            #         data = request.json
-            #         question = data.get("question")
-                    
-            #         # Start time tracking for PostgreSQL retrieval
-            #         postgres_start_time = time.time()
-                    
-            #         # Query PostgreSQL
-            #         cached_response = self.get_similar_question(question)
-                    
-            #         # Calculate PostgreSQL retrieval time
-            #         postgres_retrieval_time = time.time() - postgres_start_time
-                    
-            #         if cached_response:
-            #             response_string = cached_response.response  # Access the response attribute
-            #             if response_string.startswith('{\"') and response_string.endswith('}'):
-            #                     response_array = self.parse_response_string(response_string)
-            #             else:
-            #                 response_array = cached_response.response.split(' ')
-                        
-            #             # MongoDB insertion and retrieval logic here
-                        
-                        
-            #             # Start time tracking for MongoDB insertion/retrieval
-            #             mongo_start_time = time.time()
-                        
-            #             # Insert answer in MongoDB (optional, if not already stored)
-            #               # Store response in MongoDB
-
-            #             # Retrieve from MongoDB
-            #             mongo_cached_response = collection.find_one({"question": question})
-
-            #             # Calculate MongoDB retrieval time
-            #             mongo_retrieval_time = time.time() - mongo_start_time
-                        
-            #             return jsonify({
-            #                 'message': 'Answer retrieved from similar question in cache',
-            #                 'status': 200,
-            #                 'data': {
-            #                     'question': question,
-            #                     'answer': response_array,
-            #                 },
-            #                 'postgres_retrieval_time': postgres_retrieval_time,  # PostgreSQL retrieval time in seconds
-            #                 'mongo_retrieval_time': mongo_retrieval_time,  # MongoDB retrieval time in seconds
-            #             })
-            #         else:
-            #             return jsonify({
-            #                 'message': 'No similar question found in cache',
-            #                 'status': 404
-            #             })
-            #     except Exception as e:
-            #         db.session.rollback()
-            #         logger.error(f"Error adding chat information: {str(e)}")
-            #         return jsonify({'message': 'Internal Server Error', 'status': 500})
+                    db.session.rollback()
+                    logger.error(f"Error adding chat information: {str(e)}")
+                    return jsonify({'message': 'Internal Server Error', 'status': 500,'error': str(e)})
             
             # # def post(self):
             #     try:
