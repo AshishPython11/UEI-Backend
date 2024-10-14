@@ -92,8 +92,9 @@ class ChatController:
         @self.chat_ns.route("/chat")
         class ChatAdd(Resource):
             client = OpenAI(
-                api_key=os.getenv('OPENAI_API_KEY')
-            )
+
+                api_key=API_KEY)
+
 
             def get_gpt3_prompt(self, prompt):
                 gpt3_system_prompt = (
@@ -214,8 +215,9 @@ class ChatController:
             #         return jsonify({'message': 'Internal Server Error', 'status': 500})
 
             client = OpenAI(
-                api_key=os.getenv('OPENAI_API_KEY')
-            )
+
+                api_key=API_KEY)
+
 
             def get_similar_question(self, question, stream, course):
                 # cached_responses = ChatCache.query.filter_by(
@@ -524,7 +526,9 @@ class ChatController:
         
         class ChatAdd(Resource):
             client = OpenAI(
-                api_key=os.environ.get('OPENAI_API_KEY'),)
+
+                api_key=API_KEY)
+
 
             def get_gpt3_prompt(self, prompt):
                 gpt3_system_prompt = f"'{prompt}'\n\n"
@@ -545,6 +549,8 @@ class ChatController:
             
             def contains_exclusion(self, text):
                 exclusion_statements = ["I'm sorry", "I apologize","However,I don't have real time access","As an AI created by gyan setu, my responses are based on the 'BE' course and 'Python' subject only.","I'm unable to provide a detailed answer for this topic."]
+                if isinstance(text, list):
+                     text = ' '.join(text)
                 normalized_text = text.lower()
                 for statement in exclusion_statements:
                     if statement.lower() in normalized_text:
@@ -927,12 +933,10 @@ class ChatController:
                 "something about",
                 "what is"
             ]
+
             def parse_response_string(self, response_string):
-        
                 cleaned_string = response_string.strip('{}"')
-                
                 cleaned_string = cleaned_string.replace('\"', ',')
-                
                 words = [word.strip() for word in cleaned_string.split(',') if word.strip()]
                 return words
 
@@ -946,32 +950,32 @@ class ChatController:
             def extract_keywords(self, text):
                 return self.preprocess_text(text)
 
-            def get_similar_question(self, question):
+            def get_similar_question(self, question, student_id):
                 question_keywords = self.extract_keywords(question)
                 if not question_keywords:
                     return None
 
+                # Filter cached responses by student_id
                 cached_responses = ChatConversionData.query.filter(
+                    ChatConversionData.student_id == student_id,
                     ChatConversionData.is_deleted == False
                 ).all()
 
                 best_response = None
                 best_score = 0
-                minimum_score_threshold = 1  # Allow for at least one specific keyword match
+                minimum_score_threshold = 1  
 
                 for response in cached_responses:
                     stored_question_keywords = self.extract_keywords(response.chat_question)
                     match_count = 0
                     general_keyword_present = False
 
-                  
                     for keyword in question_keywords:
                         if keyword in stored_question_keywords:
                             match_count += 1
                             if keyword in self.general_keywords:
                                 general_keyword_present = True
 
-                   
                     if match_count == len(question_keywords):
                         score = match_count
 
@@ -979,11 +983,11 @@ class ChatController:
                             best_score = score
                             best_response = response
 
-              
                 if best_score >= minimum_score_threshold:
                     return best_response
                 else:
                     return None
+
             def fetch_from_pinecone(self, question_embedding):
                 index = pc.Index("new-hybrid-search")  # Replace with your actual index name
 
@@ -1026,13 +1030,14 @@ class ChatController:
                 #         return response
                 # return None
 
+
             @self.api.expect(self.chat_model)
             @jwt_required()
             def post(self):
                 try:
                     data = request.json
                     question = data.get("question")
-                    
+   
                   
                     postgres_start_time = time.time()
                     
@@ -1064,18 +1069,28 @@ class ChatController:
                     # Calculate PostgreSQL retrieval time
                     postgres_retrieval_time = time.time() - postgres_start_time
                     
+
+                    student_id = data.get("student_id") 
+
+                    if not student_id:
+                        return jsonify({'message': 'student_id is required', 'status': 400})
+
+                    cached_response = self.get_similar_question(question, student_id)
+
                     if cached_response:
-                        response_string = cached_response.response  # Access the response attribute
+                        response_string = cached_response.response  
                         if response_string.startswith('{\"') and response_string.endswith('}'):
-                                response_array = self.parse_response_string(response_string)
+                            response_array = self.parse_response_string(response_string)
                         else:
                             response_array = cached_response.response.split(' ')
+
   
                         mongo_start_time = time.time()
 
                         mongo_cached_response = collection.find_one({"question": question})
 
                         mongo_retrieval_time = time.time() - mongo_start_time
+
                         
                         return jsonify({
                             'message': 'Answer retrieved from similar question in cache',
@@ -1083,10 +1098,14 @@ class ChatController:
                             'data': {
                                 'question': question,
                                 'answer': response_array,
+
                             },
                             'postgres_retrieval_time': postgres_retrieval_time, 
                             'mongo_retrieval_time': mongo_retrieval_time, 
                             'pinecone_retrieval_time': pinecone_retrieval_time, 
+
+                            }
+
                         })
                     else:
                         return jsonify({
@@ -1094,6 +1113,7 @@ class ChatController:
                             'status': 404
                         })
                 except Exception as e:
+
 
                     db.session.rollback()
                     logger.error(f"Error adding chat information: {str(e)}")
@@ -1139,6 +1159,132 @@ class ChatController:
         class GenerateChat(Resource):
             client = OpenAI(
                 api_key=os.getenv('OPENAI_API_KEY')
+
+                    db.session.rollback()
+                    return jsonify({'message': str(e), 'status': 500})
+        # @self.chat_ns.route("/fetch-from-db", methods=["POST"])
+        # class FetchChat(Resource):
+            
+        #     stop_words = set(stopwords.words('english'))
+        #     lemmatizer = WordNetLemmatizer()
+        #     general_keywords = {"python", "java", "programming", "language"}
+        #     unwanted_phrases = [
+        #         "what can you tell me about",
+        #         "can you tell me about",
+        #         "brief explanation",
+        #         "explain",
+        #         "define",
+        #         "tell me about",
+        #         "something about",
+        #         "what is"
+        #     ]
+        #     def parse_response_string(self, response_string):
+        
+        #         cleaned_string = response_string.strip('{}"')
+                
+        #         cleaned_string = cleaned_string.replace('\"', ',')
+                
+        #         words = [word.strip() for word in cleaned_string.split(',') if word.strip()]
+        #         return words
+
+        #     def preprocess_text(self, text):
+        #         for phrase in self.unwanted_phrases:
+        #             text = text.replace(phrase, "")
+        #         tokens = word_tokenize(text.lower())
+        #         tokens = [self.lemmatizer.lemmatize(token) for token in tokens if token.isalnum() and token not in self.stop_words]
+        #         return tokens
+
+        #     def extract_keywords(self, text):
+        #         return self.preprocess_text(text)
+
+        #     def get_similar_question(self, question):
+        #         question_keywords = self.extract_keywords(question)
+        #         if not question_keywords:
+        #             return None
+
+        #         cached_responses = ChatConversionData.query.filter(
+        #             ChatConversionData.is_deleted == False
+        #         ).all()
+
+        #         best_response = None
+        #         best_score = 0
+        #         minimum_score_threshold = 1  # Allow for at least one specific keyword match
+
+        #         for response in cached_responses:
+        #             stored_question_keywords = self.extract_keywords(response.chat_question)
+        #             match_count = 0
+        #             general_keyword_present = False
+
+                  
+        #             for keyword in question_keywords:
+        #                 if keyword in stored_question_keywords:
+        #                     match_count += 1
+        #                     if keyword in self.general_keywords:
+        #                         general_keyword_present = True
+
+                   
+        #             if match_count == len(question_keywords):
+        #                 score = match_count
+
+        #                 if score > best_score or (score == best_score and not general_keyword_present):
+        #                     best_score = score
+        #                     best_response = response
+
+              
+        #         if best_score >= minimum_score_threshold:
+        #             return best_response
+        #         else:
+        #             return None
+        #         # question_keywords = self.extract_keywords(question)
+        #         # cached_responses = ChatConversionData.query.filter(
+        #         #     ChatConversionData.is_deleted == False
+        #         # ).all()
+
+        #         # for response in cached_responses:
+        #         #     stored_question_keywords = self.extract_keywords(response.chat_question)
+        #         #     if any(keyword in stored_question_keywords for keyword in question_keywords):
+        #         #         return response
+        #         # return None
+
+        #     @self.api.expect(self.chat_model)
+        #     @jwt_required()
+        #     def post(self):
+        #         try:
+        #             data = request.json
+        #             question = data.get("question")
+                    
+                    
+        #             cached_response = self.get_similar_question(question)
+        #             if cached_response:
+        #                 response_string = cached_response.response  # Access the response attribute
+        #                 if response_string.startswith('{\"') and response_string.endswith('}'):
+        #                         response_array = self.parse_response_string(response_string)
+        #                 else:
+        #                     response_array = cached_response.response.split(' ')
+        #                 return jsonify({
+        #                     'message': 'Answer retrieved from similar question in cache',
+        #                     'status':200,
+        #                     'data': {
+        #                         'question': question,
+        #                         # 'answer': cached_response["response"],
+        #                         'answer': response_array,
+        #                         # 'prompt': prompt,
+        #                         }
+                            
+        #                 })
+        #             else:
+        #                 return jsonify({
+        #                     'message': 'No similar question found in cache',
+        #                     'status': 404
+        #                 })
+        #         except Exception as e:
+        #                 db.session.rollback()
+        #                 return jsonify({'message': 'Internal Server Error', 'status': 500})
+        @self.chat_ns.route("/generate-from-api", methods=["POST"])
+        class GenerateChat(Resource):
+            client = OpenAI(
+                api_key=API_KEY
+
             )
 
             def get_gpt3_prompt(self, prompt):

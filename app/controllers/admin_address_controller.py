@@ -169,9 +169,10 @@ class AdminAddressController:
                     if not admin_id :
                         return jsonify({'message': 'Please Provide Admin Id', 'status': 201})
                     if not address1 :
+
                         return jsonify({'message': 'Please Provide Address 1', 'status': 201})
-                    if not address2 :
-                        return jsonify({'message': 'Please Provide Address 2', 'status': 201})
+                    
+
                     if not country :
                         return jsonify({'message': 'Please Provide Country', 'status': 201})
                     if not state :

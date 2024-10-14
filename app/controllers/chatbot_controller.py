@@ -138,7 +138,7 @@ class ChatbotController:
                             chatbot_entity.is_deleted=True
                             db.session.commit()
                         
-                            return jsonify({'message': 'Chatbot activated successfully', 'status': 200})
+                            return jsonify({'message': 'Chatbot deleted successfully', 'status': 200})
                     except Exception as e:
                        
          

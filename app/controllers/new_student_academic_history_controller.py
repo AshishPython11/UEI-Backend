@@ -18,7 +18,8 @@ class NewStudentAcademicHistoryController:
             'course_id': fields.String(required=True, description='ID of the course'),
             'learning_style': fields.String(required=False, description='Learning style'),
             'class_id': fields.String(required=True, description='ID of the class'),
-            'year': fields.String(required=False, description='Academic year or semester')
+            'year': fields.String(required=False, description='Academic year or semester'),
+            'stream': fields.String(required=False, description='Stream')
         })
 
         self.student_multiple_academic_history_model = self.api.model('AcademicHistories', {
@@ -34,7 +35,8 @@ class NewStudentAcademicHistoryController:
             'course_id': fields.String(required=True, description='ID of the course'),
             'learning_style': fields.String(required=False, description='Learning style'),
             'class_id': fields.String(required=True, description='ID of the class'),
-            'year': fields.String(required=False, description='Academic year or semester')
+            'year': fields.String(required=False, description='Academic year or semester'),
+            'stream': fields.String(required=False, description='Stream')
         })
 
         self.student_multiple_academic_history_edit_model = self.api.model('AcademicHistoriesEdit', {
@@ -77,7 +79,8 @@ class NewStudentAcademicHistoryController:
                             'year': history.year_or_semester,
                             'created_at': history.created_at,
                             'updated_at': history.updated_at,
-                            'is_active': history.is_active
+                            'is_active': history.is_active,
+                            'stream':history.stream,
                         }
                         data.append(history_data)
 
@@ -96,41 +99,87 @@ class NewStudentAcademicHistoryController:
             @jwt_required()
             def get(self):
                 try:
+            # Fetch all student academic histories as a list
                     student_academic_histories = NewStudentAcademicHistory.query.all()
                     student_academic_histories_data = []
-                    institution_name = None
-                    if student_academic_histories.institute_id:
-                        institution = Institution.query.get(student_academic_histories.institute_id)
-                        if institution:
-                            institution_name = institution.institution_name
-                    
+
+                    # Loop through each student academic history record
                     for history in student_academic_histories:
+                        # Initialize institution_name as None for each record
+                        institution_name = None
+
+                        # Check if institute_id exists, then fetch institution details
+                        if history.institute_id:
+                            institution = Institution.query.get(history.institute_id)
+                            if institution:
+                                institution_name = institution.institution_name
+                        
+                        # Create the history data dictionary for each record
                         history_data = {
                             'student_id': history.student_id,
-                            'institution_type': history.institution_type,  
+                            'institution_type': history.institution_type,
                             'board': history.board,
                             'state_for_stateboard': history.state_for_stateboard,
-                            'institute_id': history.institute_id,  
+                            'institute_id': history.institute_id,
                             'institute_name': institution_name,
-                            'course_id': history.course_id,  
+                            'course_id': history.course_id,
                             'learning_style': history.learning_style,
-                            'class_id': history.class_id,  
-                            'year': history.year_or_semester,  
+                            'class_id': history.class_id,
+                            'year': history.year_or_semester,
                             'created_at': history.created_at,
                             'updated_at': history.updated_at,
-                            'is_active': history.is_active
+                            'is_active': history.is_active,
+                            'stream':history.stream,
                         }
+
+                        # Append the processed history record to the list
                         student_academic_histories_data.append(history_data)
-                    
+
+                    # Check if any data was found
                     if not student_academic_histories_data:
-             
                         return jsonify({'message': 'No student academic histories found', 'status': 404})
                     else:
-               
                         return jsonify({'message': 'Student Academic Histories retrieved successfully', 'status': 200, 'data': student_academic_histories_data})
+
                 except Exception as e:
-          
+                    # Handle exceptions and return error message
                     return jsonify({'message': str(e), 'status': 500})
+                # try:
+                #     student_academic_histories = NewStudentAcademicHistory.query.all()
+                #     student_academic_histories_data = []
+                #     institution_name = None
+                #     if student_academic_histories.institute_id:
+                #         institution = Institution.query.get(student_academic_histories.institute_id)
+                #         if institution:
+                #             institution_name = institution.institution_name
+                    
+                #     for history in student_academic_histories:
+                #         history_data = {
+                #             'student_id': history.student_id,
+                #             'institution_type': history.institution_type,  
+                #             'board': history.board,
+                #             'state_for_stateboard': history.state_for_stateboard,
+                #             'institute_id': history.institute_id,  
+                #             'institute_name': institution_name,
+                #             'course_id': history.course_id,  
+                #             'learning_style': history.learning_style,
+                #             'class_id': history.class_id,  
+                #             'year': history.year_or_semester,  
+                #             'created_at': history.created_at,
+                #             'updated_at': history.updated_at,
+                #             'is_active': history.is_active
+                #         }
+                #         student_academic_histories_data.append(history_data)
+                    
+                #     if not student_academic_histories_data:
+             
+                #         return jsonify({'message': 'No student academic histories found', 'status': 404})
+                #     else:
+               
+                #         return jsonify({'message': 'Student Academic Histories retrieved successfully', 'status': 200, 'data': student_academic_histories_data})
+                # except Exception as e:
+          
+                #     return jsonify({'message': str(e), 'status': 500})
 
        
         @self.new_student_academic_history_ns.route('/add')
@@ -156,6 +205,7 @@ class NewStudentAcademicHistoryController:
                         course_id=course_id,
                         learning_style=data['learning_style'],
                         class_id=class_id,
+                        stream=data.get('stream'),
                         year_or_semester=data['year'],
                         created_by=current_user_id,  
                         updated_by=current_user_id
@@ -195,6 +245,7 @@ class NewStudentAcademicHistoryController:
                             board=item.get('board'),
                             state_for_stateboard=item.get('state_for_stateboard'),
                             class_id=item.get('class_id'),
+                            stream=item.get('stream'),
                             year_or_semester=item.get('year'),
                             university_name=item.get('university_name', None),  
                             learning_style=item.get('learning_style'),
@@ -239,6 +290,7 @@ class NewStudentAcademicHistoryController:
                                 record.student_id = item.get('student_id', record.student_id)
                                 record.institution_type = item.get('institution_type', record.institution_type)
                                 record.board = item.get('board', record.board)
+                                record.stream = item.get('stream', record.stream)
                                 record.state_for_stateboard = item.get('state_for_stateboard', record.state_for_stateboard)
                                 record.institute_id = item.get('institute_id', record.institute_id)
                                 record.course_id = item.get('course_id', record.course_id)
@@ -250,7 +302,7 @@ class NewStudentAcademicHistoryController:
 
                                 responses.append({'id': record.id, 'message': 'Academic History updated successfully'})
                             else:
-                                
+                           
                                 responses.append({'id': record_id, 'message': 'Record not found'})
 
                         db.session.commit()
@@ -277,6 +329,7 @@ class NewStudentAcademicHistoryController:
                     academic_history.student_id = data.get('student_id', academic_history.student_id)
                     academic_history.institution_type = data.get('institution_type', academic_history.institution_type)  
                     academic_history.board = data.get('board', academic_history.board)
+                    academic_history.stream = data.get('stream', academic_history.stream)
                     academic_history.state_for_stateboard = data.get('state_for_stateboard', academic_history.state_for_stateboard)
                     academic_history.institute_id = data.get('institution_id', academic_history.institute_id)  
                     academic_history.course_id = data.get('course_id', academic_history.course_id)  
@@ -317,6 +370,7 @@ class NewStudentAcademicHistoryController:
                                 "institution_type": student_academic_history.institution_type,
                                 "board": student_academic_history.board,
                                 "state_for_stateboard": student_academic_history.state_for_stateboard,
+                                "stream": student_academic_history.stream,
                                 'institute_name': institution_name,
                                 'institute_id': student_academic_history.institute_id,
                                 "course_id": student_academic_history.course_id,
