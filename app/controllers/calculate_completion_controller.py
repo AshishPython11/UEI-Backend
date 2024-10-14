@@ -2,7 +2,7 @@ from datetime import datetime
 import json
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from app import db, api, authorizations,logger
+from app import db, api, authorizations
 from app.controllers.admin_profession_controller import AdminProfessionController
 from app.controllers.admin_language_known_controller import AdminLanguageKnownController
 from app.controllers.admin_contact_controller import AdminContactController
@@ -32,7 +32,6 @@ class CalculateCompletion:
                 admin_addresses = AdminAddress.query.filter_by(admin_id=admin_id).all()
                 self.required_fields = ['admin_id', 'address1', 'address2', 'country', 'state', 'city', 'district', 'pincode', 'address_type']
                 if not admin_addresses:
-                    logger.warning(f"No admin addresses found for admin_id: {admin_id}")
                     return []
 
                 results = []
@@ -47,7 +46,7 @@ class CalculateCompletion:
                         results.append(round(adjusted_percentage, 2))
                     else:
                         results.append(0)
-                logger.info(f"Completion percentage for admin_id {admin_id}: {results}")
+             
                 return results
             def required_fld(self):
                 self.required_fields = ['admin_id', 'address1', 'address2', 'country', 'state', 'city', 'district', 'pincode', 'address_type']
@@ -227,14 +226,12 @@ class CalculateCompletion:
 
                     print("Overall percentage:", sum_results)
 
-                    logger.info(f"Completion percentage for admin: {results}")
                     return jsonify({
                         'results': results,
                         'overall_percentage': sum_results
                     })
                 except Exception as e:
                    
-                    logger.error(f"Error fetching completion percenting for admin: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
 
                 
@@ -560,14 +557,14 @@ class CalculateCompletion:
 
                     print("Overall percentage:", sum_results)
 
-                    logger.info(f"Completion percentage for student: {results}%")
+                  
                     return jsonify({
                         'results': results,
                         'overall_percentage': sum_results
                     })
                 except Exception as e:
                    
-                    logger.error(f"Error fetching completion percenting for student: {str(e)}")
+           
                     return jsonify({'message': str(e), 'status': 500})
         
 

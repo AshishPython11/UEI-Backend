@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
-from app import db,app,api,authorizations,logger
+from app import db,app,api,authorizations
 from flask_restx import  Api, Namespace, Resource, fields
 from app.models.adminuser import AdminBasicInformation, EntityType
 from sqlalchemy import desc
@@ -56,14 +56,12 @@ class EntityController:
                         entityes_data.append(entity_data)
                     
                     if not entityes_data:
-                        logger.info('No Entity found')
+                   
                         return jsonify({'message': 'No Entity found', 'status': 404})
                     else:
-                        logger.info('Entities found successfully')
+     
                         return jsonify({'message': 'Entities found Successfully', 'status': 200, 'data': entityes_data})
                 except Exception as e:
-                    
-                    logger.error(f"Error fetching entity information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
                 
         
@@ -79,22 +77,22 @@ class EntityController:
                     current_user_id = get_jwt_identity()
                     print(data)
                     if not entity_type :
-                        logger.warning('Entity type not provided')
+    
                         return jsonify({'message': 'Please Provide Entity type','status':201})
                     else:
                         existing_entity = EntityType.query.filter_by(entity_type=entity_type).first()
 
                         if existing_entity:
-                            logger.warning('Entity type already exists')
+              
                             return jsonify({'message': 'Entity already exists', 'status': 409})
                         entity =  EntityType(entity_type=entity_type,is_active=1,created_by=current_user_id)
                         db.session.add(entity)
                         db.session.commit()
-                        logger.info('Entity created successfully')
+         
                         return jsonify({'message': 'Entity created successfully','status':200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding entity information: {str(e)}")
+  
                     return jsonify({'message': str(e), 'status': 500})
         @self.entity_ns.route('/edit/<int:id>')
         class EntityEdit(Resource):
@@ -107,7 +105,7 @@ class EntityController:
                     entity_type = data.get('entity_type')
                     current_user_id = get_jwt_identity()
                     if not entity_type:
-                        logger.warning('Entity type not provided')
+            
                         return jsonify({'message': 'Please provide entity type', 'status': 400})
                     else:
                         entity = EntityType.query.get(id)
@@ -116,16 +114,16 @@ class EntityController:
                     else:
                         existing_entity = EntityType.query.filter_by(entity_type=entity_type).first()
                         if existing_entity:
-                            logger.warning('Entity type already exists')
+                
                             return jsonify({'message': 'Entity already exists', 'status': 409})
                         entity.entity_type = entity_type
                         entity.updated_by  = current_user_id
                         db.session.commit()
-                        logger.info('Entity updated successfully')
+            
                         return jsonify({'message': 'Entity updated successfully', 'status':200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error editing entity information: {str(e)}")
+                  
                     return jsonify({'message': str(e), 'status': 500})
                          
             @self.entity_ns.doc('entity/get', security='jwt')
@@ -134,7 +132,7 @@ class EntityController:
                 try:
                     entity = EntityType.query.get(id)  
                     if not entity:
-                        logger.warning('Entity type not provided')
+                       
                         return jsonify({'message': 'Entity not found', 'status': 404})
                     else:
                         entity_data = {
@@ -144,11 +142,10 @@ class EntityController:
                             'created_at':entity.created_at,
                             'updated_at':entity.updated_at,
                         }
-                        logger.info('Entity found successfully')
+                 
                         return jsonify({'message': 'Entity found Successfully', 'status': 200,'data':entity_data})
                 except Exception as e:
-                    
-                    logger.error(f"Error fetching entity information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
         @self.entity_ns.route('delete/<int:id>')
         class EntityDelete(Resource):
@@ -158,17 +155,15 @@ class EntityController:
                     try:
                         form_entity = EntityType.query.get(id)
                         if not form_entity:
-                            logger.warning('Entity type not provided')
+            
                             return jsonify({'message': 'entity not found', 'status': 404})
                         else:
                             # form_entity.is_active = 0
                             form_entity.is_deleted=True
                             db.session.commit()
-                            logger.info('Entity deleted successfully')
+      
                             return jsonify({'message': 'Entity deleted successfully', 'status': 200})
                     except Exception as e:
-                        
-                        logger.error(f"Error DELETING entity information: {str(e)}")
                         return jsonify({'message': str(e), 'status': 500})
                     
         @self.entity_ns.route('/activate/<int:id>')
@@ -179,17 +174,17 @@ class EntityController:
                 try:
                     entity = EntityType.query.get(id)
                     if not entity:
-                        logger.warning('Entity type not provided')
+ 
                         return jsonify({'message': 'Entity not found', 'status': 404})
                     else:
                         entity.is_active = 1
                         
                         db.session.commit()
-                        logger.info('Entity activated successfully')
+       
                         return jsonify({'message': 'Entity activated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error activating entity information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.entity_ns.route('/deactivate/<int:id>')
@@ -200,16 +195,13 @@ class EntityController:
                 try:
                     entity = EntityType.query.get(id)
                     if not entity:
-                        logger.warning('Entity type not provided')
                         return jsonify({'message': 'Entity not found', 'status': 404})
                     else:
                         entity.is_active = 0
                         db.session.commit()
-                        logger.info('Entity deactivated successfully')
                         return jsonify({'message': 'Entity deactivated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error deactivating entity information: {str(e)}")
                     return jsonify({'message': str(e), 'status': 500})
                 
 

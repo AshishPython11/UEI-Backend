@@ -7,7 +7,7 @@ from app.models.student import StudentLogin
 from app.models.adminuser import AdminLogin
 from app.models.log import ChangePwdLog,LoginLog
 from flask_restx import Api, Namespace, Resource, fields
-from app import db,api,authorizations,app,logger
+from app import db,api,authorizations,app
 import jwt
 from flask_jwt_extended import JWTManager,jwt_required, unset_jwt_cookies
 from flask_mail import Mail, Message
@@ -83,14 +83,13 @@ class AuthController:
                     userid = data.get('userid')
                     password = data.get('password')
                     if not userid or not password:
-                        logger.warning(f"Signup failed: Missing userid or password")
                         return jsonify({'message': 'Userid and password are required', 'status': 400})
                     
                     otp = random.randint(1000, 9999)
                     
                     if data.get('user_type') == 'student':
                         if StudentLogin.query.filter_by(userid=userid, is_active=1).first():
-                            logger.warning(f"Signup failed: Userid {userid} already exists")
+                           
                             return jsonify({'message': 'Userid already exists', 'status': 400})
                         
                         new_user = StudentLogin(userid=userid, password=generate_password_hash(password), is_active=1, otp=otp)
@@ -98,23 +97,22 @@ class AuthController:
 
                     elif data.get('user_type') == 'admin':
                         if AdminLogin.query.filter_by(userid=userid).first():
-                            logger.warning(f"Signup failed: Userid {userid} already exists")
+                           
                             return jsonify({'message': 'Userid already exists', 'status': 400})
                         
                         new_user = AdminLogin(userid=userid, password=generate_password_hash(password), is_active=1, otp=otp)
                         user_type = 'admin'
 
                     else:
-                        logger.error(f"Signup failed: Invalid user type {data.get('user_type')}")
                         return jsonify({'message': 'Invalid user type', 'status': 400})
                     
                     try:
                         db.session.add(new_user)
                         db.session.commit()
-                        logger.info(f"User {userid} created successfully")
+           
                         
                     except Exception as e:
-                        logger.error(f"Failed to register user {userid}: {e}")
+         
                         return jsonify({'message': 'Failed to register user', 'status': 500})
                     
                     if user_type == 'student':
@@ -125,7 +123,7 @@ class AuthController:
                     return jsonify({'message': 'User created successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding auth data: {str(e)}")
+       
                     return jsonify({'message': str(e), 'status': 500})
                
         @self.auth_ns.route('/login')
@@ -137,40 +135,50 @@ class AuthController:
                     data = request.json
                     userid = data.get('userid')
                     password = data.get('password')
-                    user = None
+
                     if not userid or not password:
-                        return jsonify({'message': 'userid and password are required','status':400})
+                        return jsonify({'message': 'userid and password are required', 'status': 400})
+
+                    user_type = data.get('user_type')
+                    user = None
+
+                    if user_type == 'student':
+                        user = StudentLogin.query.filter_by(userid=userid, is_active=1).first()
                     else:
-                        if(data.get('user_type') == 'student'):
-                            user = StudentLogin.query.filter_by(userid=userid,is_active=1).first()
-                            login_data = LoginLog(student_id=user.student_id,userid=userid,login_time=datetime.now(),ipaddress=request.remote_addr,is_active=1)
-                        else:
-                            user = AdminLogin.query.filter_by(userid=userid,is_active=1).first()
-                            login_data = LoginLog(admin_id=user.admin_id,userid=userid,login_time=datetime.now(),ipaddress=request.remote_addr,is_active=1)
-                    if not user or not check_password_hash(user.password, password):
-                        return jsonify({'message': 'Invalid userid or password','status':404})
+                        user = AdminLogin.query.filter_by(userid=userid, is_active=1).first()
+
+                    if user is None:
+                        return jsonify({'message': 'User does not exist', 'status': 404})
+
+                    if not check_password_hash(user.password, password):
+                        return jsonify({'message': 'Invalid userid or password', 'status': 404})
+
+                    if user_type == 'student':
+                        id = user.student_id
+                        login_data = LoginLog(student_id=id, userid=userid, login_time=datetime.now(), ipaddress=request.remote_addr, is_active=1)
                     else:
-                        if(data.get('user_type') == 'student'):
-                            id = user.student_id
-                        else:
-                            id = user.admin_id
-                        access_token = create_access_token(identity=id)
-                       
-                        bearer_token = f"Bearer {access_token}"
-                        user.refresh_token = access_token
-                        userdata = {
-                            'id':id,
-                            'userid':user.userid,
-                            'user_type':data.get('user_type')
-                        }
-                        db.session.add(login_data)
-                        db.session.commit()
-                        return jsonify({'token': bearer_token,'data':userdata,'message': 'User Logged In Successfully','status':200})
+                        id = user.admin_id
+                        login_data = LoginLog(admin_id=id, userid=userid, login_time=datetime.now(), ipaddress=request.remote_addr, is_active=1)
+
+                    access_token = create_access_token(identity=id)
+                    bearer_token = f"Bearer {access_token}"
+                    user.refresh_token = access_token
+
+                    userdata = {
+                        'id': id,
+                        'userid': user.userid,
+                        'user_type': user_type
+                    }
+
+                    db.session.add(login_data)
+                    db.session.commit()
+
+                    return jsonify({'token': bearer_token, 'data': userdata, 'message': 'User Logged In Successfully', 'status': 200})
+
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding auth data: {str(e)}")
+                    
                     return jsonify({'message': str(e), 'status': 500})
-                pass
 
         @self.auth_ns.route('/logout')
         class Logout(Resource):
@@ -182,7 +190,7 @@ class AuthController:
                     return  jsonify({'message': 'User logged out successfully','status':200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error awhile logging out: {str(e)}")
+                 
                     return jsonify({'message': str(e), 'status': 500})
             
 
@@ -229,7 +237,7 @@ class AuthController:
                     return jsonify({'message': 'Reset password instructions sent to email', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error in reset password: {str(e)}")
+             
                     return jsonify({'message': str(e), 'status': 500})
             
         @self.auth_ns.route('/changepassword')
@@ -274,7 +282,7 @@ class AuthController:
                         return jsonify({'message': 'Password changed successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error while changing password: {str(e)}")
+              
                     return jsonify({'message': str(e), 'status': 500})
                 
 
@@ -315,7 +323,7 @@ class AuthController:
                         return jsonify({'message': 'Password changed successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error in reset password: {str(e)}")
+                    
                     return jsonify({'message': str(e), 'status': 500})
                 
         @self.auth_ns.route('/activate/<user_id>')
@@ -339,7 +347,7 @@ class AuthController:
                     return jsonify({'message': 'User activated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error activating user: {str(e)}")
+            
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.auth_ns.route('/deactivate/<user_id>')
@@ -363,7 +371,7 @@ class AuthController:
                     return jsonify({'message': 'User deactivated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error deactivating data: {str(e)}")
+                  
                     return jsonify({'message': str(e), 'status': 500})
 
         self.api.add_namespace(self.auth_ns)

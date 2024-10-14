@@ -3,7 +3,7 @@ from urllib.parse import urlparse
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 from app.models.adminuser import AdminBasicInformation
-from app import db, api, authorizations,logger
+from app import db, api, authorizations
 from flask_restx import Api, Namespace, Resource, fields
 from app.models.role import FormMasterData, MenuMasterData, RoleMasterData, RoleVsFormMasterData, SubMenuMasterData,ManageRole,RoleVsAdminMaster
 from sqlalchemy import desc
@@ -103,14 +103,13 @@ class MenuController:
                         menues_data.append(menu_data)
                     
                     if not menues_data:
-                        logger.warning("No Menu found")
+       
                         return jsonify({'message': 'No Menu found', 'status': 404})
                     else:
-                        logger.info("Menus found Successfully")
+      
                         return jsonify({'message': 'Menus found Successfully', 'status': 200, 'data': menues_data})
                 except Exception as e:
-                    
-                    logger.error(f"Error fetching menu information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
                     
         @self.menu_ns.route('/list/<user_type>')
@@ -214,14 +213,13 @@ class MenuController:
                                     sorted_menus = self.sorted_data(menues_data)
                                     sorted_menus = self.remove_duplicate_menus(sorted_menus)
                     if not sorted_menus:
-                        logger.warning("No Menu found")
+                
                         return jsonify({'message': 'No Menu found', 'status': 404})
                     else:
-                        logger.info("Menus found Successfully")
+              
                         return jsonify({'message': 'Menus found Successfully', 'status': 200, 'data': sorted_menus})
                 except Exception as e:
-                   
-                    logger.error(f"Error fetching menu information by user type: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
         @self.menu_ns.route('/add')
         class MenuAdd(Resource):
@@ -235,20 +233,20 @@ class MenuController:
                     priority = data.get('priority')
                     current_user_id = get_jwt_identity()
                     if not menu_name :
-                        logger.warning("No Menu name found")
+                 
                         return jsonify({'message': 'Please Provide Menu name', 'status': 201})
                     if not priority :
-                        logger.warning("No priority found")
+                 
                         return jsonify({'message': 'Please Provide Priority', 'status': 201})
                     else:
                         menu = MenuMasterData(menu_name=menu_name,priority=priority,is_active=1,created_by=current_user_id)
                         db.session.add(menu)
                         db.session.commit()
-                        logger.info("Menus created Successfully")
+        
                         return jsonify({'message': 'Menu created successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error adding menu information: {str(e)}")
+          
                     return jsonify({'message': str(e), 'status': 500})
                 
         @self.menu_ns.route('/edit/<int:id>')
@@ -263,10 +261,10 @@ class MenuController:
                     priority = data.get('priority')
                     current_user_id = get_jwt_identity()
                     if not menu_name :
-                        logger.warning("No Menu name found")
+               
                         return jsonify({'message': 'Please Provide Menu name', 'status': 201})
                     if not priority :
-                        logger.warning("No priority found")
+            
                         return jsonify({'message': 'Please Provide Priority', 'status': 201})
                     else:
                         menu = MenuMasterData.query.get(id)
@@ -277,11 +275,11 @@ class MenuController:
                             menu.priority = priority
                             menu.updated_by = current_user_id
                             db.session.commit()
-                            logger.info("Menus updated Successfully")
+                   
                             return jsonify({'message': 'Menu updated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error editing menu information: {str(e)}")
+     
                     return jsonify({'message': str(e), 'status': 500})
                         
             @self.menu_ns.doc('menu/get', security='jwt')
@@ -290,7 +288,7 @@ class MenuController:
                 try:
                     menu = MenuMasterData.query.get(id)
                     if not menu:
-                        logger.warning("No Menu found")
+               
                         return jsonify({'message': 'Menu not found', 'status': 404})
                     else:
                         menu_data = {
@@ -303,11 +301,10 @@ class MenuController:
                             'updated_at':menu.updated_at,
                         }
                         print(menu_data)
-                        logger.info("Menus found Successfully")
+           
                         return jsonify({'message': 'Menu found Successfully', 'status': 200,'data':menu_data})
                 except Exception as e:
-                   
-                    logger.error(f"Error fetching menu information: {str(e)}")
+  
                     return jsonify({'message': str(e), 'status': 500})
         @self.menu_ns.route('delete/<int:id>')
         class MenuDelete(Resource):
@@ -317,17 +314,17 @@ class MenuController:
                     try:
                         menu_entity = MenuMasterData.query.get(id)
                         if not menu_entity:
-                            logger.warning("No Menu found")
+          
                             return jsonify({'message': 'menu not found', 'status': 404})
                         else:
                           
                             menu_entity.is_deleted=True
                             db.session.commit()
-                            logger.info("Menus deleted Successfully")
+                 
                             return jsonify({'message': 'Menu deleted successfully', 'status': 200})
                     except Exception as e:
                        
-                        logger.error(f"Error deleting menu information: {str(e)}")
+
                         return jsonify({'message': str(e), 'status': 500})
                     
         @self.menu_ns.route('/activate/<int:id>')
@@ -338,16 +335,16 @@ class MenuController:
                 try:
                     menu = MenuMasterData.query.get(id)
                     if not menu:
-                        logger.warning("No Menu found")
+         
                         return jsonify({'message': 'Menu not found', 'status': 404})
 
                     menu.is_active = 1
                     db.session.commit()
-                    logger.info("Menus activated Successfully")
+                
                     return jsonify({'message': 'Menu activated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error activating menu information: {str(e)}")
+
                     return jsonify({'message': str(e), 'status': 500})
 
         @self.menu_ns.route('/deactivate/<int:id>')
@@ -356,18 +353,18 @@ class MenuController:
             @jwt_required()
             def put(self, id):
                 try:
-                    logger.warning("No Menu found")
+                    
                     menu = MenuMasterData.query.get(id)
                     if not menu:
                         return jsonify({'message': 'Menu not found', 'status': 404})
 
                     menu.is_active = 0
                     db.session.commit()
-                    logger.info("Menus deactivated Successfully")
+               
                     return jsonify({'message': 'Menu deactivated successfully', 'status': 200})
                 except Exception as e:
                     db.session.rollback()
-                    logger.error(f"Error deactivating menu information: {str(e)}")
+              
                     return jsonify({'message': str(e), 'status': 500})
         @self.menu_ns.route('/menu/list_by_admin/<admin_id>')
         class MenuListByAdmin(Resource):
@@ -449,14 +446,14 @@ class MenuController:
                             menu['submenus'] = self.remove_duplicate_submenus(menu['submenus'], key=lambda x: x['menu_name'])
                         
                         if not menus_data_list:
-                            logger.warning("No Menu found for the provided admin_id")
+                       
                             return jsonify({'message': 'No menus found for the provided admin_id', 'status': 404})
                         else:
-                            logger.info("Menus found Successfully")
+              
                             return jsonify({'message': 'Menus found successfully', 'status': 200, 'data': menus_data_list})
                     except Exception as e:
                    
-                        logger.error(f"Error fetching menu information by admin: {str(e)}")
+    
                         return jsonify({'message': str(e), 'status': 500})
 
         self.api.add_namespace(self.menu_ns)
