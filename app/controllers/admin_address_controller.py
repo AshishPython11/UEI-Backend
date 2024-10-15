@@ -168,28 +168,25 @@ class AdminAddressController:
                     
                     if not admin_id :
                         return jsonify({'message': 'Please Provide Admin Id', 'status': 201})
-                    if not address1 :
+                    if address_type == 'current':
+                        if not address1:
+                            return jsonify({'message': 'Please Provide Address 1', 'status': 201})
+                        if not country:
+                            return jsonify({'message': 'Please Provide Country', 'status': 201})
+                        if not state:
+                            return jsonify({'message': 'Please Provide State', 'status': 201})
+                        if not city:
+                            return jsonify({'message': 'Please Provide City', 'status': 201})
+                        if not district:
+                            return jsonify({'message': 'Please Provide District', 'status': 201})
+                        if not pincode:
+                            return jsonify({'message': 'Please Provide Pincode', 'status': 201})
 
-                        return jsonify({'message': 'Please Provide Address 1', 'status': 201})
-                    
-
-                    if not country :
-                        return jsonify({'message': 'Please Provide Country', 'status': 201})
-                    if not state :
-                        return jsonify({'message': 'Please Provide State', 'status': 201})
-                    if not city :
-                        return jsonify({'message': 'Please Provide City', 'status': 201})
-                    if not district :
-                        return jsonify({'message': 'Please Provide District', 'status': 201})
-                    if not pincode :
-                        return jsonify({'message': 'Please Provide Pincode', 'status': 201})
-                    if not address_type :
+                    if not address_type:
                         return jsonify({'message': 'Please Provide Address Type', 'status': 201})
                     else:
-                       
-                        admin_address = AdminAddress.query.filter_by(admin_id=id,address_type=address_type).first()
+                        admin_address = AdminAddress.query.filter_by(admin_id=id, address_type=address_type).first()
                         if not admin_address:
-                
                             admin_address = AdminAddress(
                                 admin_id=admin_id,
                                 address1=address1,

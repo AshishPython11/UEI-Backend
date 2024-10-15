@@ -176,33 +176,25 @@ class StudentAddressController:
                     if not student_id :
 
                         return jsonify({'message': 'Please Provide Student Id', 'status': 201})
-                    if not address1 :
-                        if address_type == 'current':
+                    if address_type == 'current':
+                        if not address1:
                             return jsonify({'message': 'Please Provide Address 1', 'status': 201})
-                    
-                    if not country :
+                        if not country:
+                            return jsonify({'message': 'Please Provide Country', 'status': 201})
+                        if not state:
+                            return jsonify({'message': 'Please Provide State', 'status': 201})
+                        if not city:
+                            return jsonify({'message': 'Please Provide City', 'status': 201})
+                        if not district:
+                            return jsonify({'message': 'Please Provide District', 'status': 201})
+                        if not pincode:
+                            return jsonify({'message': 'Please Provide Pincode', 'status': 201})
 
-                        return jsonify({'message': 'Please Provide Country', 'status': 201})
-                    if not state :
-           
-                        return jsonify({'message': 'Please Provide State', 'status': 201})
-                    if not city :
-    
-                        return jsonify({'message': 'Please Provide City', 'status': 201})
-                    if not district :
-
-                        return jsonify({'message': 'Please Provide District', 'status': 201})
-                    if not pincode :
-
-                        return jsonify({'message': 'Please Provide Pincode', 'status': 201})
-                    if not address_type :
-   
+                    if not address_type:
                         return jsonify({'message': 'Please Provide Address Type', 'status': 201})
                     else:
-                  
-                        student_address = StudentAddress.query.filter_by(student_id=id,address_type=address_type).first()
+                        student_address = StudentAddress.query.filter_by(student_id=id, address_type=address_type).first()
                         if not student_address:
-                
                             student_address = StudentAddress(
                                 student_id=student_id,
                                 address1=address1,
@@ -217,7 +209,6 @@ class StudentAddressController:
                             )
                             db.session.add(student_address)
                             db.session.commit()
- 
                             return jsonify({'message': 'Student Address created successfully', 'status': 201})
                         else:
                             student_address.student_id = student_id
@@ -231,7 +222,6 @@ class StudentAddressController:
                             student_address.address_type = address_type
                             student_address.updated_by = current_user_id
                             db.session.commit()
-                     
                             return jsonify({'message': 'Student Address updated successfully', 'status': 200})
                 except Exception as e:
                         db.session.rollback()

@@ -436,8 +436,7 @@ class StudentAcademicHistoryController:
             def put(self, id):
                 try:
                     student_academic_history = AcademicHistory.query.get(id)
-                    if not student_academic_history:
-       
+                    if not student_academic_history:      
                         return jsonify({'message': 'Student Academic History not found', 'status': 404})
                     else:
                         student_academic_history.is_active = 1
@@ -467,8 +466,7 @@ class StudentAcademicHistoryController:
                 except Exception as e:
                     db.session.rollback()
                    
-                    return jsonify({'message': str(e), 'status': 500})
-                
+                    return jsonify({'message': str(e), 'status': 500})               
        
-                
+       
         self.api.add_namespace(self.student_academic_history_ns)
